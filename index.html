@@ -1,0 +1,1353 @@
+<title>碳氮配比 CN Balance</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#2f6b34">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+/* Layout: phone-first single column; sticky header, settings card at top, results below, fixed icon nav at bottom. */
+:root{
+  --bg:#f2f4ee; --surface:#ffffff; --surface2:#e7ebe1; --line:#c9cfbf;
+  --ink:#141a12; --ink2:#2f382b;
+  --leaf:#2f6b34; --leaf-soft:#d9ead6; --bark:#7a4a1f; --bark-soft:#efe0cf;
+  --water:#1f5f8f; --water-soft:#d6e6f2;
+  --good:#1f7a3a; --warn:#a15c00; --bad:#b3261e;
+  --good-soft:#d8efdd; --warn-soft:#fbe8c8; --bad-soft:#f8d9d6;
+  --shadow:0 1px 2px rgba(20,26,18,.08),0 4px 14px rgba(20,26,18,.06);
+  --f-body:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-num:ui-rounded,"SF Pro Rounded",-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11140f; --surface:#1b2018; --surface2:#252b21; --line:#3a4334;
+  --ink:#eef2e8; --ink2:#d3dacb;
+  --leaf:#86c98a; --leaf-soft:#22351f; --bark:#e0a86f; --bark-soft:#3a2a1a;
+  --water:#8cc4ec; --water-soft:#1b2d3b;
+  --good:#7fd896; --warn:#f2b45a; --bad:#ff8a80;
+  --good-soft:#1d3523; --warn-soft:#3a2c14; --bad-soft:#3d1d1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#11140f; --surface:#1b2018; --surface2:#252b21; --line:#3a4334;
+  --ink:#eef2e8; --ink2:#d3dacb;
+  --leaf:#86c98a; --leaf-soft:#22351f; --bark:#e0a86f; --bark-soft:#3a2a1a;
+  --water:#8cc4ec; --water-soft:#1b2d3b;
+  --good:#7fd896; --warn:#f2b45a; --bad:#ff8a80;
+  --good-soft:#1d3523; --warn-soft:#3a2c14; --bad-soft:#3d1d1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;}
+
+html{font-size:17px}
+html[data-size="2"]{font-size:19.5px}
+html[data-size="3"]{font-size:22px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;font-weight:500;line-height:1.55;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums;font-family:var(--f-num)}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--leaf)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--leaf);color:#fff;
+  padding-block:8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  display:flex;align-items:center;gap:8px}
+:root[data-theme="dark"] header.top,:root[data-theme="dark"] body::before{background:#1f3b22}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) header.top,:root:not([data-theme="light"]) body::before{background:#1f3b22}}
+header.top h1{margin:0;font-size:1.12rem;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+.hbtn{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;min-width:44px;height:40px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.92rem;flex:none}
+.hbtn svg{width:22px;height:22px}
+
+main{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px calc(96px + env(safe-area-inset-bottom,0px))}
+section.view{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 10px;font-size:1.08rem;font-weight:800;text-wrap:balance}
+.label{font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:0 0 6px}
+.muted{color:var(--ink2)}
+.small{font-size:.9rem}
+p{margin:.35em 0}
+
+/* button groups (no selects) */
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button,.chip{border:2px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;min-height:44px;font-weight:700}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--leaf);border-color:var(--leaf);color:var(--bg)}
+.btn{border:2px solid var(--leaf);background:var(--leaf);color:var(--bg);border-radius:8px;padding:10px 16px;min-height:46px;font-weight:800;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn.ghost{background:transparent;color:var(--leaf)}
+.btn.block{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+
+/* ingredient rows */
+.ing{display:grid;grid-template-columns:10px 1fr auto;grid-template-areas:'sw nm x' 'sw kg kg' 'sw ov ov';column-gap:10px;row-gap:6px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.ing .sw{grid-area:sw}.ing .nm{grid-area:nm}.ing .kg{grid-area:kg;justify-content:flex-start}.ing .x{grid-area:x}.ing .ovr{grid-area:ov}
+.ing:first-of-type{border-top:0}
+.sw{width:10px;align-self:stretch;border-radius:3px}
+.sw.N{background:var(--leaf)} .sw.C{background:var(--bark)} .sw.W{background:var(--water)}
+.ing .nm{min-width:0}
+.ing .nm button{background:none;border:0;padding:0;text-align:left;font-weight:800;font-size:1rem;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.ing .meta{font-size:.86rem;color:var(--ink2)}
+.kg{display:flex;align-items:center;gap:6px}
+.kg input,.field input{width:5.2em;border:2px solid var(--line);border-radius:8px;background:var(--surface2);padding:8px 8px;font-weight:800;text-align:right;min-height:44px;font-variant-numeric:tabular-nums}
+.kg span{font-weight:700;color:var(--ink2)}
+.x{border:0;background:none;width:40px;height:40px;border-radius:8px;color:var(--ink2);font-size:1.4rem;line-height:1}
+.ovr{display:flex;flex-wrap:wrap;gap:10px;padding:8px;background:var(--surface2);border-radius:8px}
+.field{display:flex;flex-direction:column;gap:3px;font-size:.86rem;font-weight:700;color:var(--ink2)}
+.field input{width:6em;text-align:left}
+
+/* results */
+.big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big .v{font-size:2.6rem;font-weight:900;line-height:1}
+.pill{display:inline-block;border-radius:6px;padding:3px 10px;font-weight:800;font-size:.9rem}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.gauge{width:100%;height:auto;display:block;margin-top:8px}
+.fix{border:2px solid var(--leaf);background:var(--leaf-soft);border-radius:12px;padding:14px}
+.fix.ok{border-color:var(--good);background:var(--good-soft)}
+.fix h3{margin:0 0 6px;font-size:1.05rem;font-weight:900}
+.fix ul{margin:6px 0 10px;padding-left:1.2em}
+.fix li{margin:3px 0;font-weight:700}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-size:.82rem;color:var(--ink2);font-weight:800}
+.scroll{overflow-x:auto}
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-weight:700}
+
+/* library */
+.mat{display:grid;grid-template-columns:10px 1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:center}
+.mat .vals{font-size:.88rem;color:var(--ink2)}
+.mat .cnv{font-size:1.4rem;font-weight:900;text-align:right;line-height:1.1}
+.mat .cnv small{display:block;font-size:.72rem;font-weight:800;color:var(--ink2);letter-spacing:.05em}
+.addbtn{border:2px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 10px;min-height:38px;font-weight:800;margin-top:6px}
+
+.spec{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.spr{display:grid;grid-template-columns:minmax(0,9.5em) 1fr;gap:10px;align-items:center;min-height:30px}
+.spr>span{font-size:.86rem;font-weight:700;text-align:right;line-height:1.2}
+.trk{position:relative;height:22px;border-left:1px solid var(--line);margin-right:16px}
+.spr.hd .trk{height:22px;border:0}
+.spr.hd i{position:absolute;transform:translateX(-50%);font-style:normal;font-size:.8rem;font-weight:800;color:var(--ink2)}
+.trk .zone{position:absolute;top:-4px;bottom:-4px;background:var(--good-soft)}
+.trk .ln24{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--line)}
+.trk .dot{position:absolute;top:4px;width:14px;height:14px;border-radius:50%;transform:translateX(-50%)}
+.axcap{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;white-space:nowrap;margin-right:16px;line-height:1.25}.axcap b:last-child{text-align:right}
+.trk .dot.N{background:var(--leaf)}.trk .dot.C{background:var(--bark)}
+details{border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+details.sub{border:0;box-shadow:none;background:transparent}details.sub>summary{padding:6px 0;font-size:.95rem}
+details>summary{list-style:none;cursor:pointer;padding:14px;font-weight:900;font-size:1.05rem;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"+";font-size:1.4rem;color:var(--ink2);flex:none}
+details[open]>summary::after{content:"–"}
+details .in{padding:0 14px 14px}
+.pbar{height:14px;border-radius:7px;background:var(--surface2);overflow:hidden;border:1px solid var(--line)}.pbar i{display:block;height:100%}
+#v-pile details,#v-mulch details{margin-top:0}
+.tl{display:flex;flex-direction:column;gap:6px;margin:6px 0 12px}.tlr{display:grid;grid-template-columns:2em minmax(0,9em) 1fr;gap:10px;align-items:center;border-left:6px solid;border-radius:8px;padding:8px 10px}.tlr b{line-height:1.25}.tlr span{font-weight:700;line-height:1.3}.tln{font-weight:900;color:var(--ink2)}
+.cz{display:flex;flex-direction:column;gap:4px;border-left:6px solid;border-radius:8px;padding:8px 12px}.cz span{font-weight:600;line-height:1.4}.cz b{font-size:1rem}
+@media (max-width:420px){.tlr{grid-template-columns:1.6em 1fr}.tlr span:last-child{grid-column:2}}
+.chk{padding-left:1.4em;margin:8px 0 0}.chk li{margin:0 0 10px}
+.ill{width:100%;max-width:560px;height:auto;display:block;margin:8px auto}
+.refs li{margin:6px 0;font-size:.92rem}
+a{color:var(--water);font-weight:700}
+
+/* nav */
+nav.bot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.bot button{border:0;background:none;padding:8px 1px 9px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.8rem;font-weight:800;color:var(--ink2);min-height:58px}
+nav.bot button svg{width:26px;height:26px;flex:none}
+nav.bot button span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.74rem}
+@media (max-width:380px){html[lang=ms] nav.bot button span{font-size:.68rem;letter-spacing:-.01em}}
+nav.bot button{position:relative;-webkit-tap-highlight-color:transparent;transition:background-color .15s,color .15s}
+nav.bot button svg{padding:3px 12px;box-sizing:content-box;border-radius:14px;transition:background-color .15s}
+nav.bot button:active svg{background:var(--leaf-soft);transform:scale(.92)}
+nav.bot button[aria-current="page"]{color:var(--leaf)}
+nav.bot button[aria-current="page"] svg{background:var(--leaf);color:var(--bg)}
+nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,14,8,.5);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:760px;max-height:86vh;overflow:auto;border-radius:16px 16px 0 0;
+  padding-block:14px calc(18px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet .hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.sheet h2{margin:0;font-size:1.1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0 14px}
+.pick{border:2px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 10px;text-align:left;min-height:56px;display:grid;grid-template-columns:8px 1fr;gap:8px}
+.pick b{display:block;line-height:1.25}
+.pick span{font-size:.82rem;color:var(--ink2);font-weight:700}
+
+/* first launch */
+.launch{position:fixed;inset:0;z-index:60;background:var(--leaf);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
+:root[data-theme="dark"] .launch{background:#1f3b22}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .launch{background:#1f3b22}}
+.launch .t1{font-size:2rem;font-weight:900;margin:0;text-align:center}
+.launch .t2{font-size:1.1rem;font-weight:700;margin:0;opacity:.95;text-align:center}
+.launch .langs{display:flex;flex-direction:column;gap:12px;width:min(320px,100%)}
+.launch .langs button{background:#fff;color:#1f3b22;border:0;border-radius:10px;min-height:56px;font-size:1.15rem;font-weight:900}
+@media (prefers-reduced-motion:no-preference){.card,.fix{transition:background .2s}}
+</style>
+
+<div id="launch" class="launch" hidden>
+  <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fbf7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23efe6d3%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L428.7%20370%20L83.3%20370%20Z%22%20fill%3D%22%23f0dcc4%22/%3E%3Cpath%20d%3D%22M123.9%20218%20L388.1%20218%20L392.9%20236%20L119.1%20236%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M110.5%20268%20L401.5%20268%20L406.3%20286%20L105.7%20286%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M97.2%20318%20L414.8%20318%20L419.6%20336%20L92.4%20336%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M83.3%20370%20L428.7%20370%20L442.0%20420%20L70.0%20420%20Z%22%20fill%3D%22%237a4a1f%22/%3E%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L362%20120%20Q256%2096%20150%20120%20Z%22%20fill%3D%22%23e4ebdc%22/%3E%3Cg%20stroke%3D%22%238a5a28%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M200%20198%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20194%20l26%20-7%22/%3E%3Cpath%20d%3D%22M180%20246%20l26%20-7%22/%3E%3Cpath%20d%3D%22M300%20250%20l26%20-7%22/%3E%3Cpath%20d%3D%22M215%20298%20l26%20-7%22/%3E%3Cpath%20d%3D%22M320%20296%20l26%20-7%22/%3E%3Cpath%20d%3D%22M190%20346%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20350%20l26%20-7%22/%3E%3C/g%3E%3Cg%20stroke%3D%22%23f3dcb8%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M96%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M150%20400%20l44%20-16%22/%3E%3Cpath%20d%3D%22M210%20410%20l44%20-16%22/%3E%3Cpath%20d%3D%22M270%20402%20l44%20-16%22/%3E%3Cpath%20d%3D%22M330%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M380%20398%20l44%20-16%22/%3E%3C/g%3E%3Cpath%20d%3D%22M70%20420%20L150%20120%20Q256%2096%20362%20120%20L442%20420%20Z%22%20fill%3D%22none%22%20stroke%3D%22%232b2418%22%20stroke-width%3D%229%22%20stroke-linejoin%3D%22round%22/%3E%3Crect%20x%3D%2236%22%20y%3D%22418%22%20width%3D%22440%22%20height%3D%2212%22%20rx%3D%226%22%20fill%3D%22%232b2418%22/%3E%3Cg%20fill%3D%22%232f7fc1%22%3E%3Cpath%20d%3D%22M452%20232%20q-13%2020%200%2026%20q13%20-6%200%20-26z%22/%3E%3Cpath%20d%3D%22M466%20276%20q-11%2017%200%2022%20q11%20-5%200%20-22z%22/%3E%3C/g%3E%3C/svg%3E" width="120" height="120" alt="" style="border-radius:26px;box-shadow:0 4px 18px rgba(0,0,0,.3)">
+  <p class="t1">碳氮配比</p>
+  <p class="t2">CN Balance · Imbangan C:N</p>
+  <div class="langs">
+    <button type="button" data-setlang="zh">中文</button>
+    <button type="button" data-setlang="en">English</button>
+    <button type="button" data-setlang="ms">Malay</button>
+  </div>
+</div>
+
+<header class="top">
+  <h1 id="appTitle">碳氮配比</h1>
+  <button class="hbtn" id="setBtn" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</header>
+
+<main>
+  <!-- MIX -->
+  <section class="view" id="v-mix">
+    <div class="card">
+      <p class="label" data-t="settings"></p>
+      <div class="row2">
+        <div><p class="small" style="font-weight:800;margin:0 0 6px" data-t="targetCN"></p><div class="seg" id="segCN"></div></div>
+        <div><p class="small" style="font-weight:800;margin:0 0 6px" data-t="targetM"></p><div class="seg" id="segM"></div></div>
+      </div>
+      <div style="margin-top:12px"><button type="button" class="chip" id="noChick" aria-pressed="true"></button></div>
+      <p class="small" style="font-weight:800;margin:12px 0 6px" data-t="measureBy"></p><div class="seg" id="segU"></div>
+      <p class="label" style="margin-top:14px" data-t="ingredients"></p>
+      <div id="exBanner" class="banner" hidden><span data-t="exampleNote"></span><button class="btn ghost" type="button" id="clearMix" data-t="clear"></button></div>
+      <div id="rows"></div>
+      <p id="emptyRows" class="muted" hidden data-t="emptyMix"></p>
+      <button class="btn ghost block" type="button" id="addIng" style="margin-top:8px">＋ <span data-t="addIng"></span></button>
+      <p class="small" style="font-weight:800;margin:14px 0 6px" data-t="sqTitle2"></p><div class="seg" id="segSq"></div>
+    </div>
+
+    <div id="results"></div>
+  </section>
+
+  <!-- PILE -->
+  <section class="view" id="v-pile" hidden><div id="pileOut" style="display:flex;flex-direction:column;gap:14px"></div></section>
+
+  <!-- MATERIALS -->
+  <section class="view" id="v-lib" hidden>
+    <div class="card">
+      <h2 data-t="libTitle"></h2>
+      <p class="muted small" data-t="libIntro"></p>
+      <div id="spectrum"></div>
+    </div>
+    <details class="card" style="padding:0" id="ownForm">
+      <summary data-t="ownTitle"></summary>
+      <div class="in">
+        <p class="small" data-t="ownIntro"></p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <label class="field"><span data-t="ownName"></span><input id="oName" type="text" style="width:100%;text-align:left"></label>
+          <div><p class="small" style="font-weight:800;margin:0 0 6px" data-t="ownBase"></p><button type="button" class="pick" id="oBase" style="width:100%"></button></div>
+          <div><label class="field"><span data-t="ownM"></span><input id="oM" type="number" inputmode="decimal" step="any"></label>
+            <div id="oHome"></div></div>
+          <details class="sub"><summary data-t="ownLab"></summary><div style="display:flex;flex-wrap:wrap;gap:10px;padding-top:8px">
+            <label class="field"><span data-t="ownC"></span><input id="oC" type="number" inputmode="decimal" step="any"></label>
+            <label class="field"><span data-t="ownN"></span><input id="oN" type="number" inputmode="decimal" step="any"></label>
+          </div><p class="small" style="margin:6px 0 0" data-t="ownLabNote"></p></details>
+          <p class="small" id="oPreview" style="font-weight:700"></p>
+          <button class="btn" type="button" id="oSave" data-t="ownSave"></button>
+        </div>
+      </div>
+    </details>
+    <div class="card">
+      <div class="seg" id="libFilter"></div>
+      <div id="libList" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- MULCH -->
+  <section class="view" id="v-mulch" hidden>
+    <div class="card">
+      <p class="label" data-t="settings"></p>
+      <p class="small" style="font-weight:800;margin:0 0 6px" data-t="mulchMat"></p>
+      <button type="button" class="pick" id="mulchPick" style="width:100%"></button>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px">
+        <label class="field"><span data-t="kgPerTree"></span><input id="mKg" type="number" inputmode="decimal" step="any"></label>
+        <label class="field"><span data-t="tpa"></span><input id="mTpa" type="number" inputmode="numeric" step="1"></label>
+        <label class="field"><span data-t="trees"></span><input id="mTrees" type="number" inputmode="numeric" step="1"></label>
+      </div>
+    </div>
+    <div id="mulchOut"></div>
+  </section>
+
+  <!-- LEARN -->
+  <section class="view" id="v-learn" hidden></section>
+</main>
+
+<nav class="bot" aria-label="Sections">
+  <button type="button" data-view="mix" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 20 Q6 8 12 7 Q18 8 22 20 Z"/><path d="M12 7 Q11 3 7 2 M12 7 Q13 3 17 2" stroke-linecap="round"/></svg><span data-t="navMix"></span></button>
+  <button type="button" data-view="pile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="14" rx="3"/><circle cx="12" cy="18" r="4"/><path d="M12 9v9"/><path d="M18 5h3M18 9h2M18 13h3"/></svg><span data-t="navPile"></span></button>
+  <button type="button" data-view="lib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg><span data-t="navLib"></span></button>
+  <button type="button" data-view="mulch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13V4"/><path d="M12 7c-3 0-6-1-7-4 3 0 6 1 7 4zM12 9c3 0 6-1 7-4-3 0-6 1-7 4z"/><path d="M2 19q5-4 10-4t10 4"/><path d="M2 21h20"/></svg><span data-t="navMulch"></span></button>
+  <button type="button" data-view="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5q4-2 9 1 5-3 9-1v14q-4-2-9 1-5-3-9-1z"/><path d="M12 6v14"/></svg><span data-t="navLearn"></span></button>
+</nav>
+
+<div id="setSheet" class="scrim" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="hd"><h2 id="setTitle" data-t="setTitle"></h2><button class="x" type="button" id="setClose" aria-label="Close">×</button></div>
+  <div id="setBody"></div>
+</div></div>
+<div id="sheet" class="scrim" hidden><div class="sheet" role="dialog" aria-modal="true">
+  <div class="hd"><h2 id="sheetTitle"></h2><button class="x" type="button" id="sheetClose" aria-label="Close">×</button></div>
+  <div class="seg" id="pickFilter"></div>
+  <div id="pickBody"></div>
+</div></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- storage ---------- */
+const KEY='cnbalance.v1';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const S=Object.assign({lang:null,theme:null,size:1,view:'mix',cn:30,m:55,example:false,
+  rows:[],noChicken:true,own:[],mulch:{id:'efb',kg:null,trees:null},libF:'all',unit:'kg',uw:{},pile:null,pileHist:[]},load());
+if(!S.uw)S.uw={};
+if(S.noChicken==null)S.noChicken=true;
+if(!S.noPh){if(S.example){S.rows=[];S.example=false}if(S.mulch&&S.mulch.kg===30&&S.mulch.trees===40){S.mulch.kg=null;S.mulch.trees=null}S.noPh=1}
+if(!S.noPh2){const g=id=>(S.rows.find(r=>r.id===id)||{}).kg;if(g('durian')===200&&g('cattle')===100)S.rows.forEach(r=>{r.kg=null});S.rows.forEach(r=>{if(r.kg===0)r.kg=null});S.example=false;S.noPh2=1}
+const blankKg=r=>r.kg==null||r.kg===''||!isFinite(+r.kg)||+r.kg<=0;
+const missingKg=()=>S.rows.filter(r=>mat(r.id)&&blankKg(r));
+
+
+/* ---------- materials (sourced) ---------- */
+const SRC={
+ ofch:{zh:'Rynk 等 1992，《农场堆肥手册》表 A.1（平均/典型值）',en:'Rynk et al. 1992, On-Farm Composting Handbook, Table A.1 (average/typical)',ms:'Rynk et al. 1992, On-Farm Composting Handbook, Jadual A.1 (purata/tipikal)'},
+ ofchm:{zh:'Rynk 等 1992 表 A.1（范围中点：N 1.9–2.9%，C:N 14–16）',en:'Rynk et al. 1992 Table A.1 (range midpoint: N 1.9–2.9%, C:N 14–16)',ms:'Rynk et al. 1992 Jadual A.1 (titik tengah julat: N 1.9–2.9%, C:N 14–16)'},
+ mah:{zh:'Mahathaninwong 等 2022，BioResources 17(1)：实测原料',en:'Mahathaninwong et al. 2022, BioResources 17(1): measured raw material',ms:'Mahathaninwong et al. 2022, BioResources 17(1): bahan mentah diukur'},
+ bar:{zh:'EFB 与 POME 共堆肥综述（BARformula）：含水 70%，C 42%，N 0.8%',en:'EFB–POME co-composting review (BARformula): 70% moisture, 42% C, 0.8% N',ms:'Ulasan pengkomposan EFB–POME (BARformula): lembapan 70%, C 42%, N 0.8%'},
+ corn:{zh:'康奈尔大学废物管理研究所 可行性研究表',en:'Cornell Waste Management Institute feasibility table',ms:'Jadual kajian kebolehlaksanaan Cornell Waste Management Institute'},
+ chem:{zh:'化学式 CO(NH₂)₂：C 20%，N 46%',en:'Chemical formula CO(NH₂)₂: 20% C, 46% N',ms:'Formula kimia CO(NH₂)₂: C 20%, N 46%'},
+ ums25:{zh:'Kamal 等 2025，沙巴大学（UMS）：生羊粪实测',en:'Kamal et al. 2025, Universiti Malaysia Sabah: raw goat dung measured',ms:'Kamal et al. 2025, Universiti Malaysia Sabah: tahi kambing mentah diukur'},
+ wr12:{zh:'Wan Razali 等 2012，BioResources 7(4)（UPM，FELDA Serting Hilir 厂）',en:'Wan Razali et al. 2012, BioResources 7(4) (UPM, FELDA Serting Hilir mill)',ms:'Wan Razali et al. 2012, BioResources 7(4) (UPM, kilang FELDA Serting Hilir)'},
+ kan11:{zh:'Kananam 等 2011，ScienceAsia 37（泰国油棕厂）',en:'Kananam et al. 2011, ScienceAsia 37 (Thai palm oil mill)',ms:'Kananam et al. 2011, ScienceAsia 37 (kilang sawit Thailand)'},
+ tri12:{zh:'Tripetchkul 等 2012，Int. J. Recycl. Org. Waste Agric. 1:15',en:'Tripetchkul et al. 2012, Int. J. Recycl. Org. Waste Agric. 1:15',ms:'Tripetchkul et al. 2012, Int. J. Recycl. Org. Waste Agric. 1:15'},
+ own:{zh:'您自己输入的数值',en:'Your own values',ms:'Nilai anda sendiri'}
+};
+const MATS=[
+ {id:'layer',poultry:1,n:8.0,cn:6,m:69,src:'ofch',zh:'蛋鸡粪',en:'Laying-hen manure',ms:'Tahi ayam penelur',note:'CHICK'},
+ {id:'broiler',poultry:1,n:2.7,cn:14,m:37,src:'ofch',zh:'肉鸡粪（含垫料）',en:'Broiler litter',ms:'Tahi ayam pedaging (bersekam)',note:'CHICK'},
+ {id:'cattle',n:2.4,cn:19,m:81,src:'ofch',zh:'牛粪',en:'Cattle manure',ms:'Tahi lembu'},
+ {id:'sheep',n:2.7,cn:16,m:69,src:'ofch',zh:'绵羊粪',en:'Sheep manure',ms:'Tahi biri-biri'},
+ {id:'goat',n:3.12,cn:13,m:37.65,src:'ums25',zh:'山羊粪',en:'Goat manure',ms:'Tahi kambing',
+   note:{zh:'这份样本含水约 38%，属半干的。新鲜羊粪更湿，请量一下或用“改数值”。',en:'This sample was about 38% moisture, i.e. partly dry. Fresh dung is wetter; check yours or use Edit values.',ms:'Sampel ini ~38% lembapan, separa kering. Tahi segar lebih basah; semak atau guna Ubah nilai.'}},
+ {id:'pome',n:4.7,cn:6.7,m:95,src:'wr12',zh:'POME 厌氧污泥',en:'POME anaerobic sludge',ms:'Enapcemar anaerobik POME',
+   note:{zh:'含水 95%，几乎是液体；油棕厂常把它淋在空果串上补水补氮。',en:'95% water, almost liquid; mills spray it onto EFB to add moisture and nitrogen.',ms:'95% air, hampir cecair; kilang menyiramnya ke atas EFB untuk tambah lembapan dan nitrogen.'}},
+ {id:'decanter',n:2.18,cn:20.7,m:57.3,src:'kan11',zh:'油棕滤泥（decanter cake）',en:'Palm decanter cake',ms:'Kek decanter sawit',
+   note:{zh:'刚出厂的可能更湿：马来西亚一个厂的新鲜样本含水 78%。',en:'Fresh cake can be wetter: a fresh Malaysian mill sample was 78% moisture.',ms:'Kek segar boleh lebih basah: sampel segar dari kilang di Malaysia 78% lembapan.'}},
+ {id:'fish',n:10.6,cn:3.6,m:76,src:'ofch',zh:'鱼废料（内脏、骨架）',en:'Fish waste (guts, frames)',ms:'Sisa ikan (perut, tulang)'},
+ {id:'grass',n:3.4,cn:17,m:82,src:'ofch',zh:'新割青草',en:'Fresh grass clippings',ms:'Rumput baru dipotong'},
+ {id:'veg',n:2.7,cn:19,m:87,src:'ofch',zh:'菜渣',en:'Vegetable waste',ms:'Sisa sayur'},
+ {id:'food',n:2.4,cn:15,m:69,src:'ofchm',zh:'厨余',en:'Kitchen food waste',ms:'Sisa makanan dapur'},
+ {id:'prun',n:3.1,cn:16,m:70,src:'ofch',zh:'新鲜修剪枝叶',en:'Fresh tree trimmings',ms:'Cantasan pokok segar'},
+ {id:'citrus',n:1.5,cn:23.4,m:77.3,src:'mah',zh:'柑橘皮',en:'Citrus peel',ms:'Kulit limau'},
+ {id:'urea',n:46,cn:0.43,m:0,src:'chem',zh:'尿素（46% N）',en:'Urea (46% N)',ms:'Urea (46% N)',
+   note:{zh:'化肥，用量很小；一次加太多会有氨味损失。',en:'Mineral fertiliser; doses are small. Too much at once is lost as ammonia.',ms:'Baja kimia; dos kecil. Terlalu banyak sekali gus hilang sebagai ammonia.'}},
+ {id:'fruit',n:1.4,cn:40,m:80,src:'ofch',zh:'果渣、烂果',en:'Fruit waste',ms:'Sisa buah'},
+ {id:'durian',n:0.74,cn:49.9,m:84.6,src:'mah',zh:'榴莲壳',en:'Durian husk',ms:'Kulit durian',
+   note:{zh:'按碳氮比是“褐料”，但含水约 85%——先切碎晒干再堆。',en:'A brown by C:N but about 85% water — chop and sun-dry before piling.',ms:'Bahan perang mengikut C:N tetapi ~85% air — cincang dan jemur dahulu.'}},
+ {id:'efb',n:0.8,cn:52.5,m:70,src:'bar',zh:'油棕空果串（EFB）',en:'Empty fruit bunch (EFB)',ms:'Tandan kosong sawit (EFB)',
+   note:{zh:'文献数值差很大（C:N 约 41–178），最好化验您那一批。',en:'Published values vary widely (C:N about 41–178); test your own batch.',ms:'Nilai terbitan sangat berbeza (C:N ~41–178); uji kelompok anda.'}},
+ {id:'leaves',n:0.9,cn:54,m:38,src:'ofch',zh:'干落叶',en:'Dry fallen leaves',ms:'Daun kering gugur'},
+ {id:'shrub',n:1.0,cn:53,m:15,src:'ofch',zh:'干枝条',en:'Dry shrub trimmings',ms:'Ranting renek kering'},
+ {id:'straw',n:0.7,cn:80,m:12,src:'ofch',zh:'稻草、干秸秆',en:'Straw',ms:'Jerami'},
+ {id:'coir',n:0.44,cn:66.1,m:6.35,src:'tri12',zh:'椰糠（椰壳粉）',en:'Coir pith (coco peat)',ms:'Habuk sabut kelapa',
+   note:{zh:'这是晒干的椰糠。其他研究的碳氮比可到 75–186，差异很大。',en:'This was dried pith. Other studies report C:N of 75–186, so batches vary widely.',ms:'Ini habuk sabut kering. Kajian lain melaporkan C:N 75–186; kelompok sangat berbeza.'}},
+ {id:'husk',n:0.3,cn:121,m:14,src:'ofch',zh:'谷壳',en:'Rice husk',ms:'Sekam padi'},
+ {id:'sawdust',n:0.11,cn:511,m:39,src:'corn',zh:'木屑',en:'Sawdust',ms:'Habuk kayu'},
+ {id:'card',n:0.10,cn:563,m:8,src:'ofch',zh:'纸皮（瓦楞纸箱）',en:'Cardboard',ms:'Kadbod'}
+];
+const CHICK={zh:'只用热堆腐熟的：中心 55–77 °C 15 天、翻 5 次以上；开花到收果期间不用生鸡粪。详见“原理”页的条件清单。',en:'Use only hot-composted and cured: core 55–77 °C for 15 days, turned at least 5 times; no raw dung from flowering to harvest. Full checklist in Learn.',ms:'Guna hanya yang dikompos panas dan matang: tengah 55–77 °C selama 15 hari, dibalik sekurang-kurangnya 5 kali; tiada tahi mentah dari berbunga hingga tuai. Senarai penuh di Ilmu.'};
+MATS.forEach(m=>{if(m.note==='CHICK')m.note=CHICK});
+const WATER={id:'water',n:0,cn:0,m:100,zh:'水',en:'Water',ms:'Air'};
+function allMats(){return MATS.concat(S.own)}
+function mat(id){if(id==='water')return WATER;return allMats().find(x=>x.id===id)}
+function grp(m){if(m.id==='water')return 'W';return m.cn<=24?'N':'C'}
+function nm(m){return m.name||m[L()]||m.en}
+
+/* ---------- i18n ---------- */
+const T={
+zh:{app:'碳氮配比',settings:'设定',targetCN:'目标碳氮比',targetM:'目标含水量',ingredients:'材料与重量（湿重）',addIng:'加材料',
+ exampleNote:'这是示范配方（榴莲壳＋牛粪），换成您自己的材料。',noChick:'建议时不用鸡粪',whyMulch:'为什么要铺覆盖物？',mulchFlower:'覆盖物与开花',dryFirst:'或者：先把{x}切碎晒干，再回来改含水量重算，需要加的干料会少很多。',clear:'清空',emptyMix:'还没有材料。点下面“加材料”。',
+ navMix:'配比',navLib:'材料',navMulch:'覆盖',navLearn:'原理',kg:'公斤',L:'升',edit:'改数值',
+ resCN:'混合后碳氮比',resM:'混合后含水量',total:'总湿重',
+ cn1:'氮太多：会有氨味，氮跑掉',cn2:'偏氮：能堆，但会损失一些氮',cn3:'适合热堆肥',cn4:'偏碳：会堆得慢',cn5:'碳太多：堆不热，非常慢',
+ m1:'太干：微生物停工',m2:'偏干',m3:'湿度刚好',m4:'偏湿',m5:'太湿：缺氧、发臭',
+ doThis:'这样做',okTitle:'可以开始堆了',okBody:'碳氮比和湿度都在目标内。混匀后堆起来，头两周定期翻堆。',
+ add:'加',apply:'照这个加进配方',orUrea:'或用尿素（不加有机料）',noFix:'加材料很难改好。建议换主要材料，或先把太湿的材料晒干再算。',
+ recipe:'配方明细',share:'占比',nkg:'氮 公斤',ckg:'碳 公斤',
+ howCalc:'怎么算的',howCalcBody:'每样材料：干重 = 湿重 ×（1 − 含水%）；氮 = 干重 × 氮%；碳 = 氮 × 碳氮比。全部加起来，碳 ÷ 氮 = 混合碳氮比（康奈尔大学方法）。建议的加量是同时解碳氮比和含水量两条方程得出。',
+ squeeze:'手捏测试：抓一把用力捏，挤出一两滴水就对了。',
+ libTitle:'常见材料碳氮比',libIntro:'绿色=富氮（碳氮比 ≤24，会放出氮）；褐色=富碳（>24，会向土壤借氮）。数值为文献平均，您的材料会不一样。',
+ all:'全部',greens:'富氮（绿料）',browns:'富碳（褐料）',mine:'我的材料',addToMix:'加进配方',source:'来源',
+ ownTitle:'我的材料',ownIntro:'把化验报告的有机碳%、全氮%（干重）和含水量填进来。只有有机质%？碳% ≈ 有机质% ÷ 1.72。',
+ ownName:'名称',ownC:'有机碳 %（干重）',ownN:'全氮 %（干重）',ownM:'含水量 %',ownSave:'保存材料',del:'删除',
+ pickTitle:'选材料',water:'水',
+ mulchMat:'覆盖材料',kgPerTree:'每棵树 公斤（湿重）',trees:'树数',
+ mulchBorrow:'微生物最多向土壤借氮',mulchRelease:'分解后最多放出的氮',perTree:'每棵',allTrees:'全部',ureaEq:'约等于尿素',
+ mulchAdviceC:'默认做法：铺在表面，不要翻进土里；离开树头留一圈空位；照常施肥。小树如果叶子变黄，每棵补 {u} 克尿素，分几次撒在覆盖物外缘。',
+ mulchAdviceN:'这种材料碳氮比低于 24，分解快、放出氮，但很快就烂完，覆盖时间短。',
+ mulchNote:'这是上限估算：假设材料全部烂掉（美国 NRCS 的 24:1 规则）。实际上是几个月慢慢发生，主要影响表层土壤。',
+ dry:'干重',carbon:'碳',nitrogen:'氮',g:'克',
+ nNote:'说明',
+},
+en:{app:'CN Balance',settings:'Settings',targetCN:'Target C:N',targetM:'Target moisture',ingredients:'Ingredients and weight (wet)',addIng:'Add ingredient',
+ exampleNote:'Example mix (durian husk + cattle manure). Replace with your own materials.',noChick:'No chicken dung in suggestions',whyMulch:'Why mulch?',mulchFlower:'Mulch and flowering',dryFirst:'Or: chop and sun-dry the {x} first, then update its moisture and recalculate. You will need much less dry material.',clear:'Clear',emptyMix:'No ingredients yet. Tap Add ingredient below.',
+ navMix:'Mix',navLib:'Materials',navMulch:'Mulch',navLearn:'Learn',kg:'kg',L:'L',edit:'Edit values',
+ resCN:'Mix C:N',resM:'Mix moisture',total:'Total wet weight',
+ cn1:'Too much nitrogen: ammonia smell, N lost to the air',cn2:'Nitrogen-rich: works, with some N loss',cn3:'Good range for hot composting',cn4:'Carbon-heavy: composts slowly',cn5:'Too much carbon: pile stays cool, very slow',
+ m1:'Too dry: microbes stop working',m2:'On the dry side',m3:'Moisture is right',m4:'On the wet side',m5:'Too wet: no air, bad smell',
+ doThis:'Do this',okTitle:'Ready to pile',okBody:'C:N and moisture are on target. Mix evenly, pile it up and turn it regularly for the first two weeks.',
+ add:'Add',apply:'Add these to the mix',orUrea:'Or use urea (no organic material)',noFix:'This mix is hard to fix by adding. Change the main material, or sun-dry the wet material first and recalculate.',
+ recipe:'Recipe detail',share:'Share',nkg:'N kg',ckg:'C kg',
+ howCalc:'How it is calculated',howCalcBody:'For each material: dry weight = wet weight × (1 − moisture%); N = dry weight × N%; C = N × C:N. Add them all up; total C ÷ total N = mix C:N (Cornell method). The suggested amounts solve the C:N and moisture equations together.',
+ squeeze:'Squeeze test: grab a handful and squeeze hard. One or two drops of water is right.',
+ libTitle:'C:N of common materials',libIntro:'Green = nitrogen-rich (C:N ≤24, releases N). Brown = carbon-rich (>24, borrows N from soil). Values are published averages; yours will differ.',
+ all:'All',greens:'Nitrogen-rich (greens)',browns:'Carbon-rich (browns)',mine:'My materials',addToMix:'Add to mix',source:'Source',
+ ownTitle:'My materials',ownIntro:'Enter organic C% and total N% (dry weight) and moisture from your lab report. Only organic matter %? C% ≈ OM% ÷ 1.72.',
+ ownName:'Name',ownC:'Organic C % (dry)',ownN:'Total N % (dry)',ownM:'Moisture %',ownSave:'Save material',del:'Delete',
+ pickTitle:'Choose a material',water:'Water',
+ mulchMat:'Mulch material',kgPerTree:'kg per tree (wet)',trees:'Number of trees',
+ mulchBorrow:'Most N the microbes can borrow from soil',mulchRelease:'Most N released as it rots',perTree:'Per tree',allTrees:'All trees',ureaEq:'about this much urea',
+ mulchAdviceC:'Default: spread it on the surface, do not dig it in, and keep a clear ring around the trunk base. Keep your normal fertiliser schedule. If young trees turn yellow, add {u} g urea per tree, split into a few doses around the outer edge of the mulch.',
+ mulchAdviceN:'This material is below 24:1. It rots fast and releases N, but it covers the soil only briefly.',
+ mulchNote:'Upper estimate: assumes all of it rots (USDA NRCS 24:1 rule). In reality it happens over months and mostly affects the topsoil.',
+ dry:'Dry matter',carbon:'Carbon',nitrogen:'Nitrogen',g:'g',
+ nNote:'Note',
+},
+ms:{app:'Imbangan C:N',settings:'Tetapan',targetCN:'Sasaran C:N',targetM:'Sasaran lembapan',ingredients:'Bahan dan berat (basah)',addIng:'Tambah bahan',
+ exampleNote:'Contoh campuran (kulit durian + tahi lembu). Gantikan dengan bahan anda.',noChick:'Tanpa tahi ayam dalam cadangan',whyMulch:'Mengapa sungkupan?',mulchFlower:'Sungkupan dan pembungaan',dryFirst:'Atau: cincang dan jemur {x} dahulu, kemudian kemas kini lembapannya dan kira semula. Bahan kering yang perlu jauh berkurang.',clear:'Kosongkan',emptyMix:'Belum ada bahan. Tekan Tambah bahan di bawah.',
+ navMix:'Campuran',navLib:'Bahan',navMulch:'Sungkupan',navLearn:'Ilmu',kg:'kg',L:'L',edit:'Ubah nilai',
+ resCN:'C:N campuran',resM:'Lembapan campuran',total:'Jumlah berat basah',
+ cn1:'Nitrogen terlalu banyak: bau ammonia, N hilang ke udara',cn2:'Kaya nitrogen: boleh, tetapi sedikit N hilang',cn3:'Julat baik untuk kompos panas',cn4:'Berat karbon: reput perlahan',cn5:'Karbon terlalu banyak: longgokan sejuk, sangat perlahan',
+ m1:'Terlalu kering: mikrob berhenti',m2:'Agak kering',m3:'Lembapan tepat',m4:'Agak basah',m5:'Terlalu basah: tiada udara, berbau',
+ doThis:'Buat begini',okTitle:'Sedia untuk dilonggok',okBody:'C:N dan lembapan mencapai sasaran. Gaul sekata, longgokkan dan balikkan selalu pada dua minggu pertama.',
+ add:'Tambah',apply:'Masukkan ke campuran',orUrea:'Atau guna urea (tanpa bahan organik)',noFix:'Campuran ini sukar dibetulkan dengan menambah. Tukar bahan utama, atau jemur bahan basah dahulu dan kira semula.',
+ recipe:'Butiran resipi',share:'Bahagian',nkg:'N kg',ckg:'C kg',
+ howCalc:'Cara pengiraan',howCalcBody:'Bagi setiap bahan: berat kering = berat basah × (1 − lembapan%); N = berat kering × N%; C = N × C:N. Jumlahkan semua; jumlah C ÷ jumlah N = C:N campuran (kaedah Cornell). Cadangan tambahan menyelesaikan persamaan C:N dan lembapan serentak.',
+ squeeze:'Ujian genggam: genggam segenggam dengan kuat. Satu dua titis air bermakna tepat.',
+ libTitle:'C:N bahan biasa',libIntro:'Hijau = kaya nitrogen (C:N ≤24, membebaskan N). Perang = kaya karbon (>24, meminjam N dari tanah). Nilai ialah purata terbitan; bahan anda akan berbeza.',
+ all:'Semua',greens:'Kaya nitrogen (hijau)',browns:'Kaya karbon (perang)',mine:'Bahan saya',addToMix:'Tambah ke campuran',source:'Sumber',
+ ownTitle:'Bahan saya',ownIntro:'Masukkan C organik % dan N jumlah % (berat kering) serta lembapan daripada laporan makmal. Hanya ada bahan organik %? C% ≈ BO% ÷ 1.72.',
+ ownName:'Nama',ownC:'C organik % (kering)',ownN:'N jumlah % (kering)',ownM:'Lembapan %',ownSave:'Simpan bahan',del:'Padam',
+ pickTitle:'Pilih bahan',water:'Air',
+ mulchMat:'Bahan sungkupan',kgPerTree:'kg sepokok (basah)',trees:'Bilangan pokok',
+ mulchBorrow:'N maksimum dipinjam mikrob dari tanah',mulchRelease:'N maksimum dibebaskan semasa reput',perTree:'Sepokok',allTrees:'Semua pokok',ureaEq:'lebih kurang urea',
+ mulchAdviceC:'Lalai: tabur di permukaan, jangan benamkan, dan biarkan ruang kosong sekeliling pangkal batang. Teruskan jadual baja biasa. Jika pokok muda menguning, beri {u} g urea sepokok, dibahagi beberapa kali di pinggir luar sungkupan.',
+ mulchAdviceN:'Bahan ini di bawah 24:1. Ia reput cepat dan membebaskan N, tetapi menutup tanah sekejap sahaja.',
+ mulchNote:'Anggaran maksimum: andaian semua bahan reput (peraturan 24:1 USDA NRCS). Hakikatnya berlaku dalam beberapa bulan dan kebanyakannya di tanah atas.',
+ dry:'Berat kering',carbon:'Karbon',nitrogen:'Nitrogen',g:'g',
+ nNote:'Nota',
+}};
+function L(){return S.lang||'en'}
+function t(k){return (T[L()]&&T[L()][k])||T.en[k]||k}
+
+
+Object.assign(T.zh,{seesawNote:'24 是土壤微生物需要的碳氮比，用来判断覆盖物会借氮还是放氮；它不是让树开花或长叶的开关。'});
+Object.assign(T.en,{seesawNote:'24 is the C:N soil microbes need, used to tell whether mulch borrows or releases nitrogen. It is not a switch that makes the tree flower or grow leaves.'});
+Object.assign(T.ms,{seesawNote:'24 ialah C:N yang diperlukan mikrob tanah, untuk tahu sama ada sungkupan meminjam atau melepaskan nitrogen. Ia bukan suis yang membuat pokok berbunga atau berpucuk.'});
+Object.assign(T.zh,{setTitle:'设置',setLang:'语言',setSize:'字体大小',setTheme:'显示',thLight:'白天',thDark:'夜间',thAuto:'跟随手机'});
+Object.assign(T.en,{setTitle:'Settings',setLang:'Language',setSize:'Text size',setTheme:'Display',thLight:'Light',thDark:'Dark',thAuto:'Same as phone'});
+Object.assign(T.ms,{setTitle:'Tetapan',setLang:'Bahasa',setSize:'Saiz tulisan',setTheme:'Paparan',thLight:'Cerah',thDark:'Gelap',thAuto:'Ikut telefon'});
+Object.assign(T.zh,{ovHint:'空着就用上面显示的数值；只填您自己有的数据。'});
+Object.assign(T.zh,{needKg:'请先填写数量：',needMulchKg:'请填写每棵树铺多少公斤，才计算氮的借还。',loadEx:'看一个示范配方'});
+Object.assign(T.en,{ovHint:'Leave blank to use the values shown above. Fill in only what you know for your own material.'});
+Object.assign(T.en,{needKg:'Fill in the amount for:',needMulchKg:'Enter kg per tree to calculate the nitrogen borrowed or released.',loadEx:'Show an example mix'});
+Object.assign(T.ms,{ovHint:'Biarkan kosong untuk guna nilai di atas. Isi hanya data bahan anda sendiri.'});
+Object.assign(T.ms,{needKg:'Isi jumlah untuk:',needMulchKg:'Isi kg sepokok untuk mengira nitrogen yang dipinjam atau dilepaskan.',loadEx:'Tunjuk contoh campuran'});
+Object.assign(T.zh,{buildT:'怎么堆：分层与顺序',buildSteps:'<b>底层最重要：</b>先铺 15–20 厘米粗枝条或剁碎的油棕叶，让空气从下面进去、水不积在堆底。|<b>中间交替：</b>褐料 15–25 厘米，再铺一薄层粪或青料，一层一层往上叠。能先混匀再堆更好，因为碳和氮要接触在一起。|<b>每铺一层洒一次水，</b>直到手捏挤出一两滴水。|<b>湿的新鲜粪和厨余放中间，</b>不要放在边上或顶上。|<b>新割的草先和干料混匀，</b>单独一层会压实、变黏发臭。|<b>顶层最重要：</b>最后盖一层干褐料（谷壳、木屑、干叶或旧堆肥），看不到粪和厨余，可防苍蝇、减少臭味。|<b>大小：</b>长宽高约 0.9–1.5 米。第一次翻堆后层次就没了，之后只看混合是否均匀（康奈尔大学；德州农工大学）。',ownIntro:'不用送化验。选一样最相似的材料（借用它的文献氮和碳氮比），再在家量含水量。',ownBase:'最相似的材料',ownPickBase:'点这里选择',ownLab:'有化验报告？（可选）',ownLabNote:'填了就用化验的碳和氮，代替相似材料的数值。只有有机质%？碳% ≈ 有机质% ÷ 1.72。',ownNeed:'请填名称、选相似材料（或填化验碳和氮），并填含水量（0–99）。',basedOn:'参照 {x} 的文献值，含水量为您自己量的',
+ hmT:'在家量含水量（只需厨房秤）',hmSteps:'① 称空容器。② 放约 100 克材料再称。③ 弄干：摊薄晒几天，或用微波炉每次 1–2 分钟，翻一翻再称，直到重量不再下降。④ 再称一次，填下面三个数。',hmEmpty:'空容器 克',hmWet:'容器＋湿料 克',hmDry:'容器＋干料 克',hmRes:'含水量 = {m}%',hmBad:'检查数字：湿料要比空容器重，干料要在两者之间。',hmUse:'用这个数',hmNote:'晒干可能没完全干，量出来会偏低一点。粪便请用另一台旧微波炉，不要用厨房那台（康奈尔大学；内布拉斯加大学）。',axLo:'← 氮多',axHi:'碳多 →',sqTitle:'您的手捏测试结果',sqTitle2:'混好后的手捏测试（可选）',sqDry:'松散，挤不出水',sqOk:'挤出一两滴水',sqWet:'水一直流',
+ sqMsgDry:'手感说太干：以手感为准，表里的数值只是平均。翻堆时一点一点加水，直到挤出一两滴水。',
+ sqMsgWet:'手感说太湿：以手感为准。摊开晒一晒，或混进干褐料（谷壳、木屑），下雨时盖住。',
+ sqMsgOk:'手感刚好，保持这个湿度。',rainChip:'上次记录后下过大雨',
+ advSqDry:'手捏太干：今天翻堆时加水，一点一点加，直到挤出一两滴水。太干微生物会停工、堆不热。',
+ advSqWet:'太湿或刚下过大雨：今天翻堆让空气进去，混进干褐料，下雨时盖住堆、做好排水。',
+ shareT:'分享与备份',shareWa:'把日志用 WhatsApp 发出去',backupT:'备份：复制这段代码，存在 WhatsApp 或记事本里',copyCode:'复制备份代码',copied:'已复制',
+ restoreT:'换手机或清了资料？把备份代码贴在这里还原',restoreBtn:'还原',restoreConfirm:'再按一次确认（会覆盖现在的资料）',restoreBad:'代码不对，请重新复制完整的备份代码。',restoreOk:'已还原。',
+ nBudget:'这堆含氮约 {n} 公斤。堆肥过程中最多约 40% 会变成气体跑掉（内布拉斯加大学），所以成品约含 {lo}–{n} 公斤氮。',
+ pileSize:'堆的大小：长、宽、高至少约 0.9 米（约 1 立方米）才热得起来；高和宽不要超过约 1.5 米（美国马里兰州环境局）。',
+ tpa:'每英亩树数',perAcre:'每英亩',sumHot:'高温天',sumTurn:'翻堆',sumRecent:'最近温度',yieldNote:'预计成品约为开堆湿重的 20–50%：牛粪堆肥研究中，体积和重量减少 50–80%（Michel 等 2004）。',navPile:'堆肥日志',measureBy:'用什么量',weighOne:'称一{u}后可换算',weighPrompt:'称一{u}{x}有几公斤：',perUnit:'1 {u} =',
+ chartLbl:'中心温度记录',dayN:'天数',pileStartT:'开始一堆新堆肥',pileStartB:'用目前的配比开始一堆。之后每天量中心温度、记录每次翻堆，软件每天告诉您该做什么，直到堆肥可以用。',
+ startDate:'开堆日期',pileStartBtn:'用这个配比开堆',pileNoMix:'请先在“配比”页配好材料。',logToday:'今天的记录',date:'日期',coreT:'中心温度 °C',
+ turnedToday:'今天有翻堆',saveLog:'保存记录',probeTip:'用长杆堆肥温度计（要插得到中心，农场堆约 45–90 厘米深）插到堆的正中心，等读数稳定再记。',needTemp:'请填温度，或点“今天有翻堆”。',logSaved:'已保存。',
+ todayDo:'今天这样做',progress:'进度',hotDays:'高温天数（55–77 °C）',turnsHot:'高温期翻堆次数',countRule:'只有量到 55–77 °C 的日子才算高温天；没量的日子不算。翻堆从第一个高温天开始算。',
+ cureT:'腐熟检查（三项都打勾才可以用）',cure_reheat:'翻堆后不再发热',cure_smell:'有泥土味，没有氨味或臭味',cure_seed:'种子发芽测试正常（≥80%）',
+ logList:'记录明细',turnCol:'翻堆',pileRecipe:'这堆的配方',endPile:'结束这一堆',endConfirm:'再按一次确认结束',
+ advHotHi:'超过 77 °C（{t} °C）：马上翻堆散热、让空气进去。安全标准的上限是 77 °C。',
+ advReady:'可以用了。撒在树冠外缘的表面，不要堆在树头。',
+ advCure:'高温期完成（15 天、翻 5 次）。现在让它腐熟：保持湿润，偶尔翻一翻，看到下面三个迹象就打勾。',
+ advMoreTurns:'已有 15 个高温天，但翻堆不到 5 次。继续保持高温，翻够 5 次。',
+ advMeasure:'今天量一次中心温度：把长探针温度计插到堆的正中心。',
+ advCooled:'温度掉到 55 °C 以下（{t} °C）。翻堆让它再热起来；一两天还不热，就检查水分和氮——看下面“常见问题”。低于 55 °C 的日子不算。',
+ advWarming:'还没热起来（{t} °C）。大多数堆几天内就会超过 55 °C；如果没有，看下面“常见问题”。',
+ advTurn:'今天翻堆，把外层翻到中心。（15 个高温天里翻 5 次 ≈ 每 3 天一次）',
+ advKeep:'很好，在 55–77 °C 之间。先不用动，大约 {n} 天后再翻。',
+ troubleT:'常见问题（看图找原因）',
+ tr_ammonia:'有氨味（刺鼻尿味）',tr_ammonia_x:'氮太多（碳氮比太低），氮变成氨气跑掉。混进干的褐料（谷壳、木屑）再翻堆。可在“配比”页重算。',
+ tr_rotten:'臭鸡蛋味、酸臭',tr_rotten_x:'太湿、缺氧。翻堆让空气进去，混进干褐料；下雨时盖住，堆的位置要排水好。',
+ tr_cold:'不发热',tr_cold_x:'太干、太湿、氮不够（碳氮比 >40），或堆太小散热快。先做手捏测试：太干加水，太湿加干褐料；氮不够加牛粪或少量尿素；把堆做大一些（长宽高至少约 0.9 米）。',
+ tr_hot:'超过 77 °C',tr_hot_x:'马上翻堆散热、让空气进去。77 °C 是安全标准的上限。',
+ tr_flies:'苍蝇、蛆',tr_flies_x:'新鲜粪便或厨余露在表面。用一层褐料或腐熟堆肥盖住新料；保持高温，翻堆时把外层翻进中心。',
+ tr_dry:'太干、灰白粉状',tr_dry_x:'翻堆时边翻边加水，直到手捏挤出一两滴水。',shareLogT:'把这堆的记录发给农友或农艺师',bkWhyT:'备份（换手机也不怕）',bkWhy:'您的堆肥日志、自己的材料和每包重量只存在这部手机里。换手机或清除浏览器资料就会不见。偶尔发一份备份给自己。',bkSendWa:'用 WhatsApp 发备份给自己',bkMsgHead:'碳氮配比 备份（换手机时，把整条信息复制，贴到软件“分享与备份 → 还原”）：',restoreHow:'在 WhatsApp 长按那条备份信息，复制，贴在下面，再按还原。',copyCode:'复制备份',restoreT:'换了手机？从备份还原'});
+Object.assign(T.en,{buildT:'How to build the pile: layers and order',buildSteps:'<b>The base matters:</b> start with 15–20 cm of coarse twigs or chopped palm fronds, so air gets in from below and water does not pool under the pile.|<b>Alternate in the middle:</b> browns 15–25 cm, then a thin layer of manure or greens, and repeat upward. Mixing them before piling is even better, because carbon and nitrogen need to touch.|<b>Wet each layer as you go,</b> until a squeeze gives 1–2 drops.|<b>Put wet fresh dung and food waste in the middle,</b> not at the edges or on top.|<b>Mix fresh grass with dry material first;</b> on its own it mats down and goes slimy.|<b>The top matters:</b> finish with a cover of dry browns (rice husk, sawdust, dry leaves or old compost) so no dung or food shows. This keeps flies off and cuts the smell.|<b>Size:</b> about 0.9–1.5 m each way. After the first turning the layers are gone; from then on only the mix matters (Cornell University; Texas A&amp;M).',ownIntro:'No lab needed. Pick the most similar material (its published N and C:N are used), then measure the moisture at home.',ownBase:'Most similar material',ownPickBase:'Tap to choose',ownLab:'Have a lab report? (optional)',ownLabNote:'If filled in, the lab C and N replace the similar material\'s values. Only organic matter %? C% ≈ OM% ÷ 1.72.',ownNeed:'Fill in a name, choose a similar material (or enter lab C and N), and moisture (0–99).',basedOn:'Published values of {x}, with your own measured moisture',
+ hmT:'Measure moisture at home (kitchen scale only)',hmSteps:'① Weigh an empty container. ② Add about 100 g of the material and weigh. ③ Dry it: spread thin in the sun for a few days, or microwave 1–2 minutes at a time, stir and weigh, until the weight stops dropping. ④ Weigh again and fill in the three numbers below.',hmEmpty:'Empty container g',hmWet:'Container + wet g',hmDry:'Container + dry g',hmRes:'Moisture = {m}%',hmBad:'Check the numbers: wet must be heavier than the empty container, and dry must be between them.',hmUse:'Use this value',hmNote:'Sun-drying may not dry it completely, so the result can read a little low. For manure, use an old separate microwave, not the kitchen one (Cornell University; University of Nebraska).',axLo:'← more N',axHi:'more C →',sqTitle:'Your squeeze test',sqTitle2:'Squeeze test after mixing (optional)',sqDry:'Crumbles, no water',sqOk:'1–2 drops',sqWet:'Water runs out',
+ sqMsgDry:'Your hand says too dry. Trust it over the calculation; table values are only averages. Add water a little at a time while turning, until you get 1–2 drops.',
+ sqMsgWet:'Your hand says too wet. Trust it. Spread it out in the sun, or mix in dry browns (rice husk, sawdust), and cover it when it rains.',
+ sqMsgOk:'Right by hand. Keep it at this moisture.',rainChip:'Heavy rain since last log',
+ advSqDry:'Too dry by hand: turn it today and add water a little at a time until a squeeze gives 1–2 drops. A dry pile stops heating.',
+ advSqWet:'Too wet, or heavy rain: turn it today to let air in, mix in dry browns, and cover the pile and keep it drained when it rains.',
+ shareT:'Share and back up',shareWa:'Send this log on WhatsApp',backupT:'Backup: copy this code and keep it in WhatsApp or a notes app',copyCode:'Copy backup code',copied:'Copied',
+ restoreT:'New phone or cleared data? Paste your backup code here to restore',restoreBtn:'Restore',restoreConfirm:'Tap again to confirm (replaces current data)',restoreBad:'That code is not valid. Copy the whole backup code again.',restoreOk:'Restored.',
+ nBudget:'This pile holds about {n} kg of nitrogen. Up to about 40% can escape as gas during composting (University of Nebraska), so finished compost holds roughly {lo}–{n} kg N.',
+ pileSize:'Pile size: at least about 0.9 m long, wide and high (about 1 m³) so it can heat up; no more than about 1.5 m high and wide (Maryland Department of the Environment).',
+ tpa:'Trees per acre',perAcre:'Per acre',sumHot:'Hot days',sumTurn:'Turnings',sumRecent:'Recent temperatures',yieldNote:'Expect finished compost of roughly 20–50% of the starting wet weight: a dairy-manure study found volume and weight fell by 50–80% (Michel et al. 2004).',navPile:'Pile',measureBy:'Measure by',weighOne:'weigh one {u} to convert',weighPrompt:'Weigh one {u} of {x}:',perUnit:'1 {u} =',
+ chartLbl:'Core temperature log',dayN:'Day',pileStartT:'Start a new pile',pileStartB:'Start a pile with your current mix. Then measure the core temperature every day and log each turning. The app tells you what to do each day until the compost is ready.',
+ startDate:'Start date',pileStartBtn:'Start pile with this mix',pileNoMix:'Set up a mix in the Mix tab first.',logToday:'Today\'s log',date:'Date',coreT:'Core temp °C',
+ turnedToday:'Turned it today',saveLog:'Save log',probeTip:'Use a long-stem compost thermometer that reaches the centre (about 45–90 cm deep in a farm pile). Push it into the very centre and wait for the reading to settle.',needTemp:'Enter a temperature, or tap Turned it today.',logSaved:'Saved.',
+ todayDo:'Do this today',progress:'Progress',hotDays:'Hot days (55–77 °C)',turnsHot:'Turnings in hot phase',countRule:'Only days you measured 55–77 °C count as hot days; days you didn\'t measure don\'t count. Turnings count from the first hot day.',
+ cureT:'Curing check (tick all three before use)',cure_reheat:'Does not heat up again after turning',cure_smell:'Smells earthy, no ammonia or rotten smell',cure_seed:'Seed test sprouts normally (≥80%)',
+ logList:'Log entries',turnCol:'Turned',pileRecipe:'This pile\'s recipe',endPile:'Finish this pile',endConfirm:'Tap again to confirm',
+ advHotHi:'Over 77 °C ({t} °C): turn it now to let heat out and air in. 77 °C is the safety standard\'s upper limit.',
+ advReady:'Ready to use. Spread it on the surface toward the canopy edge, not against the trunk.',
+ advCure:'Hot phase done (15 days, 5 turnings). Now let it cure: keep it moist, turn it now and then, and tick the three signs below as you see them.',
+ advMoreTurns:'You have 15 hot days but fewer than 5 turnings. Keep it hot and turn until you reach 5.',
+ advMeasure:'Measure the core temperature today: push a long probe thermometer into the centre of the pile.',
+ advCooled:'It has dropped below 55 °C ({t} °C). Turn it to reheat. If it hasn\'t heated up again in a day or two, check moisture and nitrogen; see Problems below. Days below 55 °C don\'t count.',
+ advWarming:'Not hot yet ({t} °C). Most piles pass 55 °C within a few days. If yours doesn\'t, see Problems below.',
+ advTurn:'Turn the pile today, moving the outer layer into the centre. (5 turnings in 15 hot days ≈ every 3 days.)',
+ advKeep:'Good: it is within 55–77 °C. Leave it; next turning in about {n} days.',
+ troubleT:'Problems? Find the cause',
+ tr_ammonia:'Ammonia smell (sharp, like urine)',tr_ammonia_x:'Too much nitrogen (C:N too low); nitrogen is escaping as ammonia. Mix in dry browns such as rice husk or sawdust and turn. Recalculate in the Mix tab.',
+ tr_rotten:'Rotten-egg or sour smell',tr_rotten_x:'Too wet, no air. Turn it to let air in and mix in dry browns. Cover it when it rains and keep the site well drained.',
+ tr_cold:'Not heating up',tr_cold_x:'Too dry, too wet, too little nitrogen (C:N above 40), or the pile is too small and loses heat. Do the squeeze test first: water if dry, dry browns if wet; add cattle manure or a little urea if nitrogen is short; make the pile bigger (at least about 0.9 m each way).',
+ tr_hot:'Above 77 °C',tr_hot_x:'Turn it now to release heat and let air in. 77 °C is the safety standard\'s upper limit.',
+ tr_flies:'Flies or maggots',tr_flies_x:'Fresh manure or food waste is exposed on the surface. Cover new material with a layer of browns or finished compost; keep the pile hot and turn the outer layer into the centre.',
+ tr_dry:'Too dry, grey and dusty',tr_dry_x:'Add water while turning until the squeeze test gives one or two drops.',shareLogT:'Send this pile\'s log to a friend or agronomist',bkWhyT:'Backup (in case you change phones)',bkWhy:'Your pile diary, your own materials and sack weights are saved only on this phone. Changing phones or clearing browser data deletes them. Send yourself a backup now and then.',bkSendWa:'Send backup to myself on WhatsApp',bkMsgHead:'CN Balance backup (on a new phone, copy this whole message and paste it into the app: Share and back up → Restore):',restoreHow:'In WhatsApp, long-press the backup message, copy it, paste it below, then tap Restore.',copyCode:'Copy backup',restoreT:'New phone? Restore from backup'});
+Object.assign(T.ms,{buildT:'Cara membina longgokan: lapisan dan susunan',buildSteps:'<b>Dasar penting:</b> mula dengan 15–20 cm ranting kasar atau pelepah sawit dicincang, supaya udara masuk dari bawah dan air tidak bertakung di bawah longgokan.|<b>Selang-seli di tengah:</b> bahan perang 15–25 cm, kemudian lapisan nipis tahi atau bahan hijau, ulang ke atas. Menggaul dahulu sebelum dilonggok lebih baik, kerana karbon dan nitrogen perlu bersentuhan.|<b>Basahkan setiap lapisan,</b> sehingga genggaman memberi 1–2 titis.|<b>Letak tahi segar yang basah dan sisa makanan di tengah,</b> bukan di tepi atau di atas.|<b>Gaul rumput segar dengan bahan kering dahulu;</b> jika berasingan ia memadat dan berlendir.|<b>Bahagian atas penting:</b> tutup dengan bahan perang kering (sekam, habuk kayu, daun kering atau kompos lama) supaya tiada tahi atau sisa makanan kelihatan. Ini menghalang lalat dan mengurangkan bau.|<b>Saiz:</b> kira-kira 0.9–1.5 m setiap sisi. Selepas balikan pertama lapisan hilang; selepas itu hanya campuran yang penting (Cornell University; Texas A&amp;M).',ownIntro:'Tidak perlu makmal. Pilih bahan paling serupa (N dan C:N terbitannya digunakan), kemudian ukur lembapan di rumah.',ownBase:'Bahan paling serupa',ownPickBase:'Tekan untuk pilih',ownLab:'Ada laporan makmal? (pilihan)',ownLabNote:'Jika diisi, C dan N makmal menggantikan nilai bahan serupa. Hanya ada bahan organik %? C% ≈ BO% ÷ 1.72.',ownNeed:'Isi nama, pilih bahan serupa (atau isi C dan N makmal), dan lembapan (0–99).',basedOn:'Nilai terbitan {x}, dengan lembapan yang anda ukur sendiri',
+ hmT:'Ukur lembapan di rumah (penimbang dapur sahaja)',hmSteps:'① Timbang bekas kosong. ② Masukkan ~100 g bahan dan timbang. ③ Keringkan: hamparkan nipis di bawah matahari beberapa hari, atau ketuhar gelombang mikro 1–2 minit setiap kali, kacau dan timbang, sehingga berat tidak turun lagi. ④ Timbang semula dan isi tiga nombor di bawah.',hmEmpty:'Bekas kosong g',hmWet:'Bekas + basah g',hmDry:'Bekas + kering g',hmRes:'Lembapan = {m}%',hmBad:'Semak nombor: basah mesti lebih berat daripada bekas kosong, dan kering mesti di antara keduanya.',hmUse:'Guna nilai ini',hmNote:'Jemur mungkin tidak kering sepenuhnya, jadi bacaan boleh rendah sedikit. Untuk tahi, guna ketuhar gelombang mikro lama yang berasingan, bukan yang di dapur (Cornell University; University of Nebraska).',axLo:'← lebih N',axHi:'lebih C →',sqTitle:'Ujian genggam anda',sqTitle2:'Ujian genggam selepas digaul (pilihan)',sqDry:'Berderai, tiada air',sqOk:'1–2 titis',sqWet:'Air mengalir',
+ sqMsgDry:'Tangan anda kata terlalu kering. Percayai tangan; nilai jadual hanya purata. Tambah air sedikit demi sedikit sambil membalik, sehingga dapat 1–2 titis.',
+ sqMsgWet:'Tangan anda kata terlalu basah. Percayai tangan. Hamparkan di bawah matahari, atau campur bahan perang kering (sekam, habuk kayu), dan tutup ketika hujan.',
+ sqMsgOk:'Tepat mengikut tangan. Kekalkan lembapan ini.',rainChip:'Hujan lebat sejak catatan lepas',
+ advSqDry:'Terlalu kering mengikut tangan: balikkan hari ini dan tambah air sedikit demi sedikit sehingga genggaman memberi 1–2 titis. Longgokan kering berhenti panas.',
+ advSqWet:'Terlalu basah, atau hujan lebat: balikkan hari ini untuk masukkan udara, campur bahan perang kering, dan tutup longgokan serta pastikan saliran ketika hujan.',
+ shareT:'Kongsi dan sandaran',shareWa:'Hantar catatan ini di WhatsApp',backupT:'Sandaran: salin kod ini dan simpan di WhatsApp atau aplikasi nota',copyCode:'Salin kod sandaran',copied:'Disalin',
+ restoreT:'Telefon baru atau data dipadam? Tampal kod sandaran di sini untuk pulihkan',restoreBtn:'Pulihkan',restoreConfirm:'Tekan sekali lagi untuk sahkan (menggantikan data semasa)',restoreBad:'Kod tidak sah. Salin semula keseluruhan kod sandaran.',restoreOk:'Dipulihkan.',
+ nBudget:'Longgokan ini mengandungi kira-kira {n} kg nitrogen. Sehingga ~40% boleh hilang sebagai gas semasa pengkomposan (University of Nebraska), jadi kompos siap mengandungi kira-kira {lo}–{n} kg N.',
+ pileSize:'Saiz longgokan: sekurang-kurangnya ~0.9 m panjang, lebar dan tinggi (~1 m³) supaya boleh panas; tidak melebihi ~1.5 m tinggi dan lebar (Maryland Department of the Environment).',
+ tpa:'Pokok seekar',perAcre:'Seekar',sumHot:'Hari panas',sumTurn:'Balikan',sumRecent:'Suhu terkini',yieldNote:'Jangka kompos siap kira-kira 20–50% berat basah asal: kajian tahi lembu tenusu mendapati isipadu dan berat turun 50–80% (Michel et al. 2004).',navPile:'Longgokan',measureBy:'Sukat dengan',weighOne:'timbang satu {u} untuk tukar',weighPrompt:'Timbang satu {u} {x}:',perUnit:'1 {u} =',
+ chartLbl:'Rekod suhu tengah',dayN:'Hari',pileStartT:'Mula longgokan baru',pileStartB:'Mulakan longgokan dengan campuran semasa. Kemudian ukur suhu tengah setiap hari dan catat setiap kali dibalikkan. Aplikasi memberitahu apa perlu dibuat setiap hari sehingga kompos sedia.',
+ startDate:'Tarikh mula',pileStartBtn:'Mula dengan campuran ini',pileNoMix:'Sediakan campuran di tab Campuran dahulu.',logToday:'Catatan hari ini',date:'Tarikh',coreT:'Suhu tengah °C',
+ turnedToday:'Dibalik hari ini',saveLog:'Simpan catatan',probeTip:'Guna termometer kompos batang panjang yang sampai ke tengah (~45–90 cm dalam untuk longgokan ladang). Cucuk ke tengah-tengah dan tunggu bacaan stabil.',needTemp:'Isi suhu, atau tekan Dibalik hari ini.',logSaved:'Disimpan.',
+ todayDo:'Buat ini hari ini',progress:'Kemajuan',hotDays:'Hari panas (55–77 °C)',turnsHot:'Balikan dalam fasa panas',countRule:'Hanya hari yang diukur 55–77 °C dikira hari panas; hari tidak diukur tidak dikira. Balikan dikira dari hari panas pertama.',
+ cureT:'Semakan kematangan (tanda ketiga-tiga sebelum guna)',cure_reheat:'Tidak panas lagi selepas dibalik',cure_smell:'Bau tanah, tiada bau ammonia atau busuk',cure_seed:'Ujian biji bercambah normal (≥80%)',
+ logList:'Senarai catatan',turnCol:'Dibalik',pileRecipe:'Resipi longgokan ini',endPile:'Tamatkan longgokan ini',endConfirm:'Tekan sekali lagi untuk sahkan',
+ advHotHi:'Melebihi 77 °C ({t} °C): balikkan sekarang untuk lepaskan haba dan masukkan udara. 77 °C ialah had atas piawaian keselamatan.',
+ advReady:'Sedia digunakan. Tabur di permukaan ke arah pinggir kanopi, bukan pada pangkal batang.',
+ advCure:'Fasa panas selesai (15 hari, 5 balikan). Sekarang biar ia matang: kekalkan lembap, balikkan sekali-sekala, dan tanda tiga tanda di bawah apabila kelihatan.',
+ advMoreTurns:'Sudah 15 hari panas tetapi kurang 5 balikan. Kekalkan panas dan balikkan hingga cukup 5.',
+ advMeasure:'Ukur suhu tengah hari ini: cucuk termometer prob panjang ke tengah longgokan.',
+ advCooled:'Suhu jatuh bawah 55 °C ({t} °C). Balikkan supaya panas semula. Jika tidak panas dalam sehari dua, periksa lembapan dan nitrogen; lihat Masalah di bawah. Hari bawah 55 °C tidak dikira.',
+ advWarming:'Belum panas ({t} °C). Kebanyakan longgokan melepasi 55 °C dalam beberapa hari. Jika tidak, lihat Masalah di bawah.',
+ advTurn:'Balikkan longgokan hari ini, pindahkan lapisan luar ke tengah. (5 balikan dalam 15 hari panas ≈ setiap 3 hari.)',
+ advKeep:'Bagus: dalam julat 55–77 °C. Biarkan; balikan seterusnya kira-kira {n} hari lagi.',
+ troubleT:'Masalah? Cari puncanya',
+ tr_ammonia:'Bau ammonia (tajam, seperti air kencing)',tr_ammonia_x:'Nitrogen terlalu banyak (C:N terlalu rendah); nitrogen lari sebagai ammonia. Campur bahan perang kering seperti sekam padi atau habuk kayu dan balikkan. Kira semula di tab Campuran.',
+ tr_rotten:'Bau telur busuk atau masam',tr_rotten_x:'Terlalu basah, tiada udara. Balikkan untuk masukkan udara dan campur bahan perang kering. Tutup ketika hujan dan pastikan saliran tapak baik.',
+ tr_cold:'Tidak panas',tr_cold_x:'Terlalu kering, terlalu basah, kurang nitrogen (C:N melebihi 40), atau longgokan terlalu kecil dan cepat hilang haba. Buat ujian genggam dahulu: siram jika kering, tambah bahan perang kering jika basah; tambah tahi lembu atau sedikit urea jika kurang nitrogen; besarkan longgokan (sekurang-kurangnya ~0.9 m setiap sisi).',
+ tr_hot:'Melebihi 77 °C',tr_hot_x:'Balikkan sekarang untuk lepaskan haba dan masukkan udara. 77 °C ialah had atas piawaian keselamatan.',
+ tr_flies:'Lalat atau ulat',tr_flies_x:'Tahi atau sisa makanan segar terdedah di permukaan. Tutup bahan baru dengan lapisan bahan perang atau kompos matang; kekalkan panas dan balikkan lapisan luar ke tengah.',
+ tr_dry:'Terlalu kering, kelabu dan berdebu',tr_dry_x:'Siram sambil membalikkan sehingga ujian genggam memberi satu dua titis.',shareLogT:'Hantar catatan longgokan ini kepada rakan atau ahli agronomi',bkWhyT:'Sandaran (jika tukar telefon)',bkWhy:'Diari longgokan, bahan anda dan berat guni disimpan dalam telefon ini sahaja. Tukar telefon atau padam data pelayar akan menghapuskannya. Hantar sandaran kepada diri sendiri sekali-sekala.',bkSendWa:'Hantar sandaran kepada diri sendiri di WhatsApp',bkMsgHead:'Sandaran Imbangan C:N (di telefon baru, salin seluruh mesej ini dan tampal dalam aplikasi: Kongsi dan sandaran → Pulihkan):',restoreHow:'Dalam WhatsApp, tekan lama mesej sandaran, salin, tampal di bawah, kemudian tekan Pulihkan.',copyCode:'Salin sandaran',restoreT:'Telefon baru? Pulihkan dari sandaran'});
+
+/* ---------- units (sack / bucket / barrow) ---------- */
+const UNITS=['kg','sack','bucket','barrow'];
+const ULBL={zh:{kg:'公斤',sack:'包',bucket:'桶',barrow:'手推车'},en:{kg:'kg',sack:'sack',bucket:'bucket',barrow:'wheelbarrow'},ms:{kg:'kg',sack:'guni',bucket:'baldi',barrow:'kereta sorong'}};
+function ul(u){return ULBL[L()][u]}
+function ulN(u,c){return L()==='en'&&c!==1&&u!=='kg'?ul(u)+'s':ul(u)}
+function uw(id){const u=S.unit;if(u==='kg'||id==='water')return 1;return (S.uw[id]&&S.uw[id][u])||null}
+function qtyText(id,kg){ // "6.5 sacks rice husk (≈81 kg)"
+  const m=mat(id),u=S.unit,w=uw(id);
+  if(id==='water')return `<span class="num">${kgFmt(kg)}</span> ${t('L')} ${esc(nm(m))}`;
+  if(u==='kg')return `<span class="num">${kgFmt(kg)}</span> ${t('kg')} ${esc(nm(m))}`;
+  if(!w)return `<span class="num">${kgFmt(kg)}</span> ${t('kg')} ${esc(nm(m))}`;
+  const c=Math.round(kg/w*2)/2;return `<span class="num">${f(c,1)}</span> ${ulN(u,c)} ${esc(nm(m))} <span class="small muted">(≈${kgFmt(kg)} ${t('kg')})</span>`}
+
+/* ---------- dates ---------- */
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dayDiff(a,b){return Math.round((Date.parse(b+'T00:00:00')-Date.parse(a+'T00:00:00'))/864e5)}
+function dayLbl(n){return L()==='zh'?`第 ${n} 天`:`${t('dayN')} ${n}`}
+function dFmt(s){const [y,m,d]=s.split('-');return L()==='zh'?`${+m}月${+d}日`:`${+d}/${+m}`}
+
+/* ---------- pile diary ---------- */
+const HOT_LO=55,HOT_HI=77,HOT_DAYS=15,TURNS=5;
+function pileStats(p){
+  const logs=p.logs.slice().sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
+  const hotDates=[];let firstHot=null,doneDate=null;
+  // one entry per date: keep max temp, any turn
+  const byDate={};logs.forEach(l=>{const o=byDate[l.d]||(byDate[l.d]={d:l.d,t:null,turn:false});if(l.t!=null&&(o.t==null||l.t>o.t))o.t=l.t;if(l.turn)o.turn=true});
+  const days=Object.values(byDate).sort((a,b)=>a.d<b.d?-1:1);
+  let turnsHot=0,lastTurn=null;
+  days.forEach(x=>{
+    if(x.t!=null&&x.t>=HOT_LO&&x.t<=HOT_HI&&!doneDate){hotDates.push(x.d);if(!firstHot)firstHot=x.d;if(hotDates.length===HOT_DAYS)doneDate=x.d}
+    if(x.turn){lastTurn=x.d;if(firstHot&&x.d>=firstHot&&(!doneDate||x.d<=doneDate))turnsHot++}
+  });
+  const withT=days.filter(x=>x.t!=null);const last=withT[withT.length-1]||null;
+  return {days,hot:hotDates.length,turnsHot,firstHot,lastTurn,last,
+    hotDone:hotDates.length>=HOT_DAYS,allDone:hotDates.length>=HOT_DAYS&&turnsHot>=TURNS,age:dayDiff(p.start,today())}}
+function pileAdvice(p,st){
+  const td=today(),tr=st.days.find(x=>x.d===td),tt=tr&&tr.t!=null?tr.t:null;
+  if(st.last&&st.last.t>HOT_HI&&st.last.d===td)return ['bad','advHotHi'];
+  const tl=p.logs.filter(l=>l.d===td);const lastL=tl[tl.length-1];
+  if(lastL&&lastL.sq==='dry')return ['warn','advSqDry'];
+  if(lastL&&(lastL.sq==='wet'||lastL.rain))return ['warn','advSqWet'];
+  if(st.allDone){const c=p.cure||{};return (c.reheat&&c.smell&&c.seed)?['good','advReady']:['good','advCure']}
+  if(st.hotDone)return ['warn','advMoreTurns'];
+  if(tt==null)return ['warn','advMeasure'];
+  if(tt<HOT_LO){return st.hot>0?['warn','advCooled']:['warn','advWarming']}
+  const since=st.lastTurn&&st.firstHot&&st.lastTurn>=st.firstHot?dayDiff(st.lastTurn,td):dayDiff(st.firstHot,td);
+  if(since>=3&&!tr.turn)return ['warn','advTurn'];
+  return ['good','advKeep']}
+function pileChart(p,st){
+  const W=600,H=250,x0=46,x1=586,y0=20,y1=200,tMin=20,tMax=85;
+  const n=Math.max(20,st.age+1,...st.days.map(x=>dayDiff(p.start,x.d)+1));
+  const X=d=>x0+d/(n-1)*(x1-x0),Y=t=>y1-(Math.min(Math.max(t,tMin),tMax)-tMin)/(tMax-tMin)*(y1-y0);
+  let s=`<svg class="ill" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t('chartLbl')}">`;
+  s+=`<rect x="${x0}" y="${Y(HOT_HI)}" width="${x1-x0}" height="${Y(HOT_LO)-Y(HOT_HI)}" fill="var(--bad-soft)"/>`;
+  [20,40,55,77].forEach(v=>{s+=`<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${x0-6}" y="${Y(v)+5}" text-anchor="end" font-size="15" font-weight="800" fill="var(--ink2)">${v}</text>`});
+  s+=`<text x="${x1-4}" y="${Y(HOT_HI)+18}" text-anchor="end" font-size="15" font-weight="800" fill="var(--bad)">55–77 °C</text>`;
+  const step=n>40?10:5;for(let d=0;d<n;d+=step)s+=`<text x="${X(d)}" y="${y1+20}" text-anchor="middle" font-size="15" font-weight="800" fill="var(--ink2)">${d}</text>`;
+  s+=`<text x="${x1}" y="${y1+40}" text-anchor="end" font-size="15" font-weight="800" fill="var(--ink2)">${t('dayN')}</text>`;
+  const pts=st.days.filter(x=>x.t!=null).map(x=>[X(dayDiff(p.start,x.d)),Y(x.t),x.t]);
+  if(pts.length>1)s+=`<polyline points="${pts.map(q=>q[0]+','+q[1]).join(' ')}" fill="none" stroke="var(--ink)" stroke-width="3"/>`;
+  pts.forEach(q=>{const hot=q[2]>=HOT_LO&&q[2]<=HOT_HI;s+=`<circle cx="${q[0]}" cy="${q[1]}" r="6" fill="${hot?'var(--bad)':'var(--surface)'}" stroke="var(--ink)" stroke-width="2"/>`});
+  st.days.filter(x=>x.turn).forEach(x=>{const xx=X(dayDiff(p.start,x.d));s+=`<path d="M${xx-8} ${y1-6} a8 8 0 1 0 8 -8" fill="none" stroke="var(--water)" stroke-width="3"/><path d="M${xx} ${y1-20} l6 6 l-6 6" fill="none" stroke="var(--water)" stroke-width="3"/>`});
+  s+=`<line x1="${X(st.age)}" y1="${y0}" x2="${X(st.age)}" y2="${y1}" stroke="var(--leaf)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  return s+`</svg>`}
+function bar(v,max,col){const pc=Math.min(100,v/max*100);return `<div class="pbar"><i style="width:${pc}%;background:${col}"></i></div>`}
+
+function pileSummary(p,st){
+  const L1=[`${t('app')} · ${t('navPile')}`,`${t('startDate')}: ${dFmt(p.start)} · ${dayLbl(st.age+1)}`,
+    `C:N ${f(p.cn,0)} · ${t('ownM').replace(' %','')} ${f(p.mo,0)}%`,
+    `${t('sumHot')}: ${st.hot}/${HOT_DAYS} · ${t('sumTurn')}: ${st.turnsHot}/${TURNS}`,
+    `${t('sumRecent')}: `+st.days.filter(x=>x.t!=null).slice(-7).map(x=>`${dFmt(x.d)} ${f(x.t,0)}°C${x.turn?' ↻':''}`).join(', '),
+    p.recipe.map(r=>`${nm(mat(r.id)||{en:r.id})} ${kgFmt(r.kg)} ${t('kg')}`).join(' + '),APP_URL];
+  return L1.join('\n')}
+function backupCode(){try{return 'CNB1:'+btoa(unescape(encodeURIComponent(JSON.stringify({v:1,S}))))}catch(e){return ''}}
+function backupMsg(){return t('bkMsgHead')+'\n'+backupCode()}
+function backupHTML(p,st){
+  return `<details><summary>${t('shareT')}</summary><div class="in" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+   ${p?`<p style="margin:0;font-weight:800">${t('shareLogT')}</p><a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(pileSummary(p,st))}">${t('shareWa')}</a>`:''}
+   <p style="margin:10px 0 0;font-weight:800">${t('bkWhyT')}</p>
+   <p style="margin:0">${t('bkWhy')}</p>
+   <a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(backupMsg())}">${t('bkSendWa')}</a>
+   <button type="button" class="btn ghost" id="bkCopy">${t('copyCode')}</button>
+   <textarea id="bkOut" readonly rows="3" hidden style="width:100%;font:inherit;font-size:.8rem;border:2px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);padding:8px">${backupMsg()}</textarea>
+   <details class="sub" style="width:100%"><summary>${t('restoreT')}</summary><div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding-top:6px">
+    <p style="margin:0">${t('restoreHow')}</p>
+    <textarea id="bkIn" rows="3" style="width:100%;font:inherit;font-size:.8rem;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px"></textarea>
+    <button type="button" class="btn ghost" id="bkRestore">${S.restoreArm?t('restoreConfirm'):t('restoreBtn')}</button>
+    <p class="small" id="bkMsg"></p></div></details></div></details>`}
+function buildSVG(){
+  const lb={zh:['顶层：干褐料盖住','薄层粪或青料（放中间）','褐料 15–25 厘米','底层：粗枝条 15–20 厘米','每层洒水','0.9–1.5 米'],
+   en:['Top: cover with dry browns','Thin layer of manure or greens','Browns 15–25 cm','Base: coarse twigs 15–20 cm','Wet each layer','0.9–1.5 m'],
+   ms:['Atas: tutup perang kering','Lapisan nipis tahi/hijau','Bahan perang 15–25 cm','Dasar: ranting 15–20 cm','Basahkan setiap lapisan','0.9–1.5 m']}[L()];
+  const X0=40,X1=330,top=40,bot=300;
+  const layers=[[262,300,'base'],[226,262,'brown'],[214,226,'green'],[176,214,'brown'],[164,176,'green'],[126,164,'brown'],[114,126,'green'],[80,114,'brown'],[50,80,'cover']];
+  const fill={base:'var(--bark)',brown:'var(--bark-soft)',green:'var(--leaf)',cover:'var(--surface2)'};
+  let s=`<svg class="ill" viewBox="0 0 600 340" role="img" aria-label="${lb.slice(0,4).join(', ')}">`;
+  s+=`<defs><clipPath id="bpile"><path d="M${X0} ${bot} L95 ${top+12} Q185 ${top-14} 275 ${top+12} L${X1} ${bot} Z"/></clipPath></defs>`;
+  s+=`<g clip-path="url(#bpile)">`;layers.forEach(l=>{s+=`<rect x="0" y="${l[0]}" width="400" height="${l[1]-l[0]}" fill="${fill[l[2]]}"/>`});
+  s+=`<rect x="0" y="0" width="400" height="50" fill="var(--surface2)"/>`;
+  for(let i=0;i<9;i++){const x=55+i*30;s+=`<path d="M${x} ${294-(i%3)*10} l26 -${8+(i%2)*6}" stroke="var(--bark-soft)" stroke-width="4" stroke-linecap="round"/>`}
+  [[140,236],[230,250],[120,200],[260,196],[150,146],[210,152],[170,96],[240,100]].forEach(q=>{s+=`<path d="M${q[0]} ${q[1]} l12 -3" stroke="var(--bark)" stroke-width="3" stroke-linecap="round"/>`});
+  s+=`</g><path d="M${X0} ${bot} L95 ${top+12} Q185 ${top-14} 275 ${top+12} L${X1} ${bot} Z" fill="none" stroke="var(--ink2)" stroke-width="3"/>`;
+  s+=`<line x1="10" y1="${bot+2}" x2="590" y2="${bot+2}" stroke="var(--ink2)" stroke-width="3"/>`;
+  // height marker
+  s+=`<path d="M20 ${top+4} V${bot-4} M14 ${top+10} L20 ${top+2} L26 ${top+10} M14 ${bot-10} L20 ${bot-2} L26 ${bot-10}" stroke="var(--ink)" stroke-width="2.5" fill="none"/>`;
+  s+=`<text x="${(X0+X1)/2}" y="${bot+30}" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)">↔ ${lb[5]}</text>`;
+  s+=`<text transform="translate(10 ${(top+bot)/2}) rotate(-90)" text-anchor="middle" font-size="16" font-weight="800" fill="var(--ink)">${lb[5]}</text>`;
+  // drops
+  [[306,148],[318,166]].forEach(q=>{s+=`<path d="M${q[0]} ${q[1]} q-6 10 0 13 q6 -3 0 -13z" fill="var(--water)"/>`});
+  const fs=L()==='en'?16:17;
+  const lab=(x,y,ty,txt,col)=>{s+=`<line x1="${x}" y1="${y}" x2="343" y2="${ty-6}" stroke="var(--ink2)" stroke-width="1.5"/><text x="348" y="${ty}" font-size="${fs}" font-weight="900" fill="${col}">${txt}</text>`};
+  lab(262,64,64,lb[0],'var(--ink)');lab(285,120,116,lb[1],'var(--leaf)');lab(316,160,166,lb[4],'var(--water)');lab(300,196,216,lb[2],'var(--bark)');lab(318,281,280,lb[3],'var(--bark)');
+  return s+`</svg>`}
+function buildHTML(open){return `<details ${open?'open':''}><summary>${t('buildT')}</summary><div class="in">${buildSVG()}
+  <ol class="chk">${t('buildSteps').split('|').map(x=>`<li>${x}</li>`).join('')}</ol></div></details>`}
+function renderPile(){
+  const el=$('pileOut');const p=S.pile;
+  if(!p){
+    const tot=totals(S.rows);const miss=missingKg();const has=tot.W>0&&tot.N>0&&!miss.length;
+    el.innerHTML=`<div class="card"><p class="label">${t('settings')}</p><h2>${t('pileStartT')}</h2>
+      <p class="muted">${t('pileStartB')}</p>
+      ${has?`<p class="num" style="font-weight:800">C:N ${f(tot.cn,0)} · ${t('ownM').replace(' %','')} ${f(tot.mo,0)}% · ${kgFmt(tot.W)} ${t('kg')}</p>
+      <label class="field" style="margin:10px 0"><span>${t('startDate')}</span><input id="pStart" type="date" value="${today()}" style="width:12em"></label>
+      <p class="small">${t('yieldNote')} → <b class="num">${kgFmt(tot.W*0.2)}–${kgFmt(tot.W*0.5)} ${t('kg')}</b></p>
+      <p class="small">${t('pileSize')}</p>
+      <button type="button" class="btn" id="pileStartBtn">${t('pileStartBtn')}</button>`:`<p>${miss.length?t('needKg')+' '+miss.map(r=>esc(nm(mat(r.id)))).join(' · '):t('pileNoMix')}</p><button type="button" class="btn ghost" data-view="mix">${t('navMix')}</button>`}
+      </div>${buildHTML(true)}${troubleHTML()}${backupHTML(null,null)}`;
+    return}
+  const st=pileStats(p);const [cls,key]=pileAdvice(p,st);
+  const td=today();const todayLog=st.days.find(x=>x.d===td);
+  const nextIn=st.lastTurn&&st.firstHot?Math.max(0,3-dayDiff(st.lastTurn,td)):3;
+  const cure=p.cure||{};
+  el.innerHTML=`
+  <div class="card"><p class="label">${t('logToday')}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+      <label class="field"><span>${t('date')}</span><input id="lDate" type="date" value="${td}" style="width:11em"></label>
+      <label class="field"><span>${t('coreT')}</span><input id="lTemp" type="number" inputmode="decimal" step="any" placeholder="°C"></label>
+      <button type="button" class="chip" id="lTurn" aria-pressed="${!!S.turnToggle}">${S.turnToggle?'✓ ':''}${t('turnedToday')}</button>
+    </div>
+    <p class="small" style="font-weight:800;margin:12px 0 6px">${t('sqTitle')}</p>
+    <div class="seg">${['dry','ok','wet'].map(k=>`<button type="button" data-lsq="${k}" aria-pressed="${S.lsq===k}">${t('sq'+k[0].toUpperCase()+k.slice(1))}</button>`).join('')}
+      <button type="button" class="chip" id="lRain" aria-pressed="${!!S.lrain}">${S.lrain?'✓ ':''}${t('rainChip')}</button></div>
+    <button type="button" class="btn" id="lSave" style="margin-top:12px">${t('saveLog')}</button>
+    <p class="small muted" id="lMsg" style="margin-top:6px">${t('probeTip')}</p>
+  </div>
+  <div class="fix ${cls==='good'?'ok':''}" style="${cls==='bad'?'border-color:var(--bad);background:var(--bad-soft)':cls==='warn'?'border-color:var(--warn);background:var(--warn-soft)':''}">
+    <h3>${t('todayDo')}</h3><p>${t(key).replace('{n}',nextIn).replace('{t}',st.last?f(st.last.t,0):'')}</p></div>
+  <div class="card">
+    <p class="label">${t('progress')} · ${dayLbl(st.age+1)}</p>
+    <p style="margin:6px 0 2px;font-weight:800">${t('hotDays')}: <span class="num">${st.hot} / ${HOT_DAYS}</span></p>${bar(st.hot,HOT_DAYS,'var(--bad)')}
+    <p style="margin:10px 0 2px;font-weight:800">${t('turnsHot')}: <span class="num">${st.turnsHot} / ${TURNS}</span></p>${bar(st.turnsHot,TURNS,'var(--water)')}
+    ${pileChart(p,st)}
+    <p class="small muted">${t('countRule')}</p>
+  </div>
+  ${st.hotDone?`<div class="card"><p class="label">${t('cureT')}</p>
+    <div class="seg" style="flex-direction:column;align-items:stretch">
+      ${['reheat','smell','seed'].map(k=>`<button type="button" class="chip" data-cure="${k}" aria-pressed="${!!cure[k]}" style="text-align:left">${cure[k]?'✓ ':'☐ '}${t('cure_'+k)}</button>`).join('')}
+    </div></div>`:''}
+  <details><summary>${t('logList')} (${st.days.length})</summary><div class="in">
+    ${st.days.length?`<table><thead><tr><th>${t('date')}</th><th>°C</th><th>${t('turnCol')}</th><th></th></tr></thead><tbody>
+    ${st.days.slice().reverse().map(x=>`<tr><td>${dFmt(x.d)} <span class="muted small">(${dayLbl(dayDiff(p.start,x.d)+1)})</span></td><td>${x.t!=null?f(x.t,0):'–'}</td><td>${x.turn?'✓':''}</td><td><button type="button" class="x" data-dellog="${x.d}" aria-label="${t('del')}">×</button></td></tr>`).join('')}
+    </tbody></table>`:`<p class="muted">—</p>`}
+  </div></details>
+  <details><summary>${t('pileRecipe')}</summary><div class="in">
+    <p>${t('startDate')}: <b>${dFmt(p.start)}</b> · C:N <b class="num">${f(p.cn,0)}</b> · ${t('ownM').replace(' %','')} <b class="num">${f(p.mo,0)}%</b></p>
+    <ul>${p.recipe.map(r=>`<li>${qtyText(r.id,r.kg)}</li>`).join('')}</ul>
+    <p class="small">${t('yieldNote')} → <b class="num">${kgFmt(p.recipe.reduce((a,r)=>a+r.kg,0)*0.2)}–${kgFmt(p.recipe.reduce((a,r)=>a+r.kg,0)*0.5)} ${t('kg')}</b></p>
+    ${(()=>{const n=p.recipe.reduce((a,r)=>{const m=mat(r.id);return m?a+r.kg*coef(m).n:a},0);return `<p class="small">${t('nBudget').replace(/\{n\}/g,f(n,1)).replace('{lo}',f(n*0.6,1))}</p>`})()}
+    <button type="button" class="btn ghost" id="pileEnd">${S.endArm?t('endConfirm'):t('endPile')}</button>
+  </div></details>
+  ${buildHTML(false)}${troubleHTML()}${backupHTML(p,st)}`;
+}
+
+/* ---------- troubleshooting (illustrated) ---------- */
+function icon(k){
+  const b=`<svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true" style="flex:none">`;
+  const pile=`<path d="M6 54 Q18 26 32 24 Q46 26 58 54 Z" fill="var(--bark-soft)" stroke="var(--bark)" stroke-width="2.5"/>`;
+  const I={
+   ammonia:pile+`<path d="M22 20 q4 -6 0 -12 M32 18 q4 -6 0 -12 M42 20 q4 -6 0 -12" stroke="var(--warn)" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+   rotten:pile+`<path d="M16 40 q4 -4 8 0 M38 44 q4 -4 8 0" stroke="var(--water)" stroke-width="2.5" fill="none"/><path d="M30 12 q-4 7 0 9 q4 -2 0 -9z M42 8 q-4 7 0 9 q4 -2 0 -9z" fill="var(--water)"/>`,
+   cold:pile+`<rect x="44" y="6" width="8" height="30" rx="4" fill="var(--surface)" stroke="var(--ink2)" stroke-width="2"/><circle cx="48" cy="38" r="6" fill="var(--water)"/><rect x="46" y="28" width="4" height="8" fill="var(--water)"/>`,
+   hot:pile+`<rect x="44" y="6" width="8" height="30" rx="4" fill="var(--surface)" stroke="var(--ink2)" stroke-width="2"/><circle cx="48" cy="38" r="6" fill="var(--bad)"/><rect x="46" y="8" width="4" height="28" fill="var(--bad)"/>`,
+   flies:pile+`<g fill="var(--ink)"><ellipse cx="20" cy="16" rx="3" ry="2"/><ellipse cx="34" cy="10" rx="3" ry="2"/><ellipse cx="44" cy="18" rx="3" ry="2"/></g><g stroke="var(--ink2)" stroke-width="1.5" fill="none"><path d="M18 14 l-3 -3 M22 14 l3 -3 M32 8 l-3 -3 M36 8 l3 -3 M42 16 l-3 -3 M46 16 l3 -3"/></g>`,
+   dry:`<path d="M6 54 Q18 26 32 24 Q46 26 58 54 Z" fill="var(--surface2)" stroke="var(--bark)" stroke-width="2.5"/><path d="M20 44 l6 -6 l-2 6 l6 -4 M38 46 l4 -8 l2 6" stroke="var(--bark)" stroke-width="2" fill="none"/><circle cx="50" cy="14" r="7" fill="var(--warn)"/>`};
+  return b+I[k]+`</svg>`}
+function troubleHTML(){
+  const items=['ammonia','rotten','cold','hot','flies','dry'];
+  return `<details><summary>${t('troubleT')}</summary><div class="in"><div class="tl">${items.map(k=>`<div class="cz" style="border-color:var(--bark);background:var(--surface2);flex-direction:row;gap:12px;align-items:flex-start">${icon(k)}<div style="min-width:0"><b>${t('tr_'+k)}</b><p style="margin:4px 0 0">${t('tr_'+k+'_x')}</p></div></div>`).join('')}</div></div></details>`}
+
+/* ---------- math ---------- */
+function coef(m,ov){const n=ov&&ov.n!=null?ov.n:m.n,cn=ov&&ov.cn!=null?ov.cn:m.cn,mo=ov&&ov.m!=null?ov.m:m.m;
+  const d=1-mo/100,nk=d*n/100;return {n:nk,c:nk*cn,s:mo/100}}
+function totals(rows){let W=0,C=0,N=0,Sw=0;rows.forEach(r=>{const m=mat(r.id);if(!m)return;const k=+r.kg||0;const q=coef(m,r.ov);W+=k;C+=k*q.c;N+=k*q.n;Sw+=k*q.s});
+  return {W,C,N,Sw,cn:N>0?C/N:NaN,mo:W>0?Sw/W*100:NaN}}
+function cnBand(v){if(v<20)return ['bad','cn1'];if(v<25)return ['warn','cn2'];if(v<=35)return ['good','cn3'];if(v<=45)return ['warn','cn4'];return ['bad','cn5']}
+function mBand(v){if(v<40)return ['bad','m1'];if(v<50)return ['warn','m2'];if(v<=60)return ['good','m3'];if(v<=65)return ['warn','m4'];return ['bad','m5']}
+
+function solveFix(rows){
+  const tot=totals(rows);if(!(tot.W>0)||!(tot.N>0))return null;
+  const R=S.cn,g=S.m/100;
+  const cnOK=Math.abs(tot.cn-R)<=3, mOK=tot.mo>=S.m-5&&tot.mo<=S.m+5;
+  if(cnOK&&mOK)return {ok:true};
+  const inMix=[...new Set(rows.map(r=>r.id))].filter(id=>id!=='urea'&&mat(id));
+  const helpers=['husk','sawdust','straw','cattle','grass'].concat(S.noChicken?[]:['broiler','layer']);
+  let cands=['water'].concat(inMix,helpers.filter(h=>!inMix.includes(h)));
+  const ovOf=id=>{const r=rows.find(x=>x.id===id);return r?r.ov:null};
+  const q=id=>coef(mat(id),ovOf(id));
+  const b1=R*tot.N-tot.C, b2=g*tot.W-tot.Sw;
+  const pen=id=>id==='water'?1:(inMix.includes(id)?1:1.3);
+  let best=null;
+  const consider=(adds)=>{let sc=0,sum=0;for(const a of adds){if(!(a.x>=0)||!isFinite(a.x))return;sc+=a.x*pen(a.id);sum+=a.x}
+    if(sum>tot.W*4)return; const res=totals(rows.concat(adds.filter(a=>a.x>0.05).map(a=>({id:a.id,kg:a.x,ov:ovOf(a.id)}))));
+    if(Math.abs(res.cn-R)>3.2||res.mo<S.m-5.5||res.mo>S.m+5.5)return;
+    if(!best||sc<best.sc)best={sc,adds:adds.filter(a=>a.x>0.05),res}};
+  const run=()=>{for(let i=0;i<cands.length;i++){const a=q(cands[i]);
+    const a1=a.c-R*a.n,a2=a.s-g;
+    if(Math.abs(a1)>1e-9)consider([{id:cands[i],x:b1/a1}]);
+    if(Math.abs(a2)>1e-9)consider([{id:cands[i],x:b2/a2}]);
+    for(let j=i+1;j<cands.length;j++){const b=q(cands[j]);const c1=b.c-R*b.n,c2=b.s-g;
+      const det=a1*c2-c1*a2;if(Math.abs(det)<1e-12)continue;
+      consider([{id:cands[i],x:(b1*c2-c1*b2)/det},{id:cands[j],x:(a1*b2-b1*a2)/det}]);}
+  }};
+  run();
+  if(!best&&!cands.includes('urea')){cands=cands.concat('urea');run()}
+  let urea=null;
+  if(tot.cn>R+3){const u=coef(mat('urea'));const x=b1/(u.c-R*u.n);if(x>0)urea=x}
+  return {ok:false,best,urea};
+}
+
+/* ---------- formatting ---------- */
+function f(v,d){if(!isFinite(v))return '–';const p=Math.pow(10,d==null?1:d);return (Math.round(v*p)/p).toLocaleString(L()==='zh'?'zh-CN':(L()==='ms'?'ms-MY':'en-MY'))}
+function kgFmt(x){return x>=10?f(x,0):(x>=1?f(x,1):f(x,2))}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ---------- rendering: mix ---------- */
+function renderSettings(){
+  const nc=document.getElementById('noChick');nc.setAttribute('aria-pressed',S.noChicken);nc.textContent=(S.noChicken?'✓ ':'')+t('noChick');
+  document.getElementById('segSq').innerHTML=['dry','ok','wet'].map(k=>`<button type="button" data-sq="${k}" aria-pressed="${S.sq===k}">${t('sq'+k[0].toUpperCase()+k.slice(1))}</button>`).join('');
+  document.getElementById('segU').innerHTML=UNITS.map(u=>`<button type="button" aria-pressed="${S.unit===u}" data-unit="${u}">${ul(u)}</button>`).join('');
+  segCN.innerHTML=[25,30,35].map(v=>`<button type="button" aria-pressed="${S.cn===v}" data-cn="${v}">${v}:1</button>`).join('');
+  segM.innerHTML=[50,55,60].map(v=>`<button type="button" aria-pressed="${S.m===v}" data-m="${v}">${v}%</button>`).join('');
+}
+function metaTxt(r){const m=mat(r.id),ov=r.ov||{};const n=ov.n!=null?ov.n:m.n,cn=ov.cn!=null?ov.cn:m.cn,mo=ov.m!=null?ov.m:m.m;
+  return `C:N ${f(cn,1)} · N ${f(n,2)}% · ${t('ownM').replace(' %','')} ${f(mo,0)}%`}
+function renderRows(){
+  exBanner.hidden=!S.example;
+  emptyRows.hidden=S.rows.length>0;
+  rows.innerHTML=S.rows.map((r,i)=>{const m=mat(r.id);if(!m)return '';const ov=r.ov||{};
+    const n=ov.n!=null?ov.n:m.n,cn=ov.cn!=null?ov.cn:m.cn,mo=ov.m!=null?ov.m:m.m;
+    return `<div class="ing">
+      <div class="sw ${grp(m)}"></div>
+      <div class="nm"><button type="button" data-swap="${i}">${esc(nm(m))}</button>
+        <div class="meta num" id="meta${i}">${metaTxt(r)}</div></div>
+      <div class="kg">${(()=>{const w=uw(r.id);if(S.unit==='kg'||m.id==='water'||!w)return `<input id="kg${i}" type="number" inputmode="decimal" step="any" value="${blankKg(r)?'':r.kg}" data-kg="${i}" aria-label="${t('kg')}"><span>${m.id==='water'?t('L'):t('kg')}</span>`;
+        return `<input id="ct${i}" type="number" inputmode="decimal" step="any" value="${blankKg(r)?'':Math.round(r.kg/w*10)/10}" data-cnt="${i}" aria-label="${ul(S.unit)}"><span>${ul(S.unit)}${blankKg(r)?'':` <span class="small">(≈${kgFmt(r.kg)} ${t('kg')})</span>`}</span>`})()}<button type="button" data-ov="${i}" style="background:none;border:0;padding:8px 0 8px 10px;margin-left:auto;color:var(--water);font-weight:800;text-decoration:underline">${t('edit')}</button></div>
+      <button class="x" type="button" data-del="${i}" aria-label="${t('del')}">×</button>
+      ${S.unit!=='kg'&&m.id!=='water'&&!uw(r.id)?`<div class="ovr" style="background:var(--warn-soft)"><label class="field"><span>${t('weighPrompt').replace('{u}',ul(S.unit)).replace('{x}',esc(nm(m)))}</span><span style="display:flex;gap:6px;align-items:center"><input id="uw${i}" type="number" inputmode="decimal" step="any" data-uwset="${i}"> ${t('kg')}</span></label></div>`:''}
+      ${r.open?`<div class="ovr">
+        <p class="small" style="flex-basis:100%;margin:0">${t('ovHint')}</p>
+        <label class="field">N % <input id="on${i}" type="number" inputmode="decimal" step="any" value="${ov.n??''}" data-on="${i}"></label>
+        <label class="field">C:N <input id="oc${i}" type="number" inputmode="decimal" step="any" value="${ov.cn??''}" data-oc="${i}"></label>
+        <label class="field">${t('ownM')} <input id="om${i}" type="number" inputmode="decimal" step="any" value="${ov.m??''}" data-om="${i}"></label>
+        <div style="flex-basis:100%">${homeMoist('r'+i)}<button type="button" class="btn ghost" data-hmuse="${i}" style="margin-top:6px">${t('hmUse')}</button></div>
+        ${S.unit!=='kg'&&m.id!=='water'?`<label class="field">${t('perUnit').replace('{u}',ul(S.unit))} (${t('kg')}) <input id="uwo${i}" type="number" inputmode="decimal" step="any" value="${uw(r.id)||''}" data-uwset="${i}"></label>`:''}
+      </div>`:''}
+    </div>`}).join('');
+}
+function gaugeSVG(v){
+  const W=600,H=86,x0=20,x1=580,max=60;const X=c=>x0+(Math.min(Math.max(c,0),max)/max)*(x1-x0);
+  const zones=[[0,20,'bad'],[20,25,'warn'],[25,35,'good'],[35,45,'warn'],[45,60,'bad']];
+  let s=`<svg class="gauge" viewBox="0 -4 ${W} ${H+10}" role="img" aria-label="C:N ${f(v,1)}">`;
+  zones.forEach(z=>{s+=`<rect x="${X(z[0])}" y="30" width="${X(z[1])-X(z[0])}" height="18" fill="var(--${z[2]}-soft)" stroke="var(--${z[2]})" stroke-width="1"/>`});
+  [0,10,20,25,30,35,45,60].forEach(c=>{s+=`<text x="${X(c)}" y="78" text-anchor="middle" font-size="24" font-weight="800" fill="var(--ink2)">${c===60?'60+':c}</text>`});
+  const tx=X(S.cn);s+=`<line x1="${tx}" y1="24" x2="${tx}" y2="54" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3"/>`;
+  if(isFinite(v)){const px=X(v);s+=`<path d="M${px-9} 6 L${px+9} 6 L${px} 26 Z" fill="var(--ink)"/><rect x="${px-2}" y="26" width="4" height="26" fill="var(--ink)"/>`}
+  s+=`</svg>`;return s}
+function squeezeSVG(mo){
+  const drops=mo<50?0:(mo<=60?2:5);const crumbly=mo<45;
+  let s=`<svg viewBox="0 0 120 90" width="96" height="72" aria-hidden="true" style="flex:none">`;
+  s+=`<path d="M30 20 Q60 6 90 20 L92 46 Q60 58 28 46 Z" fill="var(--bark-soft)" stroke="var(--bark)" stroke-width="2"/>`;
+  s+=`<path d="M36 22 v20 M50 18 v24 M64 18 v24 M78 20 v22" stroke="var(--bark)" stroke-width="2" opacity=".55"/>`;
+  if(crumbly)s+=`<circle cx="40" cy="64" r="3" fill="var(--bark)"/><circle cx="55" cy="72" r="2.5" fill="var(--bark)"/><circle cx="72" cy="66" r="3" fill="var(--bark)"/>`;
+  for(let i=0;i<drops;i++){const x=46+i*8,y=58+(i%2)*10;s+=`<path d="M${x} ${y} q-4 7 0 9 q4 -2 0 -9z" fill="var(--water)"/>`}
+  s+=`</svg>`;return s}
+function renderResults(){
+  const miss=missingKg();
+  if(miss.length){results.innerHTML=`<div class="banner" style="display:block"><b>${t('needKg')}</b> ${miss.map(r=>esc(nm(mat(r.id)))).join(' · ')}</div>`;return}
+  const tot=totals(S.rows);
+  if(!(tot.W>0)||!(tot.N>0)){results.innerHTML='';return}
+  const [cb,ck]=cnBand(tot.cn),[mb,mk]=mBand(tot.mo);
+  const fx=solveFix(S.rows);
+  let fixHTML='';
+  if(fx&&fx.ok){fixHTML=`<div class="fix ok"><h3>${t('okTitle')}</h3><p>${t('okBody')}</p></div>`}
+  else if(fx){
+    let inner='';
+    if(fx.best){inner=`<ul>${fx.best.adds.map(a=>`<li>${t('add')} ${qtyText(a.id,a.x)}</li>`).join('')}</ul>
+      <p class="small">→ C:N <b class="num">${f(fx.best.res.cn,0)}</b> · ${t('ownM').replace(' %','')} <b class="num">${f(fx.best.res.mo,0)}%</b></p>
+      <button type="button" class="btn" id="applyFix">${t('apply')}</button>`}
+    else inner=`<p>${t('noFix')}</p>`;
+    if(tot.mo>S.m+5){const wet=S.rows.map(r=>mat(r.id)).filter(m=>m&&m.id!=='water'&&m.m>=70).sort((x,y)=>y.m-x.m)[0];
+      if(wet)inner+=`<p class="small" style="margin-top:10px">${t('dryFirst').replace('{x}',esc(nm(wet)))}</p>`}
+    if(fx.urea)inner+=`<p class="small" style="margin-top:10px">${t('orUrea')}: <b class="num">${kgFmt(fx.urea)} ${t('kg')}</b> ${esc(nm(mat('urea')))}</p>`;
+    fixHTML=`<div class="fix"><h3>${t('doThis')}</h3>${inner}</div>`;
+    window.__fix=fx.best;
+  }
+  const rowsT=S.rows.map(r=>{const m=mat(r.id);if(!m)return '';const q=coef(m,r.ov);const k=+r.kg||0;
+    return `<tr><td>${esc(nm(m))}</td><td>${kgFmt(k)}</td><td>${f(k/tot.W*100,0)}%</td><td>${f(k*q.n,2)}</td><td>${f(k*q.c,1)}</td></tr>`}).join('');
+  results.innerHTML=`
+  <div class="card">
+    <p class="label">${t('resCN')}</p>
+    <div class="big"><span class="v num">${f(tot.cn,0)}<span style="font-size:1.4rem">:1</span></span><span class="pill ${cb}">${t(ck)}</span></div>
+    ${gaugeSVG(tot.cn)}
+    <div style="display:flex;gap:12px;align-items:center;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+      ${squeezeSVG(tot.mo)}
+      <div style="min-width:0"><p class="label" style="margin:0">${t('resM')}</p>
+      <div class="big"><span class="v num" style="font-size:2rem">${f(tot.mo,0)}%</span><span class="pill ${mb}">${t(mk)}</span></div>
+      <p class="small muted">${t('squeeze')}</p></div>
+    </div>
+    ${S.sq?`<p style="margin-top:8px;font-weight:700">${t('sqMsg'+S.sq[0].toUpperCase()+S.sq.slice(1))}</p>`:''}
+    <div>
+    </div>
+  </div>
+  ${fixHTML}
+  <details class="card" style="padding:0"><summary>${t('recipe')}</summary><div class="in scroll">
+    <table><thead><tr><th></th><th>${t('kg')}</th><th>${t('share')}</th><th>${t('nkg')}</th><th>${t('ckg')}</th></tr></thead>
+    <tbody>${rowsT}<tr><td><b>${t('total')}</b></td><td><b>${kgFmt(tot.W)}</b></td><td>100%</td><td><b>${f(tot.N,2)}</b></td><td><b>${f(tot.C,1)}</b></td></tr></tbody></table>
+    <p style="margin-top:10px">${t('nBudget').replace(/\{n\}/g,f(tot.N,1)).replace('{lo}',f(tot.N*0.6,1))}</p>
+    <p class="small muted" style="margin-top:10px"><b>${t('howCalc')}.</b> ${t('howCalcBody')}</p>
+  </div></details>`;
+}
+function renderMix(){renderSettings();renderRows();renderResults()}
+
+/* ---------- library ---------- */
+function spectrumSVG(){
+  const list=MATS.filter(m=>m.id!=='urea').concat(S.own).slice().sort((a,b)=>a.cn-b.cn);
+  const lo=Math.log10(3),hi=Math.log10(600);const P=v=>(Math.log10(Math.min(Math.max(v,3),600))-lo)/(hi-lo)*100;
+  const ticks=[3,10,24,100,600];
+  let h=`<div class="spec"><div class="spr hd"><span style="font-weight:800">C:N</span><div class="trk">${ticks.map(v=>`<i style="left:${P(v)}%">${v}</i>`).join('')}</div></div>`;
+  list.forEach(m=>{const g=grp(m);h+=`<div class="spr"><span>${esc(nm(m))}</span><div class="trk"><b class="zone" style="left:${P(25)}%;width:${P(35)-P(25)}%"></b><b class="ln24" style="left:${P(24)}%"></b><b class="dot ${g}" style="left:${P(m.cn)}%"></b></div></div>`});
+  const tk=`<div class="trk">${ticks.map(v=>`<i style="left:${P(v)}%">${v}</i>`).join('')}</div>`;
+  return h+`<div class="spr hd"><span style="font-weight:800">C:N</span>${tk}</div><div class="spr"><span></span><div class="axcap"><b style="color:var(--leaf)">${t('axLo')}</b><b style="color:var(--bark)">${t('axHi')}</b></div></div></div>`}
+function matCard(m,canDel){const ov=null;const q=coef(m);
+  return `<div class="mat"><div class="sw ${grp(m)}" style="width:10px;align-self:stretch;border-radius:3px"></div>
+   <div style="min-width:0"><b>${esc(nm(m))}</b>
+    <div class="vals num">N ${f(m.n,2)}% · ${t('ownM').replace(' %','')} ${f(m.m,0)}% · ${t('carbon')} ${f(m.n*m.cn,0)}%</div>
+    ${m.note?`<div class="vals">${esc(m.note[L()]||m.note.en)}</div>`:''}
+    <div class="vals" style="font-size:.8rem">${t('source')}: ${m.base&&mat(m.base)?esc(t('basedOn').replace('{x}',nm(mat(m.base)))):esc((SRC[m.src]||SRC.own)[L()])}</div>
+    <button type="button" class="addbtn" data-addmat="${m.id}">＋ ${t('addToMix')}</button>
+    ${canDel?`<button type="button" class="addbtn" data-delown="${m.id}">${t('del')}</button>`:''}
+   </div>
+   <div class="cnv num">${f(m.cn,m.cn<10?1:0)}<small>C:N</small></div></div>`}
+function renderLib(){
+  spectrum.innerHTML=spectrumSVG();
+  const fs=[['all','all'],['N','greens'],['C','browns'],['own','mine']];
+  libFilter.innerHTML=fs.map(x=>`<button type="button" class="chip" aria-pressed="${S.libF===x[0]}" data-libf="${x[0]}">${t(x[1])}</button>`).join('');
+  let list=S.libF==='own'?S.own:allMats().filter(m=>S.libF==='all'||grp(m)===S.libF);
+  list=list.slice().sort((a,b)=>a.cn-b.cn);
+  libList.innerHTML=list.length?list.map(m=>matCard(m,m.src==='own')).join(''):`<p class="muted">—</p>`;
+  renderOwnForm();
+}
+function homeMoist(pre){return `<details class="sub"><summary>${t('hmT')}</summary><div style="padding-top:6px">
+  <ol class="chk" style="margin:0 0 8px">${t('hmSteps').split(/[①②③④]\s*/).filter(x=>x.trim()).map(x=>`<li>${x.trim()}</li>`).join('')}</ol>
+  <div style="display:flex;flex-wrap:wrap;gap:10px">
+   <label class="field"><span>${t('hmEmpty')}</span><input id="${pre}h0" data-hm="${pre}" type="number" inputmode="decimal" step="any"></label>
+   <label class="field"><span>${t('hmWet')}</span><input id="${pre}h1" data-hm="${pre}" type="number" inputmode="decimal" step="any"></label>
+   <label class="field"><span>${t('hmDry')}</span><input id="${pre}h2" data-hm="${pre}" type="number" inputmode="decimal" step="any"></label></div>
+  <p id="${pre}hr" style="font-weight:800;margin:8px 0 0"></p>
+  <p class="small" style="margin:6px 0 0">${t('hmNote')}</p></div></details>`}
+function hmCalc(pre){const v=[0,1,2].map(i=>parseFloat(($(pre+'h'+i)||{}).value));const out=$(pre+'hr');
+  if(v.some(x=>!isFinite(x))){out.textContent='';return null}
+  const [e,w,d]=v;if(!(w>e&&d>=e&&d<=w)){out.textContent=t('hmBad');return null}
+  const m=(w-d)/(w-e)*100;out.textContent=t('hmRes').replace('{m}',f(m,0));return Math.round(m*10)/10}
+let oBaseId=null;
+function renderOwnForm(){const b=$('oBase');const m=oBaseId&&mat(oBaseId);
+  b.innerHTML=m?`<span class="sw ${grp(m)}" style="border-radius:3px"></span><span><b>${esc(nm(m))}</b><span class="num">C:N ${f(m.cn,0)} · N ${f(m.n,2)}%</span></span>`:`<span></span><span><b>${t('ownPickBase')}</b></span>`;
+  const h=$('oHome');if(!h.firstChild)h.innerHTML=homeMoist('o');ownPreview()}
+function ownPreview(){const c=parseFloat(oC.value),n=parseFloat(oN.value);const m=oBaseId&&mat(oBaseId);oPreview.textContent=(c>0&&n>0)?`C:N = ${f(c/n,1)}`:(m?`C:N ${f(m.cn,0)} · N ${f(m.n,2)}%`:'')}
+
+/* ---------- mulch ---------- */
+function renderMulch(){
+  const m=mat(S.mulch.id)||mat('efb');
+  mulchPick.innerHTML=`<span class="sw ${grp(m)}" style="width:8px;border-radius:3px"></span><span><b>${esc(nm(m))}</b><span class="num">C:N ${f(m.cn,0)} · N ${f(m.n,2)}% · ${f(m.m,0)}%</span></span>`;
+  if(document.activeElement!==mKg)mKg.value=S.mulch.kg??'';if(document.activeElement!==mTrees)mTrees.value=S.mulch.trees??'';
+  if(document.activeElement!==mTpa)mTpa.value=S.mulch.tpa||'';
+  const kg=+S.mulch.kg||0,tr=Math.max(1,Math.round(+S.mulch.trees||1)),tpa=Math.max(0,Math.round(+S.mulch.tpa||0));
+  const q=coef(m),dry=kg*(1-m.m/100),N=kg*q.n,C=kg*q.c;
+  const bal=C/24-N; // >0 borrow
+  const borrow=kg>0?bal>0:m.cn>24;const g=Math.abs(bal)*1000,u=g/0.46;
+  const seesaw=`<svg class="ill" viewBox="0 0 600 252" role="img" aria-label="24:1">
+    <g transform="translate(0,50)"><polygon points="300,150 280,170 320,170" fill="var(--ink2)"/>
+    <g transform="rotate(${borrow?-Math.min(10,(m.cn-24)/4):Math.min(10,(24-m.cn)/1.5)} 300 150)">
+     <rect x="60" y="142" width="480" height="8" rx="3" fill="var(--ink2)"/>
+     <rect x="80" y="104" width="90" height="38" rx="4" fill="var(--leaf-soft)" stroke="var(--leaf)" stroke-width="2"/><text x="125" y="129" text-anchor="middle" font-size="26" font-weight="900" fill="var(--leaf)">N</text>
+     <rect x="430" y="${borrow?84:110}" width="90" height="${borrow?58:32}" rx="4" fill="var(--bark-soft)" stroke="var(--bark)" stroke-width="2"/><text x="475" y="${borrow?120:132}" text-anchor="middle" font-size="26" font-weight="900" fill="var(--bark)">C</text>
+    </g></g>
+    <text x="300" y="30" text-anchor="middle" font-size="30" font-weight="900" fill="var(--ink)">C:N ${f(m.cn,0)}  vs  24</text>
+    <text x="300" y="64" text-anchor="middle" font-size="22" font-weight="700" fill="${borrow?'var(--warn)':'var(--good)'}">${borrow?t('mulchBorrow'):t('mulchRelease')}</text>
+   </svg>`;
+  const why=`<details><summary>${t('whyMulch')}</summary><div class="in">${benefitSVG()}${MULCHWHY[L()]}</div></details>
+   <details><summary>${t('mulchFlower')}</summary><div class="in">${timingSVG()}${MULCHFLOWER[L()]}</div></details>`;
+  if(!(kg>0)){mulchOut.innerHTML=`<div class="card">${seesaw}<p style="font-weight:800">${t('needMulchKg')}</p></div>`+why;return}
+  mulchOut.innerHTML=`<div class="card">${seesaw}
+   <div class="scroll"><table><thead><tr><th></th><th>${t('perTree')}</th>${tpa?`<th>${t('perAcre')} (${tpa})</th>`:''}${tr>1?`<th>${t('allTrees')} (${tr})</th>`:''}</tr></thead><tbody>
+    <tr><td>${t('dry')}</td><td>${kgFmt(dry)} ${t('kg')}</td>${tpa?`<td>${kgFmt(dry*tpa)} ${t('kg')}</td>`:''}${tr>1?`<td>${kgFmt(dry*tr)} ${t('kg')}</td>`:''}</tr>
+    <tr><td>${t('carbon')}</td><td>${f(C,2)} ${t('kg')}</td>${tpa?`<td>${f(C*tpa,1)} ${t('kg')}</td>`:''}${tr>1?`<td>${f(C*tr,1)} ${t('kg')}</td>`:''}</tr>
+    <tr><td>${t('nitrogen')}</td><td>${f(N*1000,0)} ${t('g')}</td>${tpa?`<td>${f(N*tpa,2)} ${t('kg')}</td>`:''}${tr>1?`<td>${f(N*tr,2)} ${t('kg')}</td>`:''}</tr>
+    <tr><td><b>${borrow?t('mulchBorrow'):t('mulchRelease')}</b></td><td><b>${f(g,0)} ${t('g')} N</b></td>${tpa?`<td><b>${f(g*tpa/1000,2)} ${t('kg')} N</b></td>`:''}${tr>1?`<td><b>${f(g*tr/1000,2)} ${t('kg')} N</b></td>`:''}</tr>
+    ${borrow?`<tr><td>${t('ureaEq')}</td><td>${f(u,0)} ${t('g')}</td>${tpa?`<td>${f(u*tpa/1000,1)} ${t('kg')}</td>`:''}${tr>1?`<td>${f(u*tr/1000,1)} ${t('kg')}</td>`:''}</tr>`:''}
+   </tbody></table></div></div>
+   <div class="fix"><h3>${t('doThis')}</h3><p>${borrow?t('mulchAdviceC').replace('{u}',f(Math.round(u/10)*10,0)):t('mulchAdviceN')}</p>
+   <p class="small muted">${t('mulchNote')}</p></div>`+why;
+}
+function benefitSVG(){
+  const lb={zh:['保湿降温','挡住暴雨冲刷','慢慢放出钾','压住杂草','养土壤生物','吸收根','树头留空'],
+   en:['keeps soil moist & cool','shields from heavy rain','slowly releases K','smothers weeds','feeds soil life','feeding roots','clear ring at trunk'],
+   ms:['tanah lembap & sejuk','lindung hujan lebat','lepas K perlahan','tekan rumpai','beri makan hidupan tanah','akar penyerap','ruang kosong di pangkal']}[L()];
+  let s=`<svg class="ill" viewBox="0 0 600 330" role="img" aria-label="${lb.slice(0,5).join(', ')}">`;
+  s+=`<rect x="0" y="190" width="600" height="140" fill="var(--bark-soft)"/>`;
+  s+=`<rect x="285" y="40" width="30" height="155" fill="var(--bark)"/><ellipse cx="300" cy="50" rx="150" ry="42" fill="var(--leaf-soft)" stroke="var(--leaf)" stroke-width="3"/>`;
+  s+=`<path d="M80 190 Q140 172 200 182 Q240 176 262 186 L262 196 L80 196 Z M338 186 Q360 176 400 182 Q460 172 520 190 L520 196 L338 196 Z" fill="var(--bark)"/>`;
+  for(let i=0;i<14;i++){const x=95+i*31;if(x>255&&x<345)continue;s+=`<path d="M${x} 182 l10 -6" stroke="var(--bark-soft)" stroke-width="2"/>`}
+  s+=`<path d="M300 195 C250 215 180 220 110 232 M300 195 C350 215 420 220 490 232 M300 200 C270 240 230 260 180 280 M300 200 C330 240 370 260 420 280" stroke="var(--ink2)" stroke-width="3" fill="none"/>`;
+  [120,170,430,480].forEach(x=>{s+=`<circle cx="${x}" cy="230" r="4" fill="var(--leaf)"/>`});
+  s+=`<text x="300" y="318" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)">${lb[5]}</text>`;
+  s+=`<path d="M318 186 L345 165" stroke="var(--bad)" stroke-width="2"/><text x="348" y="166" font-size="16" font-weight="900" fill="var(--bad)">${lb[6]}</text>`;
+  s+=`<circle cx="545" cy="40" r="20" fill="var(--warn)"/>`;[0,1,2].forEach(i=>{s+=`<path d="M${30+i*30} ${100+i*8} l-8 16" stroke="var(--water)" stroke-width="4" stroke-linecap="round"/>`});
+  const call=[[20,145,lb[1]],[440,110,lb[0]],[20,268,lb[2]],[440,250,lb[3]],[180,300,'']];
+  s+=`<text x="20" y="150" font-size="19" font-weight="900" fill="var(--water)">② ${lb[1]}</text>`;
+  s+=`<text x="580" y="128" text-anchor="end" font-size="19" font-weight="900" fill="var(--warn)">① ${lb[0]}</text>`;
+  s+=`<text x="12" y="262" font-size="18" font-weight="900" fill="var(--ink)">③ ${lb[2]}</text>`;
+  s+=`<text x="588" y="262" text-anchor="end" font-size="18" font-weight="900" fill="var(--ink)">④ ${lb[3]}</text>`;
+  s+=`<text x="588" y="290" text-anchor="end" font-size="18" font-weight="900" fill="var(--ink)">⑤ ${lb[4]}</text>`;
+  return s+`</svg>`}
+function timingSVG(){
+  const rows={zh:[['收果后','铺新覆盖物','g'],['抽新叶','保留，照常施肥','g'],['新叶老熟、干旱催花','保留；不加厚、不浇水、不加富氮新料','w'],['开花','不加富氮新料','b'],['坐果','不加富氮新料','b'],['果实发育','保留，帮助水分平稳','g']],
+   en:[['After harvest','Spread new mulch','g'],['Leaf flush','Keep it; fertilise as usual','g'],['Leaves harden, dry spell (induction)','Keep it; don\'t thicken, don\'t irrigate, no fresh N-rich material','w'],['Flowering','No fresh N-rich material','b'],['Fruit set','No fresh N-rich material','b'],['Fruit growth','Keep it; steadies moisture','g']],
+   ms:[['Lepas tuai','Tabur sungkupan baru','g'],['Pucuk baru','Kekalkan; baja seperti biasa','g'],['Daun matang, musim kering (aruhan)','Kekalkan; jangan tebalkan, jangan siram, tiada bahan kaya N segar','w'],['Berbunga','Tiada bahan kaya N segar','b'],['Pembentukan buah','Tiada bahan kaya N segar','b'],['Buah membesar','Kekalkan; lembapan stabil','g']]}[L()];
+  const col={g:['var(--good-soft)','var(--good)'],w:['var(--warn-soft)','var(--warn)'],b:['var(--bad-soft)','var(--bad)']};
+  return `<div class="tl">${rows.map((r,i)=>`<div class="tlr" style="background:${col[r[2]][0]};border-color:${col[r[2]][1]}"><span class="tln">${i+1}</span><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div>`}
+/* ---------- learn (illustrated) ---------- */
+function plateSVG(){
+  let s=`<svg class="ill" viewBox="20 20 580 190" role="img" aria-label="24:1">`;
+  for(let i=0;i<24;i++){const c=i%8,r=Math.floor(i/8),x=40+c*34,y=40+r*40,burn=i<16;
+    s+=`<rect x="${x}" y="${y}" width="26" height="26" rx="5" fill="${burn?'var(--bark-soft)':'var(--bark)'}" stroke="var(--bark)" stroke-width="2"/>`}
+  s+=`<rect x="40" y="168" width="26" height="26" rx="13" fill="var(--leaf)"/>`;
+  s+=`<text x="76" y="187" font-size="22" font-weight="900" fill="var(--ink)">1 N</text>`;
+  s+=`<path d="M320 70 h60" stroke="var(--ink2)" stroke-width="3" marker-end="url(#ar)"/><path d="M320 120 h60" stroke="var(--ink2)" stroke-width="3" marker-end="url(#ar)"/>`;
+  s+=`<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink2)"/></marker></defs>`;
+  s+=`<text x="392" y="66" font-size="24" font-weight="900" fill="var(--ink)">16 C → CO₂</text><text x="392" y="92" font-size="18" font-weight="700" fill="var(--ink2)">${L()==='zh'?'烧掉当能量':L()==='ms'?'dibakar untuk tenaga':'burned for energy'}</text>`;
+  s+=`<text x="392" y="124" font-size="24" font-weight="900" fill="var(--ink)">8 C + 1 N</text><text x="392" y="150" font-size="18" font-weight="700" fill="var(--ink2)">${L()==='zh'?'变成微生物身体（8:1）':L()==='ms'?'menjadi badan mikrob (8:1)':'becomes microbe body (8:1)'}</text>`;
+  s+=`<circle cx="470" cy="186" r="20" fill="var(--leaf-soft)" stroke="var(--leaf)" stroke-width="2"/><circle cx="463" cy="182" r="3" fill="var(--leaf)"/><circle cx="477" cy="182" r="3" fill="var(--leaf)"/><path d="M462 192 q8 6 16 0" stroke="var(--leaf)" stroke-width="2" fill="none"/>`;
+  return s+`</svg>`}
+function curveSVG(){
+  const lbl={zh:['天','温度','碳氮比'],en:['days','temperature','C:N'],ms:['hari','suhu','C:N']}[L()];
+  return `<svg class="ill" viewBox="0 0 600 226" role="img" aria-label="${lbl[1]}">
+   <line x1="50" y1="190" x2="570" y2="190" stroke="var(--ink2)" stroke-width="2"/><line x1="50" y1="20" x2="50" y2="190" stroke="var(--ink2)" stroke-width="2"/>
+   <path d="M50 160 C80 40 120 30 170 45 S300 120 380 150 S520 165 570 166" fill="none" stroke="var(--bad)" stroke-width="4"/>
+   <path d="M50 50 C150 80 250 120 350 140 S520 150 570 152" fill="none" stroke="var(--bark)" stroke-width="4" stroke-dasharray="9 6"/>
+   <text x="190" y="34" font-size="22" font-weight="900" fill="var(--bad)">${lbl[1]} 55–65 °C</text>
+   <text x="60" y="76" font-size="22" font-weight="800" fill="var(--bark)">${lbl[2]} 25–35</text>
+   <text x="490" y="132" font-size="22" font-weight="800" fill="var(--bark)">10–15</text>
+   ${[0,20,40,60].map((d,i)=>`<text x="${50+i*173}" y="216" text-anchor="middle" font-size="20" font-weight="800" fill="var(--ink2)">${d}</text>`).join('')}
+   <text x="570" y="216" text-anchor="end" font-size="20" font-weight="800" fill="var(--ink2)">${lbl[0]}</text></svg>`}
+function chickSVG(){
+  const lb={zh:['中心温度','天','翻堆','×5'],en:['core temp','days','turns','×5'],ms:['suhu tengah','hari','balik','×5']}[L()];
+  let s=`<svg class="ill" viewBox="0 0 600 200" role="img" aria-label="55–77 °C, 15 ${lb[1]}, ${lb[3]} ${lb[2]}">`;
+  s+=`<rect x="40" y="20" width="34" height="140" rx="17" fill="var(--surface2)" stroke="var(--ink2)" stroke-width="3"/><circle cx="57" cy="168" r="24" fill="var(--bad)" stroke="var(--ink2)" stroke-width="3"/><rect x="49" y="60" width="16" height="104" fill="var(--bad)"/>`;
+  s+=`<rect x="78" y="40" width="10" height="44" fill="var(--good)"/><text x="96" y="52" font-size="22" font-weight="900" fill="var(--ink)">77 °C</text><text x="96" y="88" font-size="22" font-weight="900" fill="var(--ink)">55 °C</text><text x="96" y="116" font-size="17" font-weight="700" fill="var(--ink2)">${lb[0]}</text>`;
+  for(let d=0;d<15;d++){const x=250+d*22;s+=`<rect x="${x}" y="70" width="18" height="40" rx="3" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>`}
+  [1,4,7,10,13].forEach(d=>{const x=259+d*22;s+=`<path d="M${x-9} 132 a9 9 0 1 0 9 -9" fill="none" stroke="var(--water)" stroke-width="3"/><path d="M${x} 117 l6 6 l-6 6" fill="none" stroke="var(--water)" stroke-width="3"/>`});
+  s+=`<text x="250" y="56" font-size="22" font-weight="900" fill="var(--ink)">15 ${lb[1]}</text><text x="250" y="176" font-size="20" font-weight="800" fill="var(--water)">${lb[2]} ${lb[3]}</text>`;
+  return s+`</svg>`}
+const MULCHWHY={
+zh:`<ol class="chk"><li><b>保湿降温。</b>表土少晒少风，水分蒸发少，大热天也凉一些。榴莲的吸收根大多在表层，干旱时最先受苦，覆盖物保护的正是它们。</li>
+<li><b>挡住暴雨冲刷。</b>雨点直接打在裸土上，会打碎土粒、封住表面、冲走表土。有覆盖，雨水慢慢渗进去，坡地果园特别重要（美国 NRCS）。</li>
+<li><b>慢慢放出养分，尤其是钾。</b>空果串干重约含 N 0.8%、P 0.1%、K 2.5%、Mg 0.2%；铺在油棕下，约 10 个月内放出 99% 以上的钾。榴莲果实带走很多钾，空果串等于慢效钾肥。</li>
+<li><b>压住杂草。</b>吸收根附近少了杂草抢水抢肥，也省除草工。</li>
+<li><b>养土壤、养生物。</b>烂掉后变成腐殖质，也给分解残体、吃草籽的小虫一个家。13 年油棕园每英亩铺约 14 吨空果串（35 吨/公顷），表层 20 厘米有机质增加（但那次没有测到微生物增加）。</li></ol>
+<p><b>代价：</b>高碳覆盖物会向土壤借氮（上面已算）；不要堆在树头，否则树皮长期潮湿，利于疫霉等树干病；旱季干稻草、木屑可能着火，太干就别铺太厚。</p>`,
+en:`<ol class="chk"><li><b>Keeps soil moist and cool.</b> Covered soil loses far less water to sun and wind and stays cooler on hot days. Durian feeding roots are mostly near the surface and suffer first in dry spells; mulch protects exactly them.</li>
+<li><b>Shields soil from heavy rain.</b> Raindrops on bare soil smash soil crumbs, seal the surface and wash topsoil away. Under mulch, rain soaks in, which matters on hillside orchards (USDA NRCS).</li>
+<li><b>Releases nutrients slowly, especially K.</b> EFB is about 0.8% N, 0.1% P, 2.5% K and 0.2% Mg on dry weight; under oil palm, over 99% of its K was released within about 10 months. Durian fruit removes a lot of potassium, so EFB works like slow-release potash.</li>
+<li><b>Smothers weeds.</b> Fewer weeds competing for water and fertiliser where the feeding roots are, and less weeding work.</li>
+<li><b>Builds soil and feeds soil life.</b> It becomes humus and shelters the small creatures that shred residue and eat weed seeds. In a 13-year-old oil palm stand, about 14 t of EFB per acre (35 t/ha) raised organic matter in the top 20 cm (that study did not find more microbes).</li></ol>
+<p><b>The costs:</b> high-carbon mulch borrows nitrogen (calculated above); never heap it against the trunk, which keeps bark wet and favours trunk diseases such as Phytophthora; dry straw or sawdust can burn in a long dry season, so don't build thick dry layers.</p>`,
+ms:`<ol class="chk"><li><b>Tanah lembap dan sejuk.</b> Tanah bertutup kurang kehilangan air kepada matahari dan angin, dan lebih sejuk pada hari panas. Akar penyerap durian kebanyakannya dekat permukaan dan paling awal terjejas ketika kering; sungkupan melindunginya.</li>
+<li><b>Lindung daripada hujan lebat.</b> Titis hujan atas tanah terdedah memecahkan butir tanah, menutup permukaan dan menghakis tanah atas. Di bawah sungkupan, air meresap masuk; penting di dusun berbukit (USDA NRCS).</li>
+<li><b>Lepas nutrien perlahan, terutama K.</b> EFB kira-kira N 0.8%, P 0.1%, K 2.5%, Mg 0.2% berat kering; di bawah sawit, lebih 99% K dilepaskan dalam ~10 bulan. Buah durian membawa keluar banyak kalium, jadi EFB seperti baja kalium lambat lepas.</li>
+<li><b>Menekan rumpai.</b> Kurang rumpai berebut air dan baja di zon akar penyerap, dan kurang kerja merumput.</li>
+<li><b>Membina tanah dan hidupan tanah.</b> Menjadi humus dan tempat berlindung hidupan kecil yang mencarik sisa dan makan biji rumpai. Di ladang sawit 13 tahun, ~14 tan EFB seekar (35 tan/ha) menaikkan bahan organik 20 cm atas (kajian itu tidak mendapati mikrob bertambah).</li></ol>
+<p><b>Kosnya:</b> sungkupan tinggi karbon meminjam nitrogen (dikira di atas); jangan longgok pada pangkal batang kerana kulit kekal basah dan menggalakkan penyakit batang seperti Phytophthora; jerami atau habuk kayu kering boleh terbakar dalam musim kering panjang, jadi jangan buat lapisan kering yang tebal.</p>`};
+const MULCHFLOWER={
+zh:`<p><b>高碳覆盖物不会让氮太多。</b>空果串、木屑、稻草在分解时是向土壤<b>借</b>氮，不是放氮。会在短时间放出很多氮的，是低碳氮比的材料：生鸡粪、新割青草、新鲜修剪枝叶。开花前要少氮、多磷钾，避免抽新叶跟花争养分（Haifa 榴莲施肥指南）——所以从新叶老熟到坐果，<b>不要加这些富氮的新料</b>。空果串放出的是钾，正好合用。</p>
+<p><b>真正要注意的是水分。</b>榴莲要一段干旱期才会成花（Haifa：约 1–2 个月）。覆盖物保湿，铺太厚可能减弱这个“干”的信号——这是推论，我没有找到有机覆盖与榴莲成花的直接试验。反过来，泰国 Monthong 试验用透气塑料膜挡雨约 54 天，造成严重干旱：现蕾和开花延迟，每米枝条花序从约 9 个降到不到 1 个（Kozai 等 2024）。轻度干旱催花，严重干旱伤花。</p>
+<p><b>默认做法：</b>收果后到抽叶期铺新的覆盖物；催花期保留原有的、不要加厚、不要浇水；开花到坐果不加任何富氮的新料；坐果后覆盖帮助保持水分平稳。厄尔尼诺长旱年份，覆盖物反而能防止干过头。</p><h3 style="margin:16px 0 6px;font-size:1.05rem">正在开花时，覆盖物能防落花吗？</h3><p>帮助很有限，只对一种原因有用。落一部分花是正常的：泰国 Monthong 研究中，落花最少的树也落了 60–70%，最多的落 87–93%；落花少的树，花里的糖和淀粉较多（只是趋势，统计上未证实）。</p><div class="tl"><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>授粉不完全（榴莲夜间开花，主要靠蝙蝠）。越南 Musang King 研究：早期落果主要因授粉不完全；人工授粉坐果率达 93%。</span><b style="color:var(--bad)">没帮助</b></div><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>大雨：雨多的年份（如 2017）产量明显下降，雨水减少授粉动物活动（UTM 研究）。</span><b style="color:var(--bad)">没帮助</b></div><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>新叶抽出，跟花和小果争碳水化合物。</span><b style="color:var(--bad)">没帮助；富氮新料反而更糟</b></div><div class="cz" style="background:var(--good-soft);border-color:var(--good)"><span>天热时树下土壤干裂、升温。</span><b style="color:var(--good)">有帮助</b></div></div><p><b>现在开花，这样做：</b></p><ul class="chk"><li>原有的覆盖物保留，不要翻动。</li><li>如果树下是裸土、天热快干，可铺一层薄的、干的、低氮旧料（旧空果串、干落叶），离开树头。</li><li>不要加富氮的东西：生鸡粪、新割草、新鲜枝叶、尿素，以免催出新叶跟花抢养分。</li><li>不要现在铺厚的新鲜空果串——坐果时它正在向土壤借氮。</li><li>检查排水，大雨才是现在更大的威胁。</li></ul><p>授粉和天气对结果的影响，比覆盖物大得多。</p>`,
+en:`<p><b>High-carbon mulch will not push nitrogen too high.</b> EFB, sawdust and straw <b>borrow</b> nitrogen while they rot; they don't release it. The materials that release a lot of N quickly are the low C:N ones: raw chicken dung, fresh grass clippings, fresh tree trimmings. Before flowering, durian should get less N and more P and K so a leaf flush doesn't compete with the flowers (Haifa durian fertiliser guide). So from the time new leaves harden until fruit set, <b>don't add fresh N-rich material</b>. What EFB releases is potassium, which suits this stage.</p>
+<p><b>Water is the real issue.</b> Durian needs a dry spell to set flowers (Haifa: about 1–2 months). Mulch keeps soil moist, so a thick fresh layer could soften that dry signal. That is reasoning, not a tested result; I found no direct trial of organic mulch and durian flowering. In the other direction, a Thai Monthong trial used breathable plastic sheeting to keep rain off for about 54 days. The severe drought delayed bud emergence and flowering and cut flower clusters from about 9 to under 1 per metre of branch (Kozai et al. 2024). Mild drought induces flowers; severe drought destroys them.</p>
+<p><b>Default:</b> spread new mulch after harvest through leaf flush; during induction keep what is there, don't thicken it and don't irrigate; from flowering to fruit set add no fresh N-rich material; after fruit set the mulch helps keep moisture steady. In a long El Niño drought, mulch helps stop the trees drying out too far.</p><h3 style="margin:16px 0 6px;font-size:1.05rem">Flowering now: will mulch stop flowers dropping?</h3><p>Only a little, and only for one cause. Some drop is normal: in a Thai Monthong study the best trees still dropped 60–70% of their flowers and the worst 87–93%; low-drop trees had more sugars and starch in their flowers (a tendency, not statistically confirmed).</p><div class="tl"><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>Incomplete pollination (durian flowers at night, mainly bat-pollinated). A Vietnamese Musang King study blamed early fruit drop mostly on incomplete pollination; hand pollination reached 93% fruit set.</span><b style="color:var(--bad)">No help</b></div><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>Heavy rain: wet years such as 2017 had clearly lower yields, and rain reduces pollinator activity (UTM study).</span><b style="color:var(--bad)">No help</b></div><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>A new leaf flush competing with flowers and young fruit for carbohydrates.</span><b style="color:var(--bad)">No help; N-rich mulch makes it worse</b></div><div class="cz" style="background:var(--good-soft);border-color:var(--good)"><span>Soil under the tree drying and heating up in hot weather.</span><b style="color:var(--good)">Helps</b></div></div><p><b>While the tree is blooming:</b></p><ul class="chk"><li>Keep the mulch you already have; don't disturb it.</li><li>If the ground is bare and drying out in hot weather, a thin layer of dry, old, low-nitrogen material (old EFB, dry leaves) is fine, kept away from the trunk.</li><li>Add nothing nitrogen-rich: no raw chicken dung, fresh grass, fresh trimmings or urea. They can push a leaf flush that competes with the flowers.</li><li>Don't lay a thick layer of fresh EFB now; it would be borrowing nitrogen just as fruit set begins.</li><li>Make sure drainage works; heavy rain is the bigger threat right now.</li></ul><p>Pollination and weather decide much more of the outcome than mulch.</p>`,
+ms:`<p><b>Sungkupan tinggi karbon tidak menaikkan nitrogen berlebihan.</b> EFB, habuk kayu dan jerami <b>meminjam</b> nitrogen semasa reput, bukan membebaskannya. Bahan yang cepat membebaskan banyak N ialah bahan C:N rendah: tahi ayam mentah, rumput baru dipotong, cantasan segar. Sebelum berbunga, durian patut dapat kurang N dan lebih P dan K supaya pucuk baru tidak bersaing dengan bunga (panduan baja durian Haifa). Jadi dari daun baru matang hingga pembentukan buah, <b>jangan tambah bahan kaya N segar</b>. EFB membebaskan kalium, sesuai pada peringkat ini.</p>
+<p><b>Isu sebenar ialah air.</b> Durian perlukan tempoh kering untuk berbunga (Haifa: ~1–2 bulan). Sungkupan mengekalkan lembapan, jadi lapisan baru yang tebal mungkin melemahkan isyarat kering itu. Ini penaakulan, bukan hasil ujian; saya tidak menemui kajian langsung sungkupan organik dan pembungaan durian. Sebaliknya, ujian Monthong di Thailand menggunakan plastik telap wap untuk menghalang hujan ~54 hari. Kemarau teruk melewatkan putik dan pembungaan, dan mengurangkan jambak bunga dari ~9 kepada kurang 1 semeter dahan (Kozai et al. 2024). Kemarau ringan mengaruh bunga; kemarau teruk merosakkannya.</p>
+<p><b>Lalai:</b> tabur sungkupan baru selepas tuai hingga pucuk baru; semasa aruhan kekalkan yang ada, jangan tebalkan dan jangan siram; dari berbunga hingga pembentukan buah jangan tambah bahan kaya N segar; selepas buah terbentuk sungkupan membantu lembapan stabil. Dalam kemarau panjang El Niño, sungkupan membantu pokok tidak terlalu kering.</p><h3 style="margin:16px 0 6px;font-size:1.05rem">Sedang berbunga: bolehkah sungkupan mengelak bunga gugur?</h3><p>Sedikit sahaja, dan untuk satu sebab sahaja. Sebahagian bunga gugur adalah normal: dalam kajian Monthong di Thailand, pokok terbaik masih menggugurkan 60–70% bunga dan yang paling teruk 87–93%; pokok kurang gugur mempunyai lebih banyak gula dan kanji dalam bunga (kecenderungan, belum disahkan secara statistik).</p><div class="tl"><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>Pendebungaan tidak lengkap (durian berbunga waktu malam, kebanyakannya didebunga kelawar). Kajian Musang King di Vietnam: buah gugur awal kebanyakannya akibat pendebungaan tidak lengkap; pendebungaan tangan mencapai 93% pembentukan buah.</span><b style="color:var(--bad)">Tidak membantu</b></div><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>Hujan lebat: tahun basah seperti 2017 hasil jelas menurun, dan hujan mengurangkan aktiviti pendebunga (kajian UTM).</span><b style="color:var(--bad)">Tidak membantu</b></div><div class="cz" style="background:var(--bad-soft);border-color:var(--bad)"><span>Pucuk baru bersaing dengan bunga dan buah muda untuk karbohidrat.</span><b style="color:var(--bad)">Tidak membantu; bahan kaya N memburukkan</b></div><div class="cz" style="background:var(--good-soft);border-color:var(--good)"><span>Tanah bawah pokok kering dan panas ketika cuaca panas.</span><b style="color:var(--good)">Membantu</b></div></div><p><b>Semasa pokok berbunga:</b></p><ul class="chk"><li>Kekalkan sungkupan sedia ada; jangan kacau.</li><li>Jika tanah terdedah dan cepat kering ketika panas, lapisan nipis bahan lama yang kering dan rendah nitrogen (EFB lama, daun kering) boleh, jauh dari pangkal batang.</li><li>Jangan tambah bahan kaya nitrogen: tahi ayam mentah, rumput segar, cantasan segar atau urea. Ia boleh mencetuskan pucuk baru yang bersaing dengan bunga.</li><li>Jangan tabur EFB segar yang tebal sekarang; ia akan meminjam nitrogen tepat ketika buah mula terbentuk.</li><li>Pastikan saliran berfungsi; hujan lebat ialah ancaman lebih besar sekarang.</li></ul><p>Pendebungaan dan cuaca jauh lebih menentukan hasil berbanding sungkupan.</p>`};
+const LEARN_=()=>({
+zh:[
+ ['碳氮比是什么？',`<p>碳氮比（C:N）= 材料里<b>碳的重量 ÷ 氮的重量</b>。10:1 就是每 1 份氮配 10 份碳。化验报告的碳%和氮%都按干重算，所以相除得到的比例跟湿重干重无关。</p><p>碳是微生物的“饭”（能量），氮是它们长身体用的“肉”（蛋白质）。比例对了，材料才烂得快。</p>`],
+ ['24:1 是微生物最爱吃的比例',`${plateSVG()}<p>土壤微生物本身大约是 <b>8:1</b>。它们吃进去的碳有一部分要烧掉当能量，所以要吃 <b>24:1</b> 的“饭”：16 份碳烧掉，8 份碳加 1 份氮变成身体（美国 NRCS）。</p>`],
+ ['高于 24 借氮，低于 24 放氮',`<p><b>高于 24:1</b>（稻草 80、空果串约 52、木屑 500 以上）：微生物氮不够，会<b>向土壤借氮</b>（氮固持）。这段时间作物可能缺氮，等微生物死掉分解后才还回来。</p><p><b>低于 24:1</b>（鸡粪 6–14、新割草 17）：多出来的氮被放出来给作物用（矿化），但材料很快就烂完。</p><p><b>注意：</b>${t('seesawNote')}树本身的碳氮比是另一回事，见下面“两种碳氮比：材料和树”。</p>`],
+ ['堆肥：起堆 25–35，完成 10–15',`${curveSVG()}<p>起堆时碳氮比约 <b>30:1</b> 最常用（康奈尔大学）；20–40 都能成功，25–30 最理想（《农场堆肥手册》）。马来西亚博特拉大学用空果串加 POME 厌氧污泥试验，起始 <b>35:1</b> 分解最好。</p><p>堆的过程中碳变成二氧化碳跑掉，碳氮比一路下降，成品约 10–15。</p><ul><li><b>太低</b>（&lt;20）：氮变成氨气跑掉，有臭氨味。</li><li><b>太高</b>（&gt;40）：堆不热，几个月都不烂。</li></ul>`],
+ ['含水量 50–60%',`<p>含水量按<b>湿重</b>算。大部分材料以 50–60% 为好。手捏测试：用力捏一把，滴一两滴水就对了；捏不出水又松散 = 太干；水一直流 = 太湿、会缺氧发臭。</p><p><b>湿的褐料陷阱：</b>榴莲壳碳氮比约 50（褐料），但含水约 85%。直接堆会太湿。先切碎晒干，或配谷壳、木屑这类干的褐料。泰国研究把榴莲壳和柑橘皮 1:1 堆，起始含水 78–85%，堆不热（只到约 41 °C）。</p>`],
+ ['不是所有碳都一样快',`<p>木屑、空果串、榴莲壳含很多木质素，碳很“硬”，微生物吃得慢。所以这类材料起堆碳氮比可以偏高一点（康奈尔）。<b>切碎、压碎</b>能加快分解——马来西亚大多数油棕厂都先把空果串切碎。</p>`],
+ ['覆盖物与果园',`<p>新鲜的高碳覆盖物（空果串、木屑、稻草）铺在树下，会在接触土壤的地方借氮。翻进土里借得更多，铺在表面借得少、慢。土壤有机质本身约 10:1。</p><p>做法：铺表面不翻土；树头周围留空位；照常施肥；小树发黄才补氮。或者先堆成熟再铺。在“覆盖”页可以算每棵树最多会被借多少氮。</p>`],
+['两种碳氮比：材料和树',`${twoCnSVG()}<p>本软件算的是<b>材料的碳氮比</b>（堆肥、覆盖物）。果农常说的“碳氮比高才开花”，指的是<b>树本身的碳氮比</b>：叶子做出的碳水化合物，对比根吸进来的氮。这是 1918 年 Kraus 和 Kraybill 提出的老理论。两者只是间接相关。</p>
+<p><b>榴莲的证据：</b>柬埔寨 Monthong 试验（Var 等 2026），干旱 28 天后：</p>${droughtSVG()}<p>叶片氮下降、叶片碳氮比上升，花多了约一倍，产量增加约 31%（58.5 → 76.4 公斤/棵）。但该试验没有量碳水化合物，只有一个地点、一年，所以只能说两者同时发生，不能证明是碳氮比导致开花。</p>
+<p><b>不是全部：</b>苹果研究发现成花跟树的碳平衡、淀粉没有直接关系，赤霉素等激素信号更重要（Belhassine 等 2019）；多效唑就是阻断赤霉素。干旱太严重反而毁花（Kozai 等 2024）。</p>
+<p><b>默认做法：</b>用<b>施肥时间和水分</b>来调树的碳氮比，不要用高碳覆盖物或半熟堆肥：抽叶期给氮，长出满树叶子（下一次开花的“碳水工厂”）；新叶老熟后停氮、让它轻度干旱；开花到坐果不加富氮新料；堆肥一定要腐熟（碳氮比约 10–20）才施用。</p>`],
+ ['鸡粪会带线虫吗？',`<p>很多果农不用鸡粪，怕带来线虫。可以理解，但研究结果大多相反：</p><ul><li><b>鸡不是植物线虫的寄主。</b>根结线虫等要靠植物根才能繁殖，不会在鸡肚子里繁殖。生鸡粪里扭动的小虫，多半是吃细菌的自由生活线虫，不伤根。</li><li><b>鸡粪常被用来压线虫。</b>美国北卡试验：每英亩 4–6 吨禽类垫料减少了根结线虫，棉花增产。</li><li><b>热堆能杀线虫。</b>法国 ANSES 研究：堆肥和厌氧消化在所有测试条件下都很有效；50 °C 30 分钟或 60 °C 3 分钟就能杀死根结线虫和马铃薯孢囊线虫。</li></ul><p>真正的风险来自<b>没堆熟的生粪</b>（烧根、氨味、苍蝇），或混了别处带病泥土的粪。所以本软件默认<b>不建议鸡粪</b>；牛粪、青草、尿素也能把碳氮比调下来。要用鸡粪，请照下面的条件做。</p>`],
+['安全使用鸡粪的条件',`${chickSVG()}<ol class="chk">
+<li><b>热堆，用温度计量。</b>起堆碳氮比 25–40，含水 50–60%。条形堆：中心保持 55–77 °C 共 15 天，期间至少翻 5 次；密闭或通气堆：3 天（美国有机标准 §205.203）。用长探针温度计插到中心量，不要靠手摸。这个温度远高于杀死线虫所需（50 °C 30 分钟），也能消灭沙门氏菌。</li>
+<li><b>腐熟后才用。</b>翻堆后不再发热、有泥土味没有氨味、碳氮比 ≤20、种子发芽测试正常（≥80%）。半熟的会烧根。</li>
+<li><b>生鸡粪：收果前 120 天以上。</b>榴莲落地后捡起来吃，算是果实接触土壤的作物，生粪要在收果前至少 120 天翻进土里。实际做法：开花到收果期间绝对不用生鸡粪。</li>
+<li><b>来源要干净。</b>用鸡舍垫料（谷壳或木屑），不要混了别人农场泥土的鸡粪——那才是线虫和土传病真正的传播途径。不要有死鸡；堆之前盖好保持干。</li>
+<li><b>施在对的位置。</b>撒在树冠外缘（吸收根所在）的表面，适量；不要堆在树头。</li></ol>`],
+ ['堆肥要施多少？',`<p><b>找不到榴莲“堆肥”用量的正式数字</b>：泰国农业厅 2022 年榴莲报告只说有机肥要和化肥一起用，没有给量。</p>
+<p>找到的马来西亚官方数字是<b>鸡粪</b>：砂拉越农业部建议种植时每穴 5–10 公斤，之后每棵每年 20–40 公斤，另加化肥。</p>
+<p><b>默认做法：</b>以这个范围为上限参考，全年分次撒在树冠外缘的表面，避开开花到坐果期（见“覆盖”页）。成品堆肥的养分每批都不同，量大时最好化验氮磷钾，再跟您的农艺师对照施肥计划。</p>`],
+ ['看化验报告',`<p>请化验室做<b>有机碳</b>和<b>全氮（凯氏法）</b>，都要干重。碳氮比 = 碳% ÷ 氮%。只有有机质%？碳% ≈ 有机质% ÷ 1.72（例：榴莲壳有机质 63.68%，有机碳 36.94%）。再量含水量，填进“材料”页的“我的材料”。</p>`],
+ ['堆好了没有？',`<p>泰国土地发展厅标准：成品碳氮比 ≤20，种子发芽指数 ≥80%。但<b>只看碳氮比不够</b>——日本研究发现它不能单独判断腐熟。还要看：温度回到常温、有泥土味没有臭味、种子测试正常。</p>`],
+ ['数值只是平均',`<p>表里的数值是文献平均，您的鸡粪、空果串每一批都会不同。第一次用新来源的材料，最好化验一次，用“改数值”或“我的材料”输入。</p>`]
+],
+en:[
+ ['What is C:N?',`<p>C:N = <b>weight of carbon ÷ weight of nitrogen</b> in a material. 10:1 means 10 parts carbon for every part nitrogen. Lab C% and N% are both on dry weight, so the ratio is the same whether the material is wet or dry.</p><p>Carbon is the microbes' fuel. Nitrogen builds their bodies (protein). Get the ratio right and materials rot fast.</p>`],
+ ['24:1 is the microbes\' ideal diet',`${plateSVG()}<p>Soil microbes themselves are about <b>8:1</b>. They burn part of the carbon they eat for energy, so they need a <b>24:1</b> diet: 16 parts carbon burned, 8 parts carbon plus 1 part nitrogen built into their bodies (USDA NRCS).</p>`],
+ ['Above 24 borrows N, below 24 releases N',`<p><b>Above 24:1</b> (straw 80, EFB about 52, sawdust over 500): microbes run short of nitrogen and <b>take it from the soil</b> (immobilisation). Crops can go short until the microbes die and release it again.</p><p><b>Below 24:1</b> (chicken manure 6–14, grass clippings 17): the extra nitrogen is released for crops (mineralisation), but the material is gone quickly.</p><p><b>Note:</b> ${t('seesawNote')} The tree's own C:N is a different number; see "Two kinds of C:N: material and tree" below.</p>`],
+ ['Compost: start at 25–35, finish at 10–15',`${curveSVG()}<p>A starting C:N near <b>30:1</b> is the usual target (Cornell). 20–40 works and 25–30 is preferred (On-Farm Composting Handbook). A Universiti Putra Malaysia trial of EFB with POME anaerobic sludge found <b>35:1</b> gave the best breakdown.</p><p>As carbon leaves as CO₂, C:N falls; finished compost sits around 10–15.</p><ul><li><b>Too low</b> (&lt;20): nitrogen escapes as ammonia; you smell it.</li><li><b>Too high</b> (&gt;40): the pile stays cool and takes months.</li></ul>`],
+ ['Moisture 50–60%',`<p>Moisture is on a <b>wet-weight</b> basis. Most mixes do best at 50–60%. Squeeze test: squeeze a handful hard. One or two drops is right; no water and it crumbles = too dry; water runs out = too wet, it goes airless and smells.</p><p><b>The wet-brown trap:</b> durian husk is a brown by C:N (about 50) but holds about 85% water. Piled fresh it is far too wet. Chop and sun-dry it, or mix in dry browns such as rice husk or sawdust. A Thai trial composting durian husk with citrus peel 1:1 started at 78–85% moisture and never got hot (about 41 °C).</p>`],
+ ['Not all carbon rots at the same speed',`<p>Sawdust, EFB and durian husk are high in lignin. Their carbon is tough and slow for microbes, so these can start a little higher in C:N (Cornell). <b>Shredding or pressing</b> speeds things up; most Malaysian mills shred EFB first.</p>`],
+ ['Mulch and the orchard',`<p>Fresh high-carbon mulch (EFB, sawdust, straw) borrows nitrogen where it touches the soil. Dug in, it borrows more; left on the surface, it borrows less and more slowly. Soil organic matter itself is about 10:1.</p><p>Practice: keep mulch on the surface, keep a clear ring around the trunk base, keep normal fertilising, and add N only if young trees yellow. Or compost it first. The Mulch tab estimates the most N a tree's mulch can borrow.</p>`],
+['Two kinds of C:N: material and tree',`${twoCnSVG()}<p>This app calculates the <b>material C:N</b> of compost and mulch. When growers say "high C:N makes trees flower", they mean the <b>tree's own C:N</b>: carbohydrates made by the leaves against nitrogen taken up by the roots. That is the old theory of Kraus and Kraybill (1918). The two are only loosely linked.</p>
+<p><b>Durian evidence:</b> a Monthong trial in Cambodia (Var et al. 2026), after a 28-day dry spell:</p>${droughtSVG()}<p>Leaf N fell, leaf C/N rose, flowers roughly doubled and yield rose about 31% (58.5 → 76.4 kg per tree). The trial did not measure carbohydrates and ran at one site for one year, so it shows these happening together; it does not prove C/N caused the flowering.</p>
+<p><b>Not the whole story:</b> in apple, flower induction was not tied to the tree's carbon balance or starch; hormone signals such as gibberellin mattered more (Belhassine et al. 2019). Paclobutrazol works by blocking gibberellin. Severe drought destroys flowers instead (Kozai et al. 2024).</p>
+<p><b>Default:</b> steer the tree's C:N with <b>fertiliser timing and water</b>, not with high-carbon mulch or half-made compost. Give N during leaf flush to build a full canopy (the carbohydrate factory for the next flowering); stop N once leaves harden and allow a mild dry spell; add no fresh N-rich material from flowering to fruit set; apply compost only when finished (C:N about 10–20).</p>`],
+ ['Does chicken dung bring nematodes?',`<p>Many growers avoid chicken dung for fear of nematodes. That caution is understandable, but most research points the other way:</p><ul><li><b>Chickens are not hosts of plant-parasitic nematodes.</b> Root-knot and similar nematodes need plant roots to multiply; they cannot breed inside a chicken. The small wriggling worms in fresh dung are mostly free-living bacteria-feeders that do not attack roots.</li><li><b>Poultry litter is often used to suppress nematodes.</b> North Carolina trials: 4–6 tons of poultry litter per acre reduced root-knot nematodes and raised cotton yield.</li><li><b>Hot composting kills nematodes.</b> France's ANSES found compost and anaerobic digestion very effective in every condition tested; 50 °C for 30 minutes or 60 °C for 3 minutes killed root-knot and potato cyst nematodes.</li></ul><p>The real risks come from <b>raw, uncomposted dung</b> (root burn, ammonia, flies) or manure mixed with infested soil from elsewhere. So this app by default <b>does not suggest chicken dung</b>; cattle manure, fresh grass or urea can lower C:N too. If you do use chicken dung, follow the conditions below.</p>`],
+['Conditions for using chicken dung safely',`${chickSVG()}<ol class="chk">
+<li><b>Hot-compost it, with a thermometer.</b> Start at C:N 25–40 and 50–60% moisture. Turned windrow: hold 55–77 °C in the core for 15 days and turn it at least 5 times. Closed or forced-air pile: 3 days (US organic standard §205.203). Push a long probe thermometer into the core; hand feel is not enough. This is far above what kills nematodes (50 °C for 30 minutes) and it also eliminates Salmonella.</li>
+<li><b>Use it only when cured.</b> No more heating after turning, earthy smell with no ammonia, C:N ≤20, and a seed test that sprouts normally (≥80%). Half-done compost burns roots.</li>
+<li><b>Raw dung: 120 days before harvest.</b> Durian falls on the ground and is picked up to eat, so it counts as a crop whose edible part touches soil. Raw manure must be worked in at least 120 days before harvest. In practice: never raw dung from flowering to harvest.</li>
+<li><b>Use a clean source.</b> Poultry-house litter on rice husk or sawdust. Not dung mixed with soil from another farm; that soil is how nematodes and soil diseases really travel. No dead birds; keep it covered and dry until you compost it.</li>
+<li><b>Put it in the right place.</b> Spread on the surface toward the outer canopy, where the feeding roots are, at a moderate rate. Never heap it against the trunk.</li></ol>`],
+ ['How much compost to apply?',`<p><b>No published durian compost rate was found.</b> Thailand's Department of Agriculture 2022 durian report says only to use organic fertiliser together with chemical fertiliser, with no amount.</p>
+<p>The Malaysian official figure found is for <b>chicken manure</b>: Sarawak's Department of Agriculture recommends 5–10 kg per planting hole, then 20–40 kg per tree per year, on top of chemical fertiliser.</p>
+<p><b>Default:</b> treat that range as an upper guide, spread across the year on the surface toward the canopy edge, and skip the flowering-to-fruit-set window (see the Mulch tab). Finished compost differs batch to batch; for large amounts, lab-test its N, P and K and check it against your fertiliser plan with your agronomist.</p>`],
+ ['Reading a lab report',`<p>Ask for <b>organic carbon</b> and <b>total nitrogen (Kjeldahl)</b>, both on dry weight. C:N = C% ÷ N%. Only organic matter given? C% ≈ OM% ÷ 1.72 (durian husk: OM 63.68%, organic C 36.94%). Measure moisture too, then enter it under My materials.</p>`],
+ ['Is the compost finished?',`<p>Thailand's Land Development Department standard: finished C:N ≤20 and seed germination index ≥80%. <b>C:N alone is not proof</b>; a Japanese study found it unreliable as a maturity index on its own. Also check: temperature back to ambient, earthy smell with no stink, and a seed test that sprouts normally.</p>`],
+ ['Values are averages',`<p>Table values are published averages. Every batch of chicken manure or EFB differs. When you start with a new source, lab-test it once and enter the values with Edit values or My materials.</p>`]
+],
+ms:[
+ ['Apakah nisbah C:N?',`<p>C:N = <b>berat karbon ÷ berat nitrogen</b> dalam sesuatu bahan. 10:1 bermakna 10 bahagian karbon bagi setiap 1 bahagian nitrogen. C% dan N% makmal kedua-duanya berat kering, jadi nisbahnya sama sama ada bahan basah atau kering.</p><p>Karbon ialah bahan api mikrob. Nitrogen membina badan mereka (protein). Nisbah yang betul membuat bahan reput cepat.</p>`],
+ ['24:1 ialah diet terbaik mikrob',`${plateSVG()}<p>Mikrob tanah sendiri kira-kira <b>8:1</b>. Sebahagian karbon dibakar untuk tenaga, jadi mereka perlukan diet <b>24:1</b>: 16 bahagian karbon dibakar, 8 bahagian karbon dan 1 bahagian nitrogen menjadi badan (USDA NRCS).</p>`],
+ ['Atas 24 meminjam N, bawah 24 membebaskan N',`<p><b>Atas 24:1</b> (jerami 80, EFB ~52, habuk kayu lebih 500): mikrob kekurangan nitrogen dan <b>mengambilnya dari tanah</b> (imobilisasi). Tanaman boleh kekurangan N sehingga mikrob mati dan membebaskannya semula.</p><p><b>Bawah 24:1</b> (tahi ayam 6–14, rumput 17): N berlebihan dibebaskan untuk tanaman (mineralisasi), tetapi bahan cepat habis.</p><p><b>Nota:</b> ${t('seesawNote')} C:N pokok sendiri ialah nombor lain; lihat "Dua jenis C:N: bahan dan pokok" di bawah.</p>`],
+ ['Kompos: mula 25–35, siap 10–15',`${curveSVG()}<p>C:N permulaan sekitar <b>30:1</b> ialah sasaran biasa (Cornell). 20–40 boleh, 25–30 paling baik (On-Farm Composting Handbook). Kajian Universiti Putra Malaysia (EFB + enapcemar anaerobik POME) mendapati <b>35:1</b> paling baik.</p><p>Karbon keluar sebagai CO₂, jadi C:N menurun; kompos siap sekitar 10–15.</p><ul><li><b>Terlalu rendah</b> (&lt;20): nitrogen lari sebagai ammonia; berbau.</li><li><b>Terlalu tinggi</b> (&gt;40): longgokan sejuk, berbulan-bulan.</li></ul>`],
+ ['Lembapan 50–60%',`<p>Lembapan ialah berat <b>basah</b>. Kebanyakan campuran terbaik pada 50–60%. Ujian genggam: genggam kuat. Satu dua titis = tepat; tiada air dan berderai = terlalu kering; air mengalir = terlalu basah, tiada udara dan berbau.</p><p><b>Perangkap bahan perang basah:</b> kulit durian ialah bahan perang (C:N ~50) tetapi ~85% air. Jika dilonggok segar, terlalu basah. Cincang dan jemur, atau campur bahan perang kering seperti sekam padi atau habuk kayu. Kajian Thailand (kulit durian + kulit limau 1:1) bermula pada lembapan 78–85% dan tidak panas (~41 °C).</p>`],
+ ['Tidak semua karbon sama laju',`<p>Habuk kayu, EFB dan kulit durian tinggi lignin. Karbonnya keras dan lambat dimakan mikrob, jadi boleh bermula dengan C:N lebih tinggi sedikit (Cornell). <b>Mencincang atau memampat</b> mempercepat; kebanyakan kilang di Malaysia mencincang EFB dahulu.</p>`],
+ ['Sungkupan dan dusun',`<p>Sungkupan segar tinggi karbon (EFB, habuk kayu, jerami) meminjam N di tempat ia menyentuh tanah. Jika dibenam, lebih banyak dipinjam; di permukaan, kurang dan lebih perlahan. Bahan organik tanah sendiri ~10:1.</p><p>Amalan: biar di permukaan, kosongkan sekeliling pangkal batang, teruskan baja biasa, tambah N hanya jika pokok muda menguning. Atau kompos dahulu. Tab Sungkupan menganggar N maksimum yang dipinjam.</p>`],
+['Dua jenis C:N: bahan dan pokok',`${twoCnSVG()}<p>Aplikasi ini mengira <b>C:N bahan</b> (kompos, sungkupan). Bila pekebun kata "C:N tinggi membuat pokok berbunga", maksudnya <b>C:N pokok itu sendiri</b>: karbohidrat yang dibuat daun berbanding nitrogen yang diserap akar. Itu teori lama Kraus dan Kraybill (1918). Kedua-duanya hanya berkait secara tidak langsung.</p>
+<p><b>Bukti durian:</b> ujian Monthong di Kemboja (Var et al. 2026), selepas kemarau 28 hari:</p>${droughtSVG()}<p>N daun turun, C/N daun naik, bunga hampir dua kali ganda dan hasil naik ~31% (58.5 → 76.4 kg sepokok). Ujian itu tidak mengukur karbohidrat dan hanya satu tapak, satu tahun; ia menunjukkan semuanya berlaku serentak, bukan membuktikan C/N menyebabkan pembungaan.</p>
+<p><b>Bukan keseluruhan cerita:</b> pada epal, aruhan bunga tidak berkait dengan imbangan karbon atau kanji pokok; isyarat hormon seperti giberelin lebih penting (Belhassine et al. 2019). Paklobutrazol berfungsi dengan menyekat giberelin. Kemarau teruk pula merosakkan bunga (Kozai et al. 2024).</p>
+<p><b>Lalai:</b> kawal C:N pokok dengan <b>masa pembajaan dan air</b>, bukan dengan sungkupan tinggi karbon atau kompos separuh masak. Beri N semasa pucuk baru untuk kanopi penuh (kilang karbohidrat untuk pembungaan seterusnya); hentikan N bila daun matang dan biarkan kemarau ringan; jangan tambah bahan kaya N segar dari berbunga hingga pembentukan buah; guna kompos hanya bila sudah matang (C:N ~10–20).</p>`],
+ ['Adakah tahi ayam membawa nematod?',`<p>Ramai pekebun mengelak tahi ayam kerana takut nematod. Itu boleh difahami, tetapi kebanyakan kajian menunjukkan sebaliknya:</p><ul><li><b>Ayam bukan perumah nematod parasit tumbuhan.</b> Nematod puru akar dan seumpamanya perlukan akar pokok untuk membiak; ia tidak membiak dalam ayam. Cacing kecil yang menggeliat dalam tahi segar kebanyakannya nematod hidup bebas pemakan bakteria yang tidak menyerang akar.</li><li><b>Hampas reban ayam sering digunakan untuk menekan nematod.</b> Ujian North Carolina: 4–6 tan sekeker mengurangkan nematod puru akar dan menaikkan hasil kapas.</li><li><b>Kompos panas membunuh nematod.</b> ANSES Perancis: kompos dan pencernaan anaerobik sangat berkesan dalam semua keadaan diuji; 50 °C selama 30 minit atau 60 °C selama 3 minit membunuh nematod puru akar dan nematod sista kentang.</li></ul><p>Risiko sebenar datang daripada <b>tahi mentah yang belum dikompos</b> (akar terbakar, ammonia, lalat) atau tahi bercampur tanah berpenyakit dari tempat lain. Jadi aplikasi ini secara lalai <b>tidak mencadangkan tahi ayam</b>; tahi lembu, rumput segar atau urea juga boleh menurunkan C:N. Jika mahu guna tahi ayam, ikut syarat di bawah.</p>`],
+['Syarat menggunakan tahi ayam dengan selamat',`${chickSVG()}<ol class="chk">
+<li><b>Kompos panas, dengan termometer.</b> Mula pada C:N 25–40 dan lembapan 50–60%. Longgokan memanjang: kekalkan 55–77 °C di tengah selama 15 hari dan balikkan sekurang-kurangnya 5 kali. Longgokan tertutup atau beraliran udara: 3 hari (piawaian organik AS §205.203). Cucuk termometer prob panjang ke tengah; rasa tangan tidak cukup. Suhu ini jauh melebihi yang membunuh nematod (50 °C selama 30 minit) dan turut menghapuskan Salmonella.</li>
+<li><b>Guna hanya bila sudah matang.</b> Tidak panas lagi selepas dibalikkan, bau tanah tanpa bau ammonia, C:N ≤20, dan ujian biji bercambah normal (≥80%). Kompos separuh masak membakar akar.</li>
+<li><b>Tahi mentah: 120 hari sebelum tuai.</b> Durian gugur ke tanah lalu dikutip untuk dimakan, jadi ia dikira tanaman yang bahagian boleh dimakan menyentuh tanah. Tahi mentah mesti dibenamkan sekurang-kurangnya 120 hari sebelum tuai. Amalannya: jangan langsung guna tahi mentah dari berbunga hingga tuai.</li>
+<li><b>Sumber mesti bersih.</b> Hampas reban bersekam atau berhabuk kayu. Bukan tahi bercampur tanah dari ladang lain; tanah itulah laluan sebenar nematod dan penyakit tanah. Tiada bangkai ayam; tutup dan simpan kering sebelum dikompos.</li>
+<li><b>Letak di tempat betul.</b> Tabur di permukaan ke arah pinggir kanopi, tempat akar penyerap, pada kadar sederhana. Jangan longgok pada pangkal batang.</li></ol>`],
+ ['Berapa banyak kompos perlu ditabur?',`<p><b>Tiada kadar kompos durian yang diterbitkan ditemui.</b> Laporan durian Jabatan Pertanian Thailand 2022 hanya menyebut baja organik digunakan bersama baja kimia, tanpa jumlah.</p>
+<p>Angka rasmi Malaysia yang ditemui ialah untuk <b>tahi ayam</b>: Jabatan Pertanian Sarawak mengesyorkan 5–10 kg selubang semasa menanam, kemudian 20–40 kg sepokok setahun, di samping baja kimia.</p>
+<p><b>Lalai:</b> anggap julat itu sebagai panduan maksimum, tabur sepanjang tahun di permukaan ke arah pinggir kanopi, dan elakkan tempoh berbunga hingga pembentukan buah (lihat tab Sungkupan). Kompos siap berbeza setiap kelompok; untuk jumlah besar, uji N, P dan K di makmal dan semak dengan pelan baja bersama ahli agronomi anda.</p>`],
+ ['Membaca laporan makmal',`<p>Minta <b>karbon organik</b> dan <b>nitrogen jumlah (Kjeldahl)</b>, kedua-duanya berat kering. C:N = C% ÷ N%. Hanya ada bahan organik? C% ≈ BO% ÷ 1.72 (kulit durian: BO 63.68%, C organik 36.94%). Ukur lembapan, kemudian masukkan di Bahan saya.</p>`],
+ ['Sudah siapkah kompos?',`<p>Piawaian Jabatan Pembangunan Tanah Thailand: C:N siap ≤20 dan indeks percambahan biji ≥80%. <b>C:N sahaja bukan bukti</b>; kajian Jepun mendapati ia tidak boleh dipercayai sebagai indeks kematangan sendirian. Periksa juga: suhu kembali seperti udara, bau tanah tanpa bau busuk, dan ujian biji bercambah normal.</p>`],
+ ['Nilai ialah purata',`<p>Nilai jadual ialah purata terbitan. Setiap kelompok tahi ayam atau EFB berbeza. Bila guna sumber baharu, uji di makmal sekali dan masukkan dengan Ubah nilai atau Bahan saya.</p>`]
+]});
+const REFS=[
+ ['USDA NRCS (2011). Carbon to Nitrogen Ratios in Cropping Systems.','https://sarep.ucdavis.edu/sites/g/files/dgvnsk9171/files/media/documents/NRCS-C_N_ratios_cropping_systems.pdf'],
+ ['Rynk R. et al. (1992). On-Farm Composting Handbook (NRAES-54), Appendix A, Table A.1.','https://www.aphis.usda.gov/sites/default/files/CharacteristicsofRawMaterial.pdf'],
+ ['Cornell Waste Management Institute (1996). C/N ratio & moisture calculations.','https://www.css.cornell.edu/cwmi/compost/calc/cn_ratio.html'],
+ ['Cornell CWMI. Simultaneous moisture and C/N equations.','https://compost.css.cornell.edu/calc/simultaneous.html'],
+ ['Cornell CWMI. Bulking agent table (sawdust 0.11% N, C:N 511).','https://compost.css.cornell.edu/feas.study.app.b.html'],
+ ['University of Illinois Extension. Compost needs: carbon–nitrogen relationships.','https://extension.illinois.edu/sites/default/files/soils-compost-cn-material-ratio.pdf'],
+ ['NDSU / UMN Extension (2022). Manure Composting Quick Guide.','https://www.ag.ndsu.edu:8000/agriculture/sites/default/files/2022-03/nm2047.pdf'],
+ ['Mahathaninwong N. et al. (2022). Aerobic composting and vermicomposting of durian shell and citrus peel wastes. BioResources 17(1):1144–1160.','https://bioresources.cnr.ncsu.edu/?p=37992'],
+ ['Hamzah N.H.C. et al. (2018). Pretreatments on compost from shredded OPEFB with POME anaerobic sludge and chicken manure. BioResources 13(3):4998–5012.','https://bioresources.cnr.ncsu.edu/resources/effect-of-pretreatments-on-compost-production-from-shredded-oil-palm-empty-fruit-bunch-with-palm-oil-mill-effluent-anaerobic-sludge-and-chicken-manure/'],
+ ['Mokhtar M.N. et al. (UPM, 2021). Effect of initial C/N ratio on OPEFB degradation with POME anaerobic sludge.','https://agris.fao.org/search/ar/records/647480e3425ec3c088f8d8d2'],
+ ['BARformula. Co-composting of EFB and POME (review).','https://www.barformula.com/assets/pdf/research_paper05.pdf'],
+ ['SARE LS95-060.1. Animal waste, cover crops and biological antagonists for nematode management on cotton (poultry litter vs root-knot).','https://projects.sare.org/project-reports/ls95-060-1/'],
+ ['US eCFR 7 CFR §205.203: raw manure intervals and compost temperature/turning requirements (USDA National Organic Program).','https://syfert.com/cfr/sections/7-205.203.html'],
+ ['University of Delaware Extension. In-house windrow composting and its effects on foodborne pathogens.','https://udel.edu/academics/colleges/canr/cooperative-extension/fact-sheets/in-house-windrow-composting-and-its-effects-on-foodborne-pathogens'],
+ ['Kozai N. et al. (2024). Effects of paclobutrazol application and soil mulching on flower induction in durian. JARQ 58(2):121–128.','https://www.jircas.go.jp/sites/default/files/publication/jarq/jarq58-2_121-128.pdf'],
+ ['Haifa Group. Durian fertilizer crop guide (N lower and P, K higher before flowering; 1–2 month dry period).','https://www.haifa-group.com/crop-guide/fruit-trees/durian-fertilizers-crop-guide'],
+ ['Farm Progress / USDA NRCS (2022). What you should know about mulch for specialty crops.','https://www.farmprogress.com/soil-health/what-you-should-know-about-mulch-for-specialty-crops'],
+ ['Decomposition and N & K release by oil palm EFB applied under mature palms.','https://www.researchgate.net/publication/283994855_Decomposition_and_N_K_release_by_oil_palm_empty_fruit_bunches_applied_under_mature_palms'],
+ ['EFB application at 35 t/ha (~14 t/acre) in a 13-year-old oil palm stand (soil organic matter).','https://garuda.kemdikbud.go.id/author/view/6293740?page=1'],
+ ['Sonjaroon W. et al. (2024). Carbohydrate in leaves and flowers vs flower drop and productivity of Monthong durian. Khon Kaen Agric. J. 52(5):950–963.','https://li01.tci-thaijo.org/index.php/agkasetkaj/article/view/260806'],
+ ['Duong N.H. & Tran V.H. (2025). Fruit development and physiological disorders of Musang King durian. Open Agriculture.','https://www.degruyterbrill.com/document/doi/10.1515/opag-2025-0422/html'],
+ ['UTM. Heavy rainfall impacts durian yields in Malaysia.','https://research.utm.my/?p=75722'],
+ ['Var S. et al. (2026). Effect of drought application on flower, yield and leaf mineral content of durian (Monthong) in Cambodia. J. Agric. Sci. Technol. A 16:108–112.','https://www.davidpublisher.com/Public/uploads/Contribute/6a6c5d2aac59b.pdf'],
+ ['Belhassine F. et al. (2019). Within-tree organ distances, floral induction and fruit growth in apple: carbohydrate and gibberellin contents. Front. Plant Sci. 10:1233.','https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2019.01233/pdf'],
+ ['Kamal U.K. et al. (2025). Quality of organic fertilizer from goat dung. J. Smart Farming & Food Security 1(1):16–28 (UMS).','https://jurcon.ums.edu.my/ojums/index.php/JSFFS/article/view/6587'],
+ ['Wan Razali W.A. et al. (2012). Lignocellulose changes during palm EFB composting with POME anaerobic sludge. BioResources 7(4):4786–4805.','https://bioresources.cnr.ncsu.edu/BioRes_07/BioRes_07_4_4786_Aizuddin_RBTSNHS_Lignocell_Changes_Palm_EFB_Composting_2631.pdf'],
+ ['Kananam W. et al. (2011). EFB composting with decanter sludge and chicken manure. ScienceAsia 37:17–23.','https://www.scienceasia.org/2011.37.n1/scias37_17.pdf'],
+ ['Sahad N. et al. (2014). Physicochemical characterization of oil palm decanter cake. BioResources 9(4):6361–6372.','https://bioresources.cnr.ncsu.edu/BioRes_09/BioRes_09_4_6361_Sahad_MBMBS_Physicochem_Oil_Palm_Cake_Oil_Recovery_5842.pdf'],
+ ['Tripetchkul S. et al. (2012). Co-composting of coir pith and cow manure. Int. J. Recycl. Org. Waste Agric. 1:15.','https://oiccpress.com/ijrowa/article/download/2862/19300/47455'],
+ ['Michel F.C. et al. (2004). Mass and nutrient losses during composting of dairy manure. Compost Sci. & Util. 12(4):323–334.','https://pure.psu.edu/en/publications/mass-and-nutrient-losses-during-the-composting-of-dairy-manure-am/'],
+ ['Jabatan Pertanian Sarawak. Durian (manure rates).','https://doa.sarawak.gov.my/web/subpage/webpage_view/127'],
+ ['Thai Department of Agriculture (2022). Durian research report.','https://info.doa.go.th/research/pdf/2565/43_2565.pdf'],
+ ['Maryland Department of the Environment. Building your own compost pile (size, troubleshooting).','https://mde.maryland.gov/programs/LAND/RecyclingandOperationsprogram/Pages/compostbin.aspx'],
+ ['University of Nebraska Extension G1315. Composting manure and other organic materials (N and C losses).','https://extensionpubs.unl.edu/publication/g1315/html/view'],
+ ['NCDA&CS (2016). Mortality composting temperature monitoring protocol (probe depths).','https://ncagr.gov/media/588/download'],
+ ['University of Nebraska–Lincoln CropWatch (2012). Using a microwave oven to test moisture content of forage.','https://cropwatch.unl.edu/using-microwave-oven-test-moisture-content-forage-unl-cropwatch-aug-9-2012'],
+ ['Cornell Waste Management Institute. Moisture content (weigh–dry–reweigh method).','https://www.css.cornell.edu/cwmi/compost/calc/moisture_content.html'],
+ ['Cornell Waste Management Institute. Balancing greens and browns (layering, coarse base, brown cover).','https://cwmi.css.cornell.edu/balancing.pdf'],
+ ['Texas A&M AgriLife Extension EHT-069. Composting (coarse base layer, 6–10 inch layers, soil or manure layer).','https://aggie-horticulture.tamu.edu/vegetable/files/2013/09/EHT-069.pdf'],
+ ['ANSES (France). Plant-parasitic nematodes: new waste management solutions.','https://www.anses.fr/node/158925/'],
+ ['Hino K. et al. (1995). Mixing materials in composting leftovers (C/N not a reliable maturity index).','https://agris.fao.org/search/fr/records/647236e9e17b74d2224eccea']
+];
+const APP_URL='https://stanleywoosweeleong.github.io/cnbalance/';
+const QR_SVG='<svg viewBox="0 0 37 37" width="200" height="200" role="img" aria-label="QR" shape-rendering="crispEdges" style="background:#fff;border-radius:8px"><rect width="37" height="37" fill="#fff"/><path d="M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM15 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM25 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM13 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM23 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM17 4h1v1h-1zM19 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM25 5h1v1h-1zM26 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM11 6h1v1h-1zM15 6h1v1h-1zM16 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM22 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM24 9h1v1h-1zM25 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM28 10h1v1h-1zM31 10h1v1h-1zM33 10h1v1h-1zM34 10h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM6 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM13 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM34 11h1v1h-1zM3 12h1v1h-1zM4 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM16 12h1v1h-1zM19 12h1v1h-1zM23 12h1v1h-1zM25 12h1v1h-1zM28 12h1v1h-1zM29 12h1v1h-1zM30 12h1v1h-1zM31 12h1v1h-1zM33 12h1v1h-1zM34 12h1v1h-1zM3 13h1v1h-1zM13 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM20 13h1v1h-1zM22 13h1v1h-1zM25 13h1v1h-1zM26 13h1v1h-1zM28 13h1v1h-1zM29 13h1v1h-1zM31 13h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM4 14h1v1h-1zM8 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM20 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM29 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM2 15h1v1h-1zM4 15h1v1h-1zM6 15h1v1h-1zM10 15h1v1h-1zM11 15h1v1h-1zM12 15h1v1h-1zM15 15h1v1h-1zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM26 15h1v1h-1zM29 15h1v1h-1zM31 15h1v1h-1zM33 15h1v1h-1zM2 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM13 16h1v1h-1zM14 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM32 16h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM6 17h1v1h-1zM12 17h1v1h-1zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM30 17h1v1h-1zM32 17h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM23 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM32 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM4 19h1v1h-1zM7 19h1v1h-1zM11 19h1v1h-1zM13 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM22 19h1v1h-1zM25 19h1v1h-1zM26 19h1v1h-1zM28 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM34 19h1v1h-1zM4 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM19 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM7 21h1v1h-1zM11 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM30 21h1v1h-1zM34 21h1v1h-1zM3 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM9 22h1v1h-1zM14 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM31 22h1v1h-1zM32 22h1v1h-1zM33 22h1v1h-1zM34 22h1v1h-1zM2 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM23 23h1v1h-1zM25 23h1v1h-1zM28 23h1v1h-1zM29 23h1v1h-1zM31 23h1v1h-1zM34 23h1v1h-1zM5 24h1v1h-1zM8 24h1v1h-1zM11 24h1v1h-1zM14 24h1v1h-1zM15 24h1v1h-1zM18 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM30 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM34 24h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM7 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM21 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM31 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h1v1h-1zM16 26h1v1h-1zM17 26h1v1h-1zM19 26h1v1h-1zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM17 27h1v1h-1zM18 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM23 27h1v1h-1zM25 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM31 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM16 28h1v1h-1zM18 28h1v1h-1zM21 28h1v1h-1zM22 28h1v1h-1zM23 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM15 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM15 30h1v1h-1zM17 30h1v1h-1zM19 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM25 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM32 30h1v1h-1zM33 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM11 31h1v1h-1zM19 31h1v1h-1zM20 31h1v1h-1zM21 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM24 31h1v1h-1zM29 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM19 32h1v1h-1zM21 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM26 32h1v1h-1zM27 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM31 32h1v1h-1zM32 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h1v1h-1zM12 33h1v1h-1zM13 33h1v1h-1zM15 33h1v1h-1zM17 33h1v1h-1zM18 33h1v1h-1zM19 33h1v1h-1zM20 33h1v1h-1zM21 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM26 33h1v1h-1zM28 33h1v1h-1zM29 33h1v1h-1zM30 33h1v1h-1zM34 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM11 34h1v1h-1zM13 34h1v1h-1zM15 34h1v1h-1zM16 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM20 34h1v1h-1zM23 34h1v1h-1zM25 34h1v1h-1zM27 34h1v1h-1zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1z" fill="#000"/></svg>';
+function shareHTML(){const lbl={zh:['分享这个软件','用 WhatsApp 分享','让朋友扫这个二维码，或复制链接：','复制链接','已复制'],en:['Share this app','Share on WhatsApp','Let a friend scan this QR code, or copy the link:','Copy link','Copied'],ms:['Kongsi aplikasi ini','Kongsi di WhatsApp','Biar rakan imbas kod QR ini, atau salin pautan:','Salin pautan','Disalin']}[L()];
+  const msg={zh:'碳氮配比：自己做堆肥的碳氮比、湿度计算和堆肥日志 ',en:'CN Balance: compost C:N, moisture and pile diary for farmers ',ms:'Imbangan C:N: kira C:N, lembapan dan diari longgokan kompos '}[L()]+APP_URL;
+  return `<details><summary>${lbl[0]}</summary><div class="in" style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+    <a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" style="text-decoration:none">${lbl[1]}</a>
+    <p style="margin:0">${lbl[2]}</p>${QR_SVG}
+    <p class="num" style="margin:0;user-select:all;word-break:break-all;font-weight:800">${APP_URL}</p>
+    <button type="button" class="btn ghost" id="copyLink" data-ok="${lbl[4]}">${lbl[3]}</button></div></details>`}
+function twoCnSVG(){
+  const lb={zh:['材料的碳氮比','树的碳氮比','堆肥、覆盖物','碳水化合物 ÷ 氮','决定：烂得快不快、借氮还是放氮','影响：长叶还是开花'],
+   en:['Material C:N','Tree C:N','compost, mulch','carbohydrate ÷ nitrogen','decides: how fast it rots, borrows or releases N','affects: leaf growth or flowering'],
+   ms:['C:N bahan','C:N pokok','kompos, sungkupan','karbohidrat ÷ nitrogen','menentukan: laju reput, pinjam atau lepas N','mempengaruhi: pucuk atau bunga']}[L()];
+  let s=`<svg class="ill" viewBox="0 0 600 250" role="img" aria-label="${lb[0]} / ${lb[1]}">`;
+  s+=`<rect x="10" y="10" width="280" height="230" rx="12" fill="var(--bark-soft)"/><rect x="310" y="10" width="280" height="230" rx="12" fill="var(--leaf-soft)"/>`;
+  s+=`<text x="150" y="42" text-anchor="middle" font-size="24" font-weight="900" fill="var(--bark)">${lb[0]}</text><text x="450" y="42" text-anchor="middle" font-size="24" font-weight="900" fill="var(--leaf)">${lb[1]}</text>`;
+  s+=`<path d="M60 170 Q100 90 150 84 Q200 90 240 170 Z" fill="var(--bark)"/><path d="M80 150 h140 M95 128 h110" stroke="var(--leaf)" stroke-width="8"/>`;
+  s+=`<path d="M450 70 C390 80 380 150 450 172 C520 150 510 80 450 70 Z" fill="var(--leaf)"/><path d="M450 78 V168" stroke="var(--leaf-soft)" stroke-width="4"/>`;
+  s+=`<text x="150" y="196" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)">${lb[2]}</text><text x="450" y="196" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)">${lb[3]}</text>`;
+  const wrap=(txt,x)=>{const w=L()==='zh'?[txt]:(()=>{const a=txt.split(' ');const h=Math.ceil(a.length/2);return [a.slice(0,h).join(' '),a.slice(h).join(' ')]})();return w.map((ln,i)=>`<text x="${x}" y="${216+i*18}" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink2)">${ln}</text>`).join('')};
+  s+=wrap(lb[4],150)+wrap(lb[5],450);
+  return s+`</svg>`}
+function droughtSVG(){
+  const lb={zh:['叶片碳氮比','每米花数','叶片氮 %','不干旱','干旱 28 天'],en:['Leaf C/N','Flowers per m','Leaf N %','no drought','28-day drought'],ms:['C/N daun','Bunga semeter','N daun %','tanpa kemarau','kemarau 28 hari']}[L()];
+  const g=[[lb[0],25.8,30.1,40],[lb[1],100,202,220],[lb[2],2.03,1.69,2.5]];
+  let s=`<svg class="ill" viewBox="0 0 600 250" role="img" aria-label="${g.map(x=>x[0]+' '+x[1]+'→'+x[2]).join(', ')}">`;
+  const y0=190,hMax=130;
+  g.forEach((x,i)=>{const cx=110+i*190;const h1=x[1]/x[3]*hMax,h2=x[2]/x[3]*hMax;
+    s+=`<rect x="${cx-58}" y="${y0-h1}" width="52" height="${h1}" fill="var(--surface2)" stroke="var(--ink2)" stroke-width="2"/>`;
+    s+=`<rect x="${cx+6}" y="${y0-h2}" width="52" height="${h2}" fill="var(--warn)"/>`;
+    s+=`<text x="${cx-32}" y="${y0-h1-8}" text-anchor="middle" font-size="18" font-weight="900" fill="var(--ink)">${x[1]}</text>`;
+    s+=`<text x="${cx+32}" y="${y0-h2-8}" text-anchor="middle" font-size="18" font-weight="900" fill="var(--ink)">${x[2]}</text>`;
+    s+=`<text x="${cx}" y="${y0+26}" text-anchor="middle" font-size="18" font-weight="900" fill="var(--ink)">${x[0]}</text>`});
+  s+=`<line x1="40" y1="${y0}" x2="580" y2="${y0}" stroke="var(--ink2)" stroke-width="2"/>`;
+  s+=`<rect x="150" y="226" width="18" height="18" fill="var(--surface2)" stroke="var(--ink2)" stroke-width="2"/><text x="176" y="241" font-size="16" font-weight="800" fill="var(--ink2)">${lb[3]}</text>`;
+  s+=`<rect x="320" y="226" width="18" height="18" fill="var(--warn)"/><text x="346" y="241" font-size="16" font-weight="800" fill="var(--ink2)">${lb[4]}</text>`;
+  return s+`</svg>`}
+function renderLearn(){
+  const sec=LEARN_()[L()];
+  vLearn.innerHTML=sec.map((s,i)=>`<details ${i<2?'open':''}><summary>${s[0]}</summary><div class="in">${s[1]}</div></details>`).join('')+
+  shareHTML()+`<details><summary>${L()==='zh'?'参考资料':L()==='ms'?'Rujukan':'References'}</summary><div class="in"><ol class="refs">${REFS.map(r=>`<li><a href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join('')}</ol></div></details>`;
+}
+
+/* ---------- picker sheet ---------- */
+let pickCb=null,pickF='all',pickWater=false;
+function openPicker(cb,withWater){pickCb=cb;pickWater=!!withWater;pickF='all';sheetTitle.textContent=t('pickTitle');renderPicker();sheet.hidden=false;document.body.style.overflow='hidden'}
+function closePicker(){sheet.hidden=true;document.body.style.overflow=''}
+function renderPicker(){
+  pickFilter.innerHTML=[['all','all'],['N','greens'],['C','browns']].map(x=>`<button type="button" class="chip" aria-pressed="${pickF===x[0]}" data-pf="${x[0]}">${t(x[1])}</button>`).join('');
+  const groups=[];
+  if(pickF!=='C')groups.push(['greens',allMats().filter(m=>grp(m)==='N').sort((a,b)=>a.cn-b.cn)]);
+  if(pickF!=='N')groups.push(['browns',allMats().filter(m=>grp(m)==='C').sort((a,b)=>a.cn-b.cn)]);
+  let h='';
+  if(pickWater&&pickF==='all')h+=`<div class="grid"><button type="button" class="pick" data-pick="water"><span class="sw W" style="border-radius:3px"></span><span><b>${t('water')}</b><span>${L()==='zh'?'调湿度':L()==='ms'?'laras lembapan':'adjust moisture'}</span></span></button></div>`;
+  groups.forEach(g=>{h+=`<p class="label">${t(g[0])}</p><div class="grid">${g[1].map(m=>`<button type="button" class="pick" data-pick="${m.id}"><span class="sw ${grp(m)}" style="border-radius:3px"></span><span><b>${esc(nm(m))}</b><span class="num">C:N ${f(m.cn,m.cn<10?1:0)} · ${f(m.m,0)}%</span></span></button>`).join('')}</div>`});
+  pickBody.innerHTML=h;
+}
+
+/* ---------- shell ---------- */
+const $=id=>document.getElementById(id);
+const segCN=$('segCN'),segM=$('segM'),rows=$('rows'),results=$('results'),exBanner=$('exBanner'),emptyRows=$('emptyRows'),
+ spectrum=$('spectrum'),libFilter=$('libFilter'),libList=$('libList'),oC=$('oC'),oN=$('oN'),oM=$('oM'),oName=$('oName'),oPreview=$('oPreview'),
+ mulchPick=$('mulchPick'),mTpa=$('mTpa'),mKg=$('mKg'),mTrees=$('mTrees'),mulchOut=$('mulchOut'),vLearn=$('v-learn'),
+ sheet=$('sheet'),sheetTitle=$('sheetTitle'),pickFilter=$('pickFilter'),pickBody=$('pickBody');
+
+function applyStatic(){
+  document.documentElement.lang=L()==='zh'?'zh-CN':L();
+  document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
+  $('appTitle').textContent=t('app');document.title=t('app')+(L()==='zh'?' · CN Balance':'');
+  if(!$('setSheet').hidden)renderSettingsSheet();
+}
+function applyTheme(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);else document.documentElement.removeAttribute('data-theme')}
+function closeSettings(){$('setSheet').hidden=true;document.body.style.overflow=''}
+function renderSettingsSheet(){
+  const sec=(lbl,html)=>`<p class="small" style="font-weight:800;margin:14px 0 6px">${lbl}</p><div class="seg">${html}</div>`;
+  const lang=[['zh','中文'],['en','English'],['ms','Malay']].map(([k,v])=>`<button type="button" data-setlang="${k}" aria-pressed="${L()===k}">${v}</button>`).join('');
+  const size=[1,2,3].map(n=>`<button type="button" data-setsize="${n}" aria-pressed="${S.size===n}" aria-label="${t('setSize')} ${n}"><span style="font-size:${[1,1.25,1.5][n-1]}em;line-height:1">A</span></button>`).join('');
+  const th=[['light','thLight'],['dark','thDark'],[null,'thAuto']].map(([k,l])=>`<button type="button" data-settheme="${k||'auto'}" aria-pressed="${(S.theme||null)===k}">${t(l)}</button>`).join('');
+  $('setBody').innerHTML=sec(t('setLang'),lang)+sec(t('setSize'),size)+sec(t('setTheme'),th);
+}
+function applySize(){document.documentElement.setAttribute('data-size',S.size)}
+function renderAll(){applyStatic();renderMix();renderPile();renderLib();renderMulch();renderLearn()}
+function show(v){S.view=v;save();['mix','pile','lib','mulch','learn'].forEach(x=>{$('v-'+x).hidden=x!==v});if(v==='pile')renderPile();
+  document.querySelectorAll('nav.bot button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v?'page':'false'));window.scrollTo(0,0)}
+function touched(){if(S.example){S.example=false;exBanner.hidden=true}}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button,[data-setlang]');if(!b)return;const d=b.dataset;
+  if(d.setlang){S.lang=d.setlang;save();$('launch').hidden=true;renderAll();return}
+  if(d.view){show(d.view);return}
+  if(d.cn){S.cn=+d.cn;save();renderSettings();renderResults();return}
+  if(d.m){S.m=+d.m;save();renderSettings();renderResults();return}
+  if(d.del!=null){S.rows.splice(+d.del,1);touched();save();renderRows();renderResults();return}
+  if(d.ov!=null){const r=S.rows[+d.ov];r.open=!r.open;save();renderRows();return}
+  if(d.swap!=null){const i=+d.swap;openPicker(id=>{S.rows[i]={id,kg:S.rows[i].kg};touched()},true);return}
+  if(d.sq){S.sq=S.sq===d.sq?null:d.sq;save();renderSettings();renderResults();return}
+  if(d.lsq){S.lsq=S.lsq===d.lsq?null:d.lsq;document.querySelectorAll('[data-lsq]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.lsq===S.lsq));return}
+  if(d.hmuse!=null){const i=+d.hmuse;const m=hmCalc('r'+i);if(m!=null){const r=S.rows[i];r.ov=r.ov||{};r.ov.m=m;touched();save();renderRows();renderResults()}return}
+  if(d.setsize){S.size=+d.setsize;save();applySize();renderSettingsSheet();return}
+  if(d.settheme){S.theme=d.settheme==='auto'?null:d.settheme;save();applyTheme();renderSettingsSheet();return}
+  if(d.unit){S.unit=d.unit;save();renderMix();renderPile();return}
+  if(d.cure){S.pile.cure=S.pile.cure||{};S.pile.cure[d.cure]=!S.pile.cure[d.cure];save();renderPile();return}
+  if(d.dellog){S.pile.logs=S.pile.logs.filter(l=>l.d!==d.dellog);save();renderPile();return}
+  if(d.libf){S.libF=d.libf;save();renderLib();return}
+  if(d.addmat){const ex=S.rows.find(r=>r.id===d.addmat);if(!ex)S.rows.push({id:d.addmat,kg:null});touched();save();renderMix();show('mix');return}
+  if(d.delown){S.own=S.own.filter(m=>m.id!==d.delown);S.rows=S.rows.filter(r=>r.id!==d.delown);save();renderAll();return}
+  if(d.pf){pickF=d.pf;renderPicker();return}
+  if(d.pick){const cb=pickCb;closePicker();if(cb)cb(d.pick);save();renderMix();renderMulch();return}
+  if(b.id==='applyFix'&&window.__fix){window.__fix.adds.forEach(a=>{const r=S.rows.find(x=>x.id===a.id);const add=Math.round(a.x*10)/10;
+      if(r)r.kg=Math.round(((+r.kg||0)+add)*10)/10;else S.rows.push({id:a.id,kg:add})});touched();save();renderRows();renderResults();return}
+  switch(b.id){
+    case 'addIng':openPicker(id=>{S.rows.push({id,kg:null});touched()},true);break;
+    case 'clearMix':S.rows=[];S.example=false;save();renderMix();break;
+    case 'sheetClose':closePicker();break;
+    case 'mulchPick':openPicker(id=>{S.mulch.id=id},false);break;
+    case 'copyLink':{const done=()=>{b.textContent=b.dataset.ok};try{navigator.clipboard.writeText(APP_URL).then(done,()=>{})}catch(e){}break}
+    case 'pileStartBtn':{if(missingKg().length){show('mix');break}const tot=totals(S.rows);S.pile={start:($('pStart')&&$('pStart').value)||today(),recipe:S.rows.map(r=>({id:r.id,kg:+r.kg||0})),cn:tot.cn,mo:tot.mo,logs:[],cure:{}};S.turnToggle=false;save();renderPile();break}
+    case 'lRain':S.lrain=!S.lrain;b.setAttribute('aria-pressed',S.lrain);b.textContent=(S.lrain?'✓ ':'')+t('rainChip');break;
+    case 'bkCopy':{const ta=$('bkOut');const done=()=>{b.textContent=t('copied')};const fb=()=>{ta.hidden=false;ta.select()};try{navigator.clipboard.writeText(ta.value).then(done,fb)}catch(e){fb()}break}
+    case 'bkRestore':{const mm=($('bkIn').value||'').replace(/\s+/g,'').match(/CNB1:([A-Za-z0-9+/=]+)/);let obj=null;
+      try{if(mm)obj=JSON.parse(decodeURIComponent(escape(atob(mm[1]))))}catch(e){obj=null}
+      if(!obj||!obj.S||typeof obj.S!=='object'){S.restoreArm=false;$('bkMsg').textContent=t('restoreBad');b.textContent=t('restoreBtn');break}
+      if(!S.restoreArm){S.restoreArm=true;b.textContent=t('restoreConfirm');break}
+      const keep=S.lang;Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,obj.S);S.restoreArm=false;if(!S.lang)S.lang=keep;save();applyTheme();applySize();renderAll();show('pile');$('bkMsg')&&($('bkMsg').textContent=t('restoreOk'));break}
+    case 'lTurn':S.turnToggle=!S.turnToggle;b.setAttribute('aria-pressed',S.turnToggle);b.textContent=(S.turnToggle?'✓ ':'')+t('turnedToday');break;
+    case 'lSave':{const d=$('lDate').value||today(),tv=parseFloat($('lTemp').value);const has=isFinite(tv);
+      if(!has&&!S.turnToggle&&!S.lsq&&!S.lrain){$('lMsg').textContent=t('needTemp');break}
+      S.pile.logs.push({d,t:has?tv:null,turn:!!S.turnToggle,sq:S.lsq||null,rain:!!S.lrain});S.turnToggle=false;S.lsq=null;S.lrain=false;save();renderPile();$('lMsg').textContent=t('logSaved');break}
+    case 'pileEnd':if(!S.endArm){S.endArm=true;renderPile()}else{const st=pileStats(S.pile);S.pileHist.unshift({start:S.pile.start,end:today(),cn:S.pile.cn,hot:st.hot,turns:st.turnsHot});S.pileHist=S.pileHist.slice(0,5);S.pile=null;S.endArm=false;save();renderPile()}break;
+    case 'noChick':S.noChicken=!S.noChicken;save();renderSettings();renderResults();break;
+    case 'setBtn':renderSettingsSheet();$('setSheet').hidden=false;document.body.style.overflow='hidden';break;
+    case 'setClose':closeSettings();break;
+    case 'oSave':{const c=parseFloat(oC.value),n=parseFloat(oN.value),mo=parseFloat(oM.value),name=oName.value.trim();const base=oBaseId&&mat(oBaseId);
+      const lab=c>0&&n>0;if(!(name&&(lab||base)&&mo>=0&&mo<100)){oPreview.textContent=t('ownNeed');return}
+      const rec={id:'u'+Date.now(),name,n:lab?n:base.n,cn:lab?c/n:base.cn,m:mo,src:'own'};if(!lab)rec.base=base.id;
+      S.own.push(rec);oName.value=oC.value=oN.value=oM.value='';oBaseId=null;save();S.libF='own';renderAll();break}
+    case 'oBase':openPicker(id=>{oBaseId=id;renderOwnForm()},false);break;
+  }
+});
+sheet.addEventListener('click',e=>{if(e.target===sheet)closePicker()});
+$('setSheet').addEventListener('click',e=>{if(e.target===$('setSheet'))closeSettings()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!sheet.hidden)closePicker();if(!$('setSheet').hidden)closeSettings()}});
+document.addEventListener('input',e=>{const el=e.target,d=el.dataset;
+  if(d.hm){const m=hmCalc(d.hm);if(d.hm==='o'&&m!=null){oM.value=m;ownPreview()}return}
+  const v=parseFloat(el.value);
+  if(d.kg!=null){S.rows[+d.kg].kg=isFinite(v)?v:null;touched();save();renderResults();return}
+  if(d.cnt!=null){const r=S.rows[+d.cnt];const w=uw(r.id);r.kg=isFinite(v)&&w?Math.round(v*w*100)/100:null;touched();save();renderResults();return}
+  const ovSet=(i,k)=>{const r=S.rows[+i];r.ov=r.ov||{};r.ov[k]=isFinite(v)?v:null;touched();save();const me=$('meta'+i);if(me)me.textContent=metaTxt(r);renderResults()};
+  if(d.on!=null)return ovSet(d.on,'n');if(d.oc!=null)return ovSet(d.oc,'cn');if(d.om!=null)return ovSet(d.om,'m');
+  if(el===oC||el===oN)return ownPreview();
+  if(el===mKg){S.mulch.kg=isFinite(v)?v:null;save();renderMulch();return}
+  if(el===mTpa){S.mulch.tpa=isFinite(v)?v:null;save();renderMulch();return}
+  if(el===mTrees){S.mulch.trees=isFinite(v)?v:null;save();renderMulch();return}
+});
+document.addEventListener('change',e=>{const ds=e.target.dataset||{};if(ds.uwset!=null){const v=parseFloat(e.target.value);const r=S.rows[+ds.uwset];if(isFinite(v)&&v>0){S.uw[r.id]=S.uw[r.id]||{};S.uw[r.id][S.unit]=v;save();renderRows();renderResults()}return}
+if(e.target.dataset&&(e.target.dataset.on!=null||e.target.dataset.oc!=null||e.target.dataset.om!=null))renderRows()});
+
+/* PWA manifest + offline worker on GitHub Pages */
+try{const icon='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fbf7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23efe6d3%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L428.7%20370%20L83.3%20370%20Z%22%20fill%3D%22%23f0dcc4%22/%3E%3Cpath%20d%3D%22M123.9%20218%20L388.1%20218%20L392.9%20236%20L119.1%20236%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M110.5%20268%20L401.5%20268%20L406.3%20286%20L105.7%20286%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M97.2%20318%20L414.8%20318%20L419.6%20336%20L92.4%20336%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M83.3%20370%20L428.7%20370%20L442.0%20420%20L70.0%20420%20Z%22%20fill%3D%22%237a4a1f%22/%3E%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L362%20120%20Q256%2096%20150%20120%20Z%22%20fill%3D%22%23e4ebdc%22/%3E%3Cg%20stroke%3D%22%238a5a28%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M200%20198%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20194%20l26%20-7%22/%3E%3Cpath%20d%3D%22M180%20246%20l26%20-7%22/%3E%3Cpath%20d%3D%22M300%20250%20l26%20-7%22/%3E%3Cpath%20d%3D%22M215%20298%20l26%20-7%22/%3E%3Cpath%20d%3D%22M320%20296%20l26%20-7%22/%3E%3Cpath%20d%3D%22M190%20346%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20350%20l26%20-7%22/%3E%3C/g%3E%3Cg%20stroke%3D%22%23f3dcb8%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M96%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M150%20400%20l44%20-16%22/%3E%3Cpath%20d%3D%22M210%20410%20l44%20-16%22/%3E%3Cpath%20d%3D%22M270%20402%20l44%20-16%22/%3E%3Cpath%20d%3D%22M330%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M380%20398%20l44%20-16%22/%3E%3C/g%3E%3Cpath%20d%3D%22M70%20420%20L150%20120%20Q256%2096%20362%20120%20L442%20420%20Z%22%20fill%3D%22none%22%20stroke%3D%22%232b2418%22%20stroke-width%3D%229%22%20stroke-linejoin%3D%22round%22/%3E%3Crect%20x%3D%2236%22%20y%3D%22418%22%20width%3D%22440%22%20height%3D%2212%22%20rx%3D%226%22%20fill%3D%22%232b2418%22/%3E%3Cg%20fill%3D%22%232f7fc1%22%3E%3Cpath%20d%3D%22M452%20232%20q-13%2020%200%2026%20q13%20-6%200%20-26z%22/%3E%3Cpath%20d%3D%22M466%20276%20q-11%2017%200%2022%20q11%20-5%200%20-22z%22/%3E%3C/g%3E%3C/svg%3E';const onPages=/github\.io$/.test(location.hostname);
+  const man={name:'碳氮配比 CN Balance',short_name:'碳氮配比',start_url:'.',display:'standalone',background_color:'#2f6b34',theme_color:'#2f6b34',icons:[{src:icon,sizes:'any',type:'image/svg+xml'}]};
+  const l=document.createElement('link');l.rel='manifest';l.href=onPages?'manifest.webmanifest':'data:application/manifest+json,'+encodeURIComponent(JSON.stringify(man));document.head.appendChild(l);
+  const ai=document.createElement('link');ai.rel='apple-touch-icon';ai.href='data:image/png;base64,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';document.head.appendChild(ai);
+  const fi=document.createElement('link');fi.rel='icon';fi.href=icon;document.head.appendChild(fi);
+  if('serviceWorker' in navigator&&onPages)navigator.serviceWorker.register('sw.js').catch(()=>{});
+}catch(e){}
+
+applyTheme();applySize();
+if(!S.lang)$('launch').hidden=false;
+renderAll();show(S.view||'mix');
+window.__cn={totals,solveFix,coef,S};
+})();
+</script>
