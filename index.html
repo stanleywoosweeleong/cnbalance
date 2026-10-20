@@ -161,6 +161,22 @@ nav.bot button svg{width:26px;height:26px;flex:none}
 nav.bot button span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.74rem}
 @media (max-width:380px){html[lang=ms] nav.bot button span{font-size:.68rem;letter-spacing:-.01em}}
 input[aria-invalid="true"]{border-color:var(--bad)!important;background:var(--bad-soft)!important}
+.stg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:26px 0 4px}
+.stgc{position:relative;background:var(--c);border:2px solid var(--line);border-radius:8px;padding:10px 2px;text-align:center;min-width:0}
+.stgc b{display:block;font-size:.84rem;line-height:1.2;overflow-wrap:anywhere}
+html[lang=zh-CN] .stgc b{font-size:.92rem}
+html:not([lang=zh-CN]) .stg,html[data-size="3"] .stg{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:30px}
+html:not([lang=zh-CN]) .stgc b{font-size:.95rem}
+.stgc.on{background:var(--e);border-color:var(--e)}.stgc.on b{color:#fff}
+:root[data-theme="dark"] .stgc.on b{color:#111}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stgc.on b{color:#111}}
+.stgm{position:absolute;left:50%;top:-24px;transform:translateX(-50%);font-size:1.1rem;color:var(--ink);line-height:1}
+.upd{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;gap:8px;align-items:center;background:var(--ink);color:var(--bg);border-radius:12px;padding:6px 6px 6px 14px;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:736px;margin:0 auto}
+.upd #updGo{flex:1;background:none;border:0;color:inherit;font:inherit;font-weight:900;text-align:left;padding:10px 0;text-decoration:underline}
+.upd .x{color:inherit;background:none;border:0;font-size:1.4rem;min-width:44px;min-height:44px}
+.mk{list-style:none;padding-left:0}.mk li{border-left:8px solid var(--warn);padding:4px 0 4px 10px;margin-bottom:8px}.mk li:nth-child(2){border-left-color:var(--bad)}.mk li:nth-child(3){border-image:linear-gradient(var(--water),var(--leaf)) 1}
+.key{display:flex;flex-direction:column;gap:6px;margin:4px 0 12px}.key div{display:flex;gap:8px;align-items:flex-start}.key i{flex:none;width:18px;height:18px;border:2px solid;border-radius:4px;margin-top:3px}
+.cap2{display:grid;grid-template-columns:1fr 1fr;text-align:center;gap:8px}
 #setBtn[aria-pressed="true"]{background:#fff;color:var(--leaf)}
 #v-set details{margin-top:0}
 nav.bot button{position:relative;-webkit-tap-highlight-color:transparent;transition:background-color .15s,color .15s}
@@ -271,7 +287,9 @@ nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
   <section class="view" id="v-mulch" hidden>
     <div class="card">
       <p class="label" data-t="settings"></p>
-      <p class="small" style="font-weight:800;margin:0 0 6px" data-t="mulchMat"></p>
+      <p class="small" style="font-weight:800;margin:0 0 6px" data-t="howApplied"></p>
+      <div class="seg" id="mHow" style="margin-bottom:12px"></div>
+      <p class="small" style="font-weight:800;margin:0 0 6px" id="mMatLbl"></p>
       <button type="button" class="pick" id="mulchPick" style="width:100%"></button>
       <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px">
         <label class="field"><span data-t="kgPerTree"></span><input id="mKg" type="number" inputmode="decimal" step="any"></label>
@@ -295,6 +313,7 @@ nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
   <button type="button" data-view="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5q4-2 9 1 5-3 9-1v14q-4-2-9 1-5-3-9-1z"/><path d="M12 6v14"/></svg><span data-t="navLearn"></span></button>
 </nav>
 
+<div id="upd" class="upd" role="status" hidden><button type="button" id="updGo"></button><button type="button" class="x" id="updX"></button></div>
 <div id="sheet" class="scrim" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="hd"><h2 id="sheetTitle"></h2><button class="x" type="button" id="sheetClose" aria-label="Close">×</button></div>
   <div class="seg" id="pickFilter"></div>
@@ -327,6 +346,7 @@ function normalize(src){
   o.rows=o.rows.filter(r=>isObj(r)&&typeof r.id==='string');
   o.rows.forEach(r=>{if(r.ov!=null&&!isObj(r.ov))delete r.ov});
   if(!isObj(o.mulch))o.mulch={id:'efb',kg:null,trees:null};
+  if(!['top','dig'].includes(o.mulch.how))o.mulch.how='top';
   if(!isObj(o.uw))o.uw={};
   if(!Array.isArray(o.pileHist))o.pileHist=[];
   if(o.pile!=null&&!(isObj(o.pile)&&typeof o.pile.start==='string'&&Array.isArray(o.pile.recipe)&&Array.isArray(o.pile.logs)))o.pile=null;
@@ -481,6 +501,42 @@ Object.assign(T.ms,{seesawNote:'24 ialah C:N yang diperlukan mikrob tanah, untuk
 Object.assign(T.zh,{setLang:'语言',setSize:'字体大小',setTheme:'显示',thLight:'白天',thDark:'夜间',thAuto:'跟随手机'});
 Object.assign(T.en,{setLang:'Language',setSize:'Text size',setTheme:'Display',thLight:'Light',thDark:'Dark',thAuto:'Same as phone'});
 Object.assign(T.ms,{setLang:'Bahasa',setSize:'Saiz tulisan',setTheme:'Paparan',thLight:'Cerah',thDark:'Gelap',thAuto:'Ikut telefon'});
+Object.assign(T.zh,{updT:'有新版本，点这里更新'});
+Object.assign(T.en,{updT:'New version available — tap to refresh'});
+Object.assign(T.ms,{updT:'Versi baharu tersedia — tekan untuk muat semula'});
+Object.assign(T.zh,{howApplied:'怎么用？',howTop:'铺在表面',howDig:'翻进土里',digMat:'翻进土里的材料',
+digAdviceC:'默认做法：高碳材料先堆肥，或者铺在表面当覆盖物，不要直接翻进土里。一定要翻进去的话，同时每棵补约 {u} 克尿素（这是按 24:1 算的上限）。参考：美国爱达荷大学对翻进土里的稻草，规则是每吨稻草补 7.5–10 公斤氮。',
+digAdviceN:'这种材料烂的时候会放氮，翻进土里后大部分在头 4–6 星期分解（美国俄勒冈州立大学）。在树需要氮的时候前不久翻进去，例如抽新叶时；开花到坐果期不要翻。',
+digNote:'上限估算（美国 NRCS 24:1 规则）。翻进土里比铺在表面烂得快（表面约慢 35%），所以借氮更快、更多。马来西亚土壤试验中，有些高碳材料 12 星期后仍在借氮；铺在油棕下的空果串 10 个月都没有放出氮。所以能堆肥就先堆肥。'});
+Object.assign(T.en,{howApplied:'How is it applied?',howTop:'On the surface',howDig:'Dug into the soil',digMat:'Material dug in',
+digAdviceC:'Default: compost high-carbon material first, or leave it on the surface as mulch; don\'t dig it straight in. If you must dig it in, add about {u} g urea per tree at the same time (an upper estimate from the 24:1 rule). For comparison, the University of Idaho rule for straw dug into soil is 7.5–10 kg N per tonne of straw.',
+digAdviceN:'This material releases N as it rots, mostly in the first 4–6 weeks after digging in (Oregon State University). Dig it in shortly before the trees need N, for example at leaf flush, and not between flowering and fruit set.',
+digNote:'Upper estimate (USDA NRCS 24:1 rule). Dug in, it rots faster than on the surface (the surface is about 35% slower), so it borrows more N sooner. In Malaysian soil tests some high-carbon material was still holding N after 12 weeks, and EFB spread under oil palms released no N for 10 months. So compost it first if you can.'});
+Object.assign(T.ms,{howApplied:'Bagaimana digunakan?',howTop:'Di permukaan',howDig:'Dibenamkan ke tanah',digMat:'Bahan yang dibenamkan',
+digAdviceC:'Lalai: komposkan bahan tinggi karbon dahulu, atau biarkan di permukaan sebagai sungkupan; jangan benamkan terus. Jika terpaksa dibenamkan, beri kira-kira {u} g urea sepokok pada masa yang sama (anggaran maksimum daripada peraturan 24:1). Sebagai perbandingan, peraturan University of Idaho untuk jerami yang dibenamkan ialah 7.5–10 kg N setan jerami.',
+digAdviceN:'Bahan ini membebaskan N semasa reput, kebanyakannya dalam 4–6 minggu pertama selepas dibenamkan (Oregon State University). Benamkan sejurus sebelum pokok memerlukan N, contohnya semasa pucuk baru, dan bukan antara berbunga hingga pembentukan buah.',
+digNote:'Anggaran maksimum (peraturan 24:1 USDA NRCS). Bila dibenamkan, ia reput lebih cepat daripada di permukaan (permukaan ~35% lebih perlahan), jadi lebih banyak N dipinjam lebih awal. Dalam ujian tanah Malaysia, sesetengah bahan tinggi karbon masih memegang N selepas 12 minggu, dan EFB yang ditabur di bawah sawit tidak membebaskan N selama 10 bulan. Jadi komposkan dahulu jika boleh.'});
+Object.assign(T.zh,{siteT:'起堆之前：选地点、剁碎',
+siteSteps:'<b>遮荫或盖屋顶：</b>在炎热多雨的热带，把堆放在大树荫下或简单的棚子下。大雨会冲走养分，也会让堆变湿变冷（联合国粮农组织 FAO）。|<b>地面稍高、平坦：</b>雨水不会流进堆里，不积水（FAO）。|<b>靠近水源，也靠近要用的地方；远离水井和溪流。</b>马来西亚没有找到规定距离，美国农场规定是离水井、溪流 30–60 米。|<b>剁碎：</b>约 1–4 厘米的小块烂得最快（FAO）。粗枝可以留大一点（5–7 厘米）放在底层。不要磨成木屑那么细，会压实、不透气（佛罗里达大学）。|<b>大小：</b>长宽高至少 90 厘米；小于 80 厘米就热不起来（FAO）。',
+finT:'高温期之后：腐熟、检查、过筛、储存',finCureH:'腐熟多久：',finCure:'高温期过后让它静置至少 3 星期，最好 1–2 个月，温度在 40 °C 以下。保持湿润、透气（偶尔翻一翻），并且要遮盖（加拿大卑诗省农业部；犹他州立大学）。',
+finTestH:'不用化验，自己检查是否可以用：',finTests:'<b>看和摸：</b>颜色深而均匀，松散像湿海绵，看不出原来的材料（康奈尔；乔治亚大学）。|<b>翻堆、加湿后不再发热：</b>温度只比气温高不到约 5 °C（卑诗省）。|<b>塑料袋测试：</b>抓一把湿堆肥封在塑料袋里 2–3 天，打开闻：泥土味 = 好；氨味、酸味、臭味 = 还没好（卑诗省）。|<b>种子测试：</b>一盘装堆肥，一盘装买来的育苗土，各种同样数量的白萝卜种子（卑诗省用 100 粒），5–10 天后数发芽数。堆肥盘的发芽数有育苗土的 80% 以上就可以，90% 以上非常好（佛罗里达大学；俄克拉荷马州立大学）。',
+finSieveH:'过筛：',finSieve:'施在田里用约 12 毫米的筛网；做育苗土用约 6 毫米。筛不过的粗块放回下一堆再烂（俄克拉荷马州立大学；乔治亚大学）。',
+finStoreH:'储存：',finStore:'放在屋顶下，或用压好的帆布盖住，保持微湿；不要装进密封塑料。西非试验中，盖塑料布让氮的损失从 29–67% 降到 5–30%；尼日尔的试验中，屋顶几乎挡住了雨季钾的流失（路易斯安那州立大学；Opoku 等 2024）。'});
+Object.assign(T.en,{siteT:'Before building: the spot and chopping',
+siteSteps:'<b>Shade or a roof:</b> in the hot, rainy tropics put the pile under large trees or a simple shed. Heavy rain washes out nutrients and makes the pile soggy and cold (FAO).|<b>Slightly raised, level ground:</b> so rainwater does not run into the pile and no water stands (FAO).|<b>Near water and near where you will use it; away from wells and streams.</b> No Malaysian distance was found; US farm rules keep 30–60 m from wells and streams.|<b>Chop:</b> pieces of about 1–4 cm break down fastest (FAO). Coarse twigs can stay larger (5–7 cm) for the base layer. Don\'t grind to sawdust size; it packs down and blocks air (University of Florida).|<b>Size:</b> at least 90 cm each way; under 80 cm it will not heat up (FAO).',
+finT:'After the hot stage: curing, checking, sieving, storing',finCureH:'How long to cure:',finCure:'After the hot stage let it rest at least 3 weeks, better 1–2 months, below 40 °C. Keep it moist and airy (turn now and then) and covered (BC Ministry of Agriculture; Utah State University).',
+finTestH:'Check it yourself, no lab needed:',finTests:'<b>Look and feel:</b> dark and even, crumbly like a damp sponge, original materials no longer recognisable (Cornell; University of Georgia).|<b>No reheating after turning and wetting:</b> it stays within about 5 °C of air temperature (BC).|<b>Bag test:</b> seal a damp handful in a plastic bag for 2–3 days, then open and smell: earthy = good; ammonia, sour or rotten = not ready (BC).|<b>Seed test:</b> one tray of compost and one of bought potting mix, the same number of radish seeds in each (BC uses 100). Count the sprouts after 5–10 days. The compost tray should have at least 80% as many as the potting mix; 90% or more is very good (Univ. of Florida; Oklahoma State).',
+finSieveH:'Sieving:',finSieve:'Use a mesh of about 12 mm for field use and about 6 mm for potting mix. Lumps that don\'t pass go back into the next pile (Oklahoma State; University of Georgia).',
+finStoreH:'Storing:',finStore:'Keep it under a roof or a weighted tarp, slightly moist, and not in sealed plastic. In a West African trial, plastic covers cut nitrogen losses from 29–67% to 5–30%; in Niger a roof all but stopped potassium washing out in the rainy season (LSU AgCenter; Opoku et al. 2024).'});
+Object.assign(T.ms,{siteT:'Sebelum membina: tempat dan mencincang',
+siteSteps:'<b>Teduhan atau bumbung:</b> di kawasan tropika yang panas dan banyak hujan, letak longgokan di bawah pokok besar atau bangsal ringkas. Hujan lebat menghanyutkan nutrien dan menjadikan longgokan basah dan sejuk (FAO).|<b>Tanah tinggi sedikit dan rata:</b> supaya air hujan tidak masuk ke longgokan dan tiada air bertakung (FAO).|<b>Dekat sumber air dan tempat ia akan digunakan; jauh dari perigi dan sungai.</b> Tiada jarak Malaysia ditemui; peraturan ladang AS ialah 30–60 m dari perigi dan sungai.|<b>Cincang:</b> kepingan kira-kira 1–4 cm paling cepat reput (FAO). Ranting kasar boleh lebih besar (5–7 cm) untuk lapisan dasar. Jangan kisar sehalus habuk kayu; ia memadat dan menyekat udara (University of Florida).|<b>Saiz:</b> sekurang-kurangnya 90 cm setiap sisi; kurang 80 cm ia tidak akan panas (FAO).',
+finT:'Selepas fasa panas: pematangan, semakan, ayak, simpan',finCureH:'Berapa lama dimatangkan:',finCure:'Selepas fasa panas biarkan ia berehat sekurang-kurangnya 3 minggu, lebih baik 1–2 bulan, di bawah 40 °C. Kekalkan lembap dan berudara (balikkan sekali-sekala) dan bertutup (Kementerian Pertanian BC; Utah State University).',
+finTestH:'Semak sendiri, tanpa makmal:',finTests:'<b>Lihat dan rasa:</b> gelap dan sekata, rapuh seperti span lembap, bahan asal tidak dapat dikenali lagi (Cornell; University of Georgia).|<b>Tidak panas semula selepas dibalik dan dibasahkan:</b> suhunya kurang daripada ~5 °C di atas suhu udara (BC).|<b>Ujian beg:</b> tutup segenggam kompos lembap dalam beg plastik 2–3 hari, kemudian buka dan hidu: bau tanah = baik; bau ammonia, masam atau busuk = belum siap (BC).|<b>Ujian biji:</b> satu dulang kompos dan satu dulang campuran semaian yang dibeli, bilangan biji lobak yang sama dalam setiap satu (BC guna 100). Kira yang bercambah selepas 5–10 hari. Dulang kompos patut ada sekurang-kurangnya 80% daripada dulang semaian; 90% ke atas sangat baik (Univ. of Florida; Oklahoma State).',
+finSieveH:'Mengayak:',finSieve:'Guna jaring kira-kira 12 mm untuk ladang dan kira-kira 6 mm untuk campuran semaian. Ketulan yang tidak lepas dimasukkan semula ke longgokan seterusnya (Oklahoma State; University of Georgia).',
+finStoreH:'Menyimpan:',finStore:'Simpan di bawah bumbung atau kanvas yang diberatkan, sedikit lembap, dan bukan dalam plastik bertutup rapat. Dalam satu ujian di Afrika Barat, penutup plastik mengurangkan kehilangan nitrogen daripada 29–67% kepada 5–30%; di Niger, bumbung hampir menghalang kalium dihanyutkan pada musim hujan (LSU AgCenter; Opoku et al. 2024).'});
+Object.assign(T.zh,{stg_warm:'升温期：微生物正在繁殖，堆子开始发热，头几天应该升到 55 °C 以上。升不上去就检查湿度和青料（氮）够不够。',stg_hot:'高温期：耐热细菌在工作。保持 55–77 °C，每隔几天翻一次；本软件会数高温天数和翻堆次数。',stg_cool:'降温期：高温期已完成，温度在下降。放线菌和真菌回来分解硬纤维。',stg_cure:'腐熟期（日本叫“二次发酵”）：40 °C 以下，慢慢降到接近气温。让它静置，保持湿润，做下面三项检查。',stg_ready:'完成：三项检查都通过，可以施用了。'});
+Object.assign(T.en,{stg_warm:'Warm-up: microbes are multiplying and the pile is heating up. It should pass 55 °C in the first days; if not, check moisture and whether there are enough greens (N).',stg_hot:'Hot stage: heat-loving bacteria at work. Keep it at 55–77 °C and turn every few days; the app counts hot days and turnings.',stg_cool:'Cooling: the hot stage is done and the temperature is dropping. Actinomycetes and fungi return to break down the tough fibre.',stg_cure:'Curing (Japanese "second fermentation", 二次発酵): below 40 °C, settling toward air temperature. Let it rest, keep it moist, and do the three checks below.',stg_ready:'Done: all three checks passed. Ready to use.'});
+Object.assign(T.ms,{stg_warm:'Memanas: mikrob sedang membiak dan longgokan mula panas. Ia patut melepasi 55 °C dalam hari-hari pertama; jika tidak, semak lembapan dan cukup bahan hijau (N).',stg_hot:'Fasa panas: bakteria tahan panas sedang bekerja. Kekalkan 55–77 °C dan balikkan setiap beberapa hari; aplikasi mengira hari panas dan balikan.',stg_cool:'Sejuk: fasa panas selesai dan suhu menurun. Aktinomiset dan kulat kembali mengurai serat keras.',stg_cure:'Matang ("penapaian kedua" Jepun, 二次発酵): bawah 40 °C, menurun ke suhu udara. Biarkan berehat, kekalkan lembap, dan buat tiga semakan di bawah.',stg_ready:'Selesai: ketiga-tiga semakan lulus. Sedia digunakan.'});
 Object.assign(T.zh,{ownInPile:'正在使用中的堆肥用了这个材料，完成该堆后才能删除。',ovBad:'这个数值不合理：氮 0–50%，碳氮比 1–2000，含水量 0–99%。暂时用上面的数值。',calcBad:'无法计算：请检查数量和“改数值”里填的数字。',navAria:'主要页面',close:'关闭'});
 Object.assign(T.en,{ownInPile:'Your current pile uses this material. Finish that pile before deleting it.',ovBad:'That value is not possible: N 0–50%, C:N 1–2000, moisture 0–99%. Using the value shown above for now.',calcBad:'Cannot calculate: check the amounts and any numbers typed in Edit values.',navAria:'Main sections',close:'Close'});
 Object.assign(T.ms,{ownInPile:'Longgokan semasa anda menggunakan bahan ini. Selesaikan longgokan itu dahulu sebelum memadamnya.',ovBad:'Nilai itu tidak mungkin: N 0–50%, C:N 1–2000, lembapan 0–99%. Nilai di atas digunakan buat sementara.',calcBad:'Tidak dapat mengira: semak jumlah dan nombor yang diisi dalam Ubah nilai.',navAria:'Bahagian utama',close:'Tutup'});
@@ -508,13 +564,13 @@ Object.assign(T.zh,{buildT:'怎么堆：分层与顺序',buildSteps:'<b>底层�
  chartLbl:'中心温度记录',dayN:'天数',pileStartT:'开始一堆新堆肥',pileStartB:'用目前的配比开始一堆。之后每天量中心温度、记录每次翻堆，软件每天告诉您该做什么，直到堆肥可以用。',
  startDate:'开堆日期',pileStartBtn:'用这个配比开堆',pileNoMix:'请先在“配比”页配好材料。',logToday:'今天的记录',date:'日期',coreT:'中心温度 °C',
  turnedToday:'今天有翻堆',saveLog:'保存记录',probeTip:'用长杆堆肥温度计（要插得到中心，农场堆约 45–90 厘米深）插到堆的正中心，等读数稳定再记。',needTemp:'请填温度，或点“今天有翻堆”。',logSaved:'已保存。',
- todayDo:'今天这样做',progress:'进度',hotDays:'高温天数（55–77 °C）',turnsHot:'高温期翻堆次数',countRule:'只有量到 55–77 °C 的日子才算高温天；没量的日子不算。翻堆从第一个高温天开始算。',
- cureT:'腐熟检查（三项都打勾才可以用）',cure_reheat:'翻堆后不再发热',cure_smell:'有泥土味，没有氨味或臭味',cure_seed:'种子发芽测试正常（≥80%）',
+ todayDo:'今天这样做',progress:'进度',hotDays:'高温天数（55–77 °C）',turnsHot:'高温期翻堆次数',countRule:'只有量到 55–77 °C 的日子才算高温天；没量的日子不算。翻堆从第一个高温天开始算：翻堆当天是高温，或翻后再升回 55 °C 以上，才算一次。',
+ cureT:'腐熟检查（三项都打勾才可以用）',cure_reheat:'翻堆、加湿后不再发热（比气温高不到 5 °C）',cure_smell:'塑料袋测试：泥土味，没有氨味、酸味或臭味',cure_seed:'种子测试：发芽数有育苗土的 80% 以上',
  logList:'记录明细',turnCol:'翻堆',pileRecipe:'这堆的配方',endPile:'结束这一堆',endConfirm:'再按一次确认结束',
  advHotHi:'超过 77 °C（{t} °C）：马上翻堆散热、让空气进去。安全标准的上限是 77 °C。',
  advReady:'可以用了。撒在树冠外缘的表面，不要堆在树头。',
- advCure:'高温期完成（15 天、翻 5 次）。现在让它腐熟：保持湿润，偶尔翻一翻，看到下面三个迹象就打勾。',
- advMoreTurns:'已有 15 个高温天，但翻堆不到 5 次。继续保持高温，翻够 5 次。',
+ advCure:'高温期完成（15 天、翻 5 次）。现在让它腐熟：保持湿润，偶尔翻一翻，看到下面三个迹象就打勾。如果要加木霉菌等防病菌，等堆子降到接近气温，翻堆时混入。翻干堆时戴口罩。',
+ advMoreTurns:'已有 15 个高温天，但翻堆不到 5 次。继续保持高温并翻堆；翻堆当天是高温、或翻后再升回 55 °C 以上，才算一次。',
  advMeasure:'今天量一次中心温度：把长探针温度计插到堆的正中心。',
  advCooled:'温度掉到 55 °C 以下（{t} °C）。翻堆让它再热起来；一两天还不热，就检查水分和氮——看下面“常见问题”。低于 55 °C 的日子不算。',
  advWarming:'还没热起来（{t} °C）。大多数堆几天内就会超过 55 °C；如果没有，看下面“常见问题”。',
@@ -542,13 +598,13 @@ Object.assign(T.en,{buildT:'How to build the pile: layers and order',buildSteps:
  chartLbl:'Core temperature log',dayN:'Day',pileStartT:'Start a new pile',pileStartB:'Start a pile with your current mix. Then measure the core temperature every day and log each turning. The app tells you what to do each day until the compost is ready.',
  startDate:'Start date',pileStartBtn:'Start pile with this mix',pileNoMix:'Set up a mix in the Mix tab first.',logToday:'Today\'s log',date:'Date',coreT:'Core temp °C',
  turnedToday:'Turned it today',saveLog:'Save log',probeTip:'Use a long-stem compost thermometer that reaches the centre (about 45–90 cm deep in a farm pile). Push it into the very centre and wait for the reading to settle.',needTemp:'Enter a temperature, or tap Turned it today.',logSaved:'Saved.',
- todayDo:'Do this today',progress:'Progress',hotDays:'Hot days (55–77 °C)',turnsHot:'Turnings in hot phase',countRule:'Only days you measured 55–77 °C count as hot days; days you didn\'t measure don\'t count. Turnings count from the first hot day.',
- cureT:'Curing check (tick all three before use)',cure_reheat:'Does not heat up again after turning',cure_smell:'Smells earthy, no ammonia or rotten smell',cure_seed:'Seed test sprouts normally (≥80%)',
+ todayDo:'Do this today',progress:'Progress',hotDays:'Hot days (55–77 °C)',turnsHot:'Turnings in hot phase',countRule:'Only days you measured 55–77 °C count as hot days; days you didn\'t measure don\'t count. Turnings count from the first hot day, if the pile is hot that day or heats back up to 55 °C afterwards.',
+ cureT:'Curing check (tick all three before use)',cure_reheat:'No reheating after turning and wetting (within 5 °C of air)',cure_smell:'Bag test: earthy smell, no ammonia, sour or rotten smell',cure_seed:'Seed test: at least 80% as many sprouts as potting mix',
  logList:'Log entries',turnCol:'Turned',pileRecipe:'This pile\'s recipe',endPile:'Finish this pile',endConfirm:'Tap again to confirm',
  advHotHi:'Over 77 °C ({t} °C): turn it now to let heat out and air in. 77 °C is the safety standard\'s upper limit.',
  advReady:'Ready to use. Spread it on the surface toward the canopy edge, not against the trunk.',
- advCure:'Hot phase done (15 days, 5 turnings). Now let it cure: keep it moist, turn it now and then, and tick the three signs below as you see them.',
- advMoreTurns:'You have 15 hot days but fewer than 5 turnings. Keep it hot and turn until you reach 5.',
+ advCure:'Hot phase done (15 days, 5 turnings). Now let it cure: keep it moist, turn it now and then, and tick the three signs below as you see them. If you add disease-fighting microbes such as Trichoderma, wait until the pile is near air temperature and mix them in while turning. Wear a dust mask when turning a dry pile.',
+ advMoreTurns:'You have 15 hot days but fewer than 5 turnings. Keep it hot and keep turning; a turning counts if the pile is hot that day or heats back up to 55 °C afterwards.',
  advMeasure:'Measure the core temperature today: push a long probe thermometer into the centre of the pile.',
  advCooled:'It has dropped below 55 °C ({t} °C). Turn it to reheat. If it hasn\'t heated up again in a day or two, check moisture and nitrogen; see Problems below. Days below 55 °C don\'t count.',
  advWarming:'Not hot yet ({t} °C). Most piles pass 55 °C within a few days. If yours doesn\'t, see Problems below.',
@@ -576,13 +632,13 @@ Object.assign(T.ms,{buildT:'Cara membina longgokan: lapisan dan susunan',buildSt
  chartLbl:'Rekod suhu tengah',dayN:'Hari',pileStartT:'Mula longgokan baru',pileStartB:'Mulakan longgokan dengan campuran semasa. Kemudian ukur suhu tengah setiap hari dan catat setiap kali dibalikkan. Aplikasi memberitahu apa perlu dibuat setiap hari sehingga kompos sedia.',
  startDate:'Tarikh mula',pileStartBtn:'Mula dengan campuran ini',pileNoMix:'Sediakan campuran di tab Campuran dahulu.',logToday:'Catatan hari ini',date:'Tarikh',coreT:'Suhu tengah °C',
  turnedToday:'Dibalik hari ini',saveLog:'Simpan catatan',probeTip:'Guna termometer kompos batang panjang yang sampai ke tengah (~45–90 cm dalam untuk longgokan ladang). Cucuk ke tengah-tengah dan tunggu bacaan stabil.',needTemp:'Isi suhu, atau tekan Dibalik hari ini.',logSaved:'Disimpan.',
- todayDo:'Buat ini hari ini',progress:'Kemajuan',hotDays:'Hari panas (55–77 °C)',turnsHot:'Balikan dalam fasa panas',countRule:'Hanya hari yang diukur 55–77 °C dikira hari panas; hari tidak diukur tidak dikira. Balikan dikira dari hari panas pertama.',
- cureT:'Semakan kematangan (tanda ketiga-tiga sebelum guna)',cure_reheat:'Tidak panas lagi selepas dibalik',cure_smell:'Bau tanah, tiada bau ammonia atau busuk',cure_seed:'Ujian biji bercambah normal (≥80%)',
+ todayDo:'Buat ini hari ini',progress:'Kemajuan',hotDays:'Hari panas (55–77 °C)',turnsHot:'Balikan dalam fasa panas',countRule:'Hanya hari yang diukur 55–77 °C dikira hari panas; hari tidak diukur tidak dikira. Balikan dikira dari hari panas pertama, jika longgokan panas pada hari itu atau panas semula ke 55 °C selepasnya.',
+ cureT:'Semakan kematangan (tanda ketiga-tiga sebelum guna)',cure_reheat:'Tidak panas semula selepas dibalik dan dibasahkan (kurang 5 °C atas suhu udara)',cure_smell:'Ujian beg: bau tanah, tiada bau ammonia, masam atau busuk',cure_seed:'Ujian biji: sekurang-kurangnya 80% daripada campuran semaian',
  logList:'Senarai catatan',turnCol:'Dibalik',pileRecipe:'Resipi longgokan ini',endPile:'Tamatkan longgokan ini',endConfirm:'Tekan sekali lagi untuk sahkan',
  advHotHi:'Melebihi 77 °C ({t} °C): balikkan sekarang untuk lepaskan haba dan masukkan udara. 77 °C ialah had atas piawaian keselamatan.',
  advReady:'Sedia digunakan. Tabur di permukaan ke arah pinggir kanopi, bukan pada pangkal batang.',
- advCure:'Fasa panas selesai (15 hari, 5 balikan). Sekarang biar ia matang: kekalkan lembap, balikkan sekali-sekala, dan tanda tiga tanda di bawah apabila kelihatan.',
- advMoreTurns:'Sudah 15 hari panas tetapi kurang 5 balikan. Kekalkan panas dan balikkan hingga cukup 5.',
+ advCure:'Fasa panas selesai (15 hari, 5 balikan). Sekarang biar ia matang: kekalkan lembap, balikkan sekali-sekala, dan tanda tiga tanda di bawah apabila kelihatan. Jika menambah mikrob melawan penyakit seperti Trichoderma, tunggu longgokan hampir suhu udara dan gaul semasa membalik. Pakai topeng debu semasa membalik longgokan kering.',
+ advMoreTurns:'Sudah 15 hari panas tetapi kurang 5 balikan. Kekalkan panas dan terus balikkan; balikan dikira jika longgokan panas pada hari itu atau panas semula ke 55 °C selepasnya.',
  advMeasure:'Ukur suhu tengah hari ini: cucuk termometer prob panjang ke tengah longgokan.',
  advCooled:'Suhu jatuh bawah 55 °C ({t} °C). Balikkan supaya panas semula. Jika tidak panas dalam sehari dua, periksa lembapan dan nitrogen; lihat Masalah di bawah. Hari bawah 55 °C tidak dikira.',
  advWarming:'Belum panas ({t} °C). Kebanyakan longgokan melepasi 55 °C dalam beberapa hari. Jika tidak, lihat Masalah di bawah.',
@@ -622,10 +678,16 @@ function pileStats(p){
   // one entry per date: keep max temp, any turn
   const byDate={};logs.forEach(l=>{const o=byDate[l.d]||(byDate[l.d]={d:l.d,t:null,turn:false});if(l.t!=null&&(o.t==null||l.t>o.t))o.t=l.t;if(l.turn)o.turn=true});
   const days=Object.values(byDate).sort((a,b)=>a.d<b.d?-1:1);
-  let turnsHot=0,lastTurn=null;
+  // NOP windrow rule: 15 days at 55–77 °C with at least 5 turnings in that hot period.
+  // A turning counts if the pile is hot that day, or heats back up to 55–77 °C afterwards.
+  let turnsHot=0,lastTurn=null,pending=0;
   days.forEach(x=>{
-    if(x.t!=null&&x.t>=HOT_LO&&x.t<=HOT_HI&&!doneDate){hotDates.push(x.d);if(!firstHot)firstHot=x.d;if(hotDates.length===HOT_DAYS)doneDate=x.d}
-    if(x.turn){lastTurn=x.d;if(firstHot&&x.d>=firstHot&&(!doneDate||x.d<=doneDate))turnsHot++}
+    const hot=x.t!=null&&x.t>=HOT_LO&&x.t<=HOT_HI;
+    if(x.turn)lastTurn=x.d;
+    if(doneDate)return;
+    if(hot){hotDates.push(x.d);if(!firstHot)firstHot=x.d;turnsHot+=pending+(x.turn?1:0);pending=0}
+    else if(x.turn&&firstHot)pending++;
+    if(hotDates.length>=HOT_DAYS&&turnsHot>=TURNS)doneDate=x.d;
   });
   const withT=days.filter(x=>x.t!=null);const last=withT[withT.length-1]||null;
   return {days,hot:hotDates.length,turnsHot,firstHot,lastTurn,last,
@@ -643,6 +705,17 @@ function pileAdvice(p,st){
   const since=st.lastTurn&&st.firstHot&&st.lastTurn>=st.firstHot?dayDiff(st.lastTurn,td):dayDiff(st.firstHot,td);
   if(since>=3&&!tr.turn)return ['warn','advTurn'];
   return ['good','advKeep']}
+function pileStage(p,st){const c=p.cure||{};
+  if(st.allDone&&c.reheat&&c.smell&&c.seed)return 'ready';
+  if(st.allDone){const lt=st.last?st.last.t:null;return lt!=null&&lt>=HOT_LO?'hot':lt!=null&&lt>40?'cool':'cure'}
+  if(st.hot>0)return 'hot';
+  return 'warm'}
+function stageHTML(stage){
+  const lb={zh:['升温','高温','降温','腐熟','您的堆在这里'],en:['Warm-up','Hot','Cooling','Curing','Your pile is here'],ms:['Memanas','Panas','Sejuk','Matang','Longgokan anda di sini']}[L()];
+  const keys=['warm','hot','cool','cure'],col=['warn','bad','water','leaf'];
+  const i=stage==='ready'?3:keys.indexOf(stage);
+  return `<div class="stg" role="img" aria-label="${lb[4]}: ${lb[i]}">${keys.map((k,n)=>`<div class="stgc${n===i?' on':''}" style="--c:var(--${col[n]}-soft);--e:var(--${col[n]})">${n===i?`<span class="stgm" aria-hidden="true">▼</span>`:''}<b>${lb[n]}${n===i&&stage==='ready'?' ✓':''}</b></div>`).join('')}</div>
+`}
 function pileChart(p,st){
   const W=600,H=250,x0=46,x1=586,y0=20,y1=200,tMin=20,tMax=85;
   const n=Math.max(20,st.age+1,...st.days.map(x=>dayDiff(p.start,x.d)+1));
@@ -709,6 +782,30 @@ function buildSVG(){
   const lab=(x,y,ty,txt,col)=>{s+=`<line x1="${x}" y1="${y}" x2="343" y2="${ty-6}" stroke="var(--ink2)" stroke-width="1.5"/><text x="348" y="${ty}" font-size="${fs}" font-weight="900" fill="${col}">${txt}</text>`};
   lab(262,64,64,lb[0],'var(--ink)');lab(285,120,116,lb[1],'var(--leaf)');lab(316,160,166,lb[4],'var(--water)');lab(300,196,216,lb[2],'var(--bark)');lab(318,281,280,lb[3],'var(--bark)');
   return s+`</svg>`}
+function siteSVG(){
+  const num=(n,x,y)=>`<circle cx="${x}" cy="${y}" r="27" fill="var(--ink)"/><text x="${x}" y="${y+14}" text-anchor="middle" font-size="40" font-weight="900" fill="var(--bg)">${n}</text>`;
+  let s=`<svg class="ill" viewBox="0 0 600 300" role="img" aria-label="1, 2, 3">`;
+  s+=`<g stroke="var(--water)" stroke-width="5" stroke-linecap="round">${[40,85,130,470,515,560].map(x=>`<path d="M${x} 12 l-10 26"/>`).join('')}</g>`;
+  s+=`<path d="M150 80 L300 30 L450 80 Z" fill="var(--bark)"/><rect x="168" y="80" width="12" height="150" fill="var(--bark)"/><rect x="420" y="80" width="12" height="150" fill="var(--bark)"/>`;
+  s+=`<path d="M60 238 Q300 212 540 238 L540 254 L60 254 Z" fill="var(--bark-soft)" stroke="var(--bark)" stroke-width="2"/>`;
+  s+=`<path d="M215 230 L250 138 Q300 120 350 138 L385 230 Z" fill="var(--leaf-soft)" stroke="var(--ink2)" stroke-width="3"/><path d="M234 188 h132 M226 208 h148 M243 164 h114" stroke="var(--leaf)" stroke-width="8"/>`;
+  s+=`<rect x="490" y="180" width="44" height="52" rx="5" fill="var(--water-soft)" stroke="var(--water)" stroke-width="3"/>`;
+  s+=num(1,300,72)+num(2,110,224)+num(3,512,140);
+  return s+`</svg>`}
+function siteHTML(open){return `<details ${open?'open':''}><summary>${t('siteT')}</summary><div class="in">${siteSVG()}<ol class="chk">${t('siteSteps').split('|').map(x=>`<li>${x}</li>`).join('')}</ol></div></details>`}
+function seedSVG(){
+  const lb={zh:['堆肥','买来的育苗土','5–10 天后：发芽数差不多 = 可以用'],en:['compost','bought potting mix','After 5–10 days: about as many sprouts = ready'],ms:['kompos','campuran semaian beli','Selepas 5–10 hari: lebih kurang sama banyak = sedia']}[L()];
+  let s=`<svg class="ill" viewBox="0 0 600 200" role="img" aria-label="${lb.join(', ')}">`;
+  const cup=(cx,fill)=>{let g=`<path d="M${cx-100} 110 L${cx+100} 110 L${cx+80} 196 L${cx-80} 196 Z" fill="${fill}" stroke="var(--ink2)" stroke-width="3"/>`;
+    [-60,-30,0,30,60].forEach((dx,i)=>{const x=cx+dx,h=i===2?60:50;g+=`<path d="M${x} 112 v-${h}" stroke="var(--leaf)" stroke-width="6"/><path d="M${x} ${112-h} q-18 -4 -22 -20 q18 0 22 20 z M${x} ${112-h} q18 -4 22 -20 q-18 0 -22 20 z" fill="var(--leaf)"/>`});return g};
+  s+=cup(140,'var(--bark)')+cup(460,'var(--bark-soft)');
+  s+=`<text x="300" y="150" text-anchor="middle" font-size="56" font-weight="900" fill="var(--good)">≈</text></svg>`;
+  return s+`<div class="cap2"><b>${lb[0]}</b><b>${lb[1]}</b></div><p style="margin:6px 0 0;font-weight:900;color:var(--good)">${lb[2]}</p>`}
+function finishHTML(open){return `<details ${open?'open':''}><summary>${t('finT')}</summary><div class="in">
+  <p><b>${t('finCureH')}</b> ${t('finCure')}</p>
+  <p><b>${t('finTestH')}</b></p><ol class="chk">${t('finTests').split('|').map(x=>`<li>${x}</li>`).join('')}</ol>${seedSVG()}
+  <p><b>${t('finSieveH')}</b> ${t('finSieve')}</p>
+  <p><b>${t('finStoreH')}</b> ${t('finStore')}</p></div></details>`}
 function buildHTML(open){return `<details ${open?'open':''}><summary>${t('buildT')}</summary><div class="in">${buildSVG()}
   <ol class="chk">${t('buildSteps').split('|').map(x=>`<li>${x}</li>`).join('')}</ol></div></details>`}
 function renderPile(){
@@ -722,7 +819,7 @@ function renderPile(){
       <p class="small">${t('yieldNote')} → <b class="num">${kgFmt(tot.W*0.2)}–${kgFmt(tot.W*0.5)} ${t('kg')}</b></p>
       <p class="small">${t('pileSize')}</p>
       <button type="button" class="btn" id="pileStartBtn">${t('pileStartBtn')}</button>`:`<p>${miss.length?t('needKg')+' '+miss.map(r=>esc(nm(mat(r.id)))).join(' · '):t('pileNoMix')}</p><button type="button" class="btn ghost" data-view="mix">${t('navMix')}</button>`}
-      </div>${buildHTML(true)}${troubleHTML()}`;
+      </div>${siteHTML(false)}${buildHTML(true)}${finishHTML(false)}${troubleHTML()}`;
     return}
   const st=pileStats(p);const [cls,key]=pileAdvice(p,st);
   const td=today();const todayLog=st.days.find(x=>x.d===td);
@@ -745,8 +842,9 @@ function renderPile(){
     <h3>${t('todayDo')}</h3><p>${t(key).replace('{n}',nextIn).replace('{t}',st.last?f(st.last.t,0):'')}</p></div>
   <div class="card">
     <p class="label">${t('progress')} · ${dayLbl(st.age+1)}</p>
-    <p style="margin:6px 0 2px;font-weight:800">${t('hotDays')}: <span class="num">${st.hot} / ${HOT_DAYS}</span></p>${bar(st.hot,HOT_DAYS,'var(--bad)')}
-    <p style="margin:10px 0 2px;font-weight:800">${t('turnsHot')}: <span class="num">${st.turnsHot} / ${TURNS}</span></p>${bar(st.turnsHot,TURNS,'var(--water)')}
+    ${(()=>{const sg=pileStage(p,st);return stageHTML(sg)+`<p style="margin:8px 0 12px;font-weight:600">${t('stg_'+sg)}</p>`})()}
+    <p style="margin:6px 0 2px;font-weight:800">${t('hotDays')}: <span class="num">${Math.min(st.hot,HOT_DAYS)} / ${HOT_DAYS}</span></p>${bar(st.hot,HOT_DAYS,'var(--bad)')}
+    <p style="margin:10px 0 2px;font-weight:800">${t('turnsHot')}: <span class="num">${Math.min(st.turnsHot,TURNS)} / ${TURNS}</span></p>${bar(st.turnsHot,TURNS,'var(--water)')}
     ${pileChart(p,st)}
     <p class="small muted">${t('countRule')}</p>
   </div>
@@ -754,6 +852,7 @@ function renderPile(){
     <div class="seg" style="flex-direction:column;align-items:stretch">
       ${['reheat','smell','seed'].map(k=>`<button type="button" class="chip" data-cure="${k}" aria-pressed="${!!cure[k]}" style="text-align:left">${cure[k]?'✓ ':'☐ '}${t('cure_'+k)}</button>`).join('')}
     </div></div>`:''}
+  ${finishHTML(['cool','cure','ready'].includes(pileStage(p,st)))}
   <details><summary>${t('logList')} (${st.days.length})</summary><div class="in">
     ${st.days.length?`<table><thead><tr><th>${t('date')}</th><th>°C</th><th>${t('turnCol')}</th><th></th></tr></thead><tbody>
     ${st.days.slice().reverse().map(x=>`<tr><td>${dFmt(x.d)} <span class="muted small">(${dayLbl(dayDiff(p.start,x.d)+1)})</span></td><td>${x.t!=null?f(x.t,0):'–'}</td><td>${x.turn?'✓':''}</td><td><button type="button" class="x" data-dellog="${x.d}" aria-label="${t('del')}">×</button></td></tr>`).join('')}
@@ -763,7 +862,7 @@ function renderPile(){
     <p>${t('startDate')}: <b>${dFmt(p.start)}</b> · C:N <b class="num">${f(p.cn,0)}</b> · ${t('ownM').replace(' %','')} <b class="num">${f(p.mo,0)}%</b></p>
     <ul>${p.recipe.map(r=>`<li>${qtyText(r.id,r.kg,r.n)}</li>`).join('')}</ul>
     <p class="small">${t('yieldNote')} → <b class="num">${kgFmt(p.recipe.reduce((a,r)=>a+r.kg,0)*0.2)}–${kgFmt(p.recipe.reduce((a,r)=>a+r.kg,0)*0.5)} ${t('kg')}</b></p>
-    ${(()=>{const n=p.recipe.reduce((a,r)=>{const m=mat(r.id);return m?a+r.kg*coef(m).n:a},0);return `<p class="small">${t('nBudget').replace(/\{n\}/g,f(n,1)).replace('{lo}',f(n*0.6,1))}</p>`})()}
+    ${(()=>{const n=p.recipe.reduce((a,r)=>{const m=mat(r.id);return m?a+r.kg*coef(m,r.ov).n:a},0);return `<p class="small">${t('nBudget').replace(/\{n\}/g,f(n,1)).replace('{lo}',f(n*0.6,1))}</p>`})()}
     <button type="button" class="btn ghost" id="pileEnd">${S.endArm?t('endConfirm'):t('endPile')}</button>
   </div></details>
   ${buildHTML(false)}${pileShareHTML(p,st)}${troubleHTML()}`;
@@ -976,7 +1075,9 @@ function ownPreview(){const c=parseFloat(oC.value),n=parseFloat(oN.value);const 
 
 /* ---------- mulch ---------- */
 function renderMulch(){
-  const m=mat(S.mulch.id)||mat('efb');
+  const m=mat(S.mulch.id)||mat('efb');const dig=S.mulch.how==='dig';
+  $('mHow').innerHTML=[['top','howTop'],['dig','howDig']].map(([k,l])=>`<button type="button" data-mhow="${k}" aria-pressed="${S.mulch.how===k}">${t(l)}</button>`).join('');
+  $('mMatLbl').textContent=t(dig?'digMat':'mulchMat');
   mulchPick.innerHTML=`<span class="sw ${grp(m)}" style="width:8px;border-radius:3px"></span><span><b>${esc(nm(m))}</b><span class="num">C:N ${f(m.cn,0)} · N ${f(m.n,2)}% · ${f(m.m,0)}%</span></span>`;
   if(document.activeElement!==mKg)mKg.value=S.mulch.kg??'';if(document.activeElement!==mTrees)mTrees.value=S.mulch.trees??'';
   if(document.activeElement!==mTpa)mTpa.value=S.mulch.tpa||'';
@@ -996,7 +1097,7 @@ function renderMulch(){
    </svg>`;
   const why=`<details><summary>${t('whyMulch')}</summary><div class="in">${benefitSVG()}${MULCHWHY[L()]}</div></details>
    <details><summary>${t('mulchFlower')}</summary><div class="in">${timingSVG()}${MULCHFLOWER[L()]}</div></details>`;
-  if(!(kg>0)){mulchOut.innerHTML=`<div class="card">${seesaw}<p style="font-weight:800">${t('needMulchKg')}</p></div>`+why;return}
+  if(!(kg>0)){mulchOut.innerHTML=`<div class="card">${seesaw}<p style="font-weight:800">${t('needMulchKg')}</p></div>`+(dig?'':why);return}
   mulchOut.innerHTML=`<div class="card">${seesaw}
    <div class="scroll"><table><thead><tr><th></th><th>${t('perTree')}</th>${tpa?`<th>${t('perAcre')} (${tpa})</th>`:''}${tr>1?`<th>${t('allTrees')} (${tr})</th>`:''}</tr></thead><tbody>
     <tr><td>${t('dry')}</td><td>${kgFmt(dry)} ${t('kg')}</td>${tpa?`<td>${kgFmt(dry*tpa)} ${t('kg')}</td>`:''}${tr>1?`<td>${kgFmt(dry*tr)} ${t('kg')}</td>`:''}</tr>
@@ -1005,8 +1106,8 @@ function renderMulch(){
     <tr><td><b>${borrow?t('mulchBorrow'):t('mulchRelease')}</b></td><td><b>${f(g,0)} ${t('g')} N</b></td>${tpa?`<td><b>${f(g*tpa/1000,2)} ${t('kg')} N</b></td>`:''}${tr>1?`<td><b>${f(g*tr/1000,2)} ${t('kg')} N</b></td>`:''}</tr>
     ${borrow?`<tr><td>${t('ureaEq')}</td><td>${f(u,0)} ${t('g')}</td>${tpa?`<td>${f(u*tpa/1000,1)} ${t('kg')}</td>`:''}${tr>1?`<td>${f(u*tr/1000,1)} ${t('kg')}</td>`:''}</tr>`:''}
    </tbody></table></div></div>
-   <div class="fix"><h3>${t('doThis')}</h3><p>${borrow?t('mulchAdviceC').replace('{u}',f(Math.round(u/10)*10,0)):t('mulchAdviceN')}</p>
-   <p class="small muted">${t('mulchNote')}</p></div>`+why;
+   <div class="fix"><h3>${t('doThis')}</h3><p>${borrow?t(dig?'digAdviceC':'mulchAdviceC').replace('{u}',u<5?'<10':f(Math.max(10,Math.round(u/10)*10),0)):t(dig?'digAdviceN':'mulchAdviceN')}</p>
+   <p class="small muted">${t(dig?'digNote':'mulchNote')}</p></div>`+(dig?'':why);
 }
 function benefitSVG(){
   const lb={zh:['保湿降温','挡住暴雨冲刷','慢慢放出钾','压住杂草','养土壤生物','吸收根','树头留空'],
@@ -1045,12 +1146,12 @@ function plateSVG(){
   s+=`<path d="M320 70 h60" stroke="var(--ink2)" stroke-width="3" marker-end="url(#ar)"/><path d="M320 120 h60" stroke="var(--ink2)" stroke-width="3" marker-end="url(#ar)"/>`;
   s+=`<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink2)"/></marker></defs>`;
   s+=`<text x="392" y="66" font-size="24" font-weight="900" fill="var(--ink)">16 C → CO₂</text><text x="392" y="92" font-size="18" font-weight="700" fill="var(--ink2)">${L()==='zh'?'烧掉当能量':L()==='ms'?'dibakar untuk tenaga':'burned for energy'}</text>`;
-  s+=`<text x="392" y="124" font-size="24" font-weight="900" fill="var(--ink)">8 C + 1 N</text><text x="392" y="150" font-size="18" font-weight="700" fill="var(--ink2)">${L()==='zh'?'变成微生物身体（8:1）':L()==='ms'?'menjadi badan mikrob (8:1)':'becomes microbe body (8:1)'}</text>`;
+  s+=`<text x="392" y="124" font-size="24" font-weight="900" fill="var(--ink)">8 C + 1 N</text><text x="392" y="150" font-size="18" font-weight="700" fill="var(--ink2)">${L()==='zh'?'变成微生物身体（8:1）':L()==='ms'?'badan mikrob (8:1)':'microbe body (8:1)'}</text>`;
   s+=`<circle cx="470" cy="186" r="20" fill="var(--leaf-soft)" stroke="var(--leaf)" stroke-width="2"/><circle cx="463" cy="182" r="3" fill="var(--leaf)"/><circle cx="477" cy="182" r="3" fill="var(--leaf)"/><path d="M462 192 q8 6 16 0" stroke="var(--leaf)" stroke-width="2" fill="none"/>`;
   return s+`</svg>`}
 function curveSVG(){
   const lbl={zh:['天','温度','碳氮比'],en:['days','temperature','C:N'],ms:['hari','suhu','C:N']}[L()];
-  return `<svg class="ill" viewBox="0 0 600 226" role="img" aria-label="${lbl[1]}">
+  return `<svg class="ill" viewBox="0 0 600 250" role="img" aria-label="${lbl[1]}">
    <line x1="50" y1="190" x2="570" y2="190" stroke="var(--ink2)" stroke-width="2"/><line x1="50" y1="20" x2="50" y2="190" stroke="var(--ink2)" stroke-width="2"/>
    <path d="M50 160 C80 40 120 30 170 45 S300 120 380 150 S520 165 570 166" fill="none" stroke="var(--bad)" stroke-width="4"/>
    <path d="M50 50 C150 80 250 120 350 140 S520 150 570 152" fill="none" stroke="var(--bark)" stroke-width="4" stroke-dasharray="9 6"/>
@@ -1058,7 +1159,7 @@ function curveSVG(){
    <text x="60" y="76" font-size="22" font-weight="800" fill="var(--bark)">${lbl[2]} 25–35</text>
    <text x="490" y="132" font-size="22" font-weight="800" fill="var(--bark)">10–15</text>
    ${[0,20,40,60].map((d,i)=>`<text x="${50+i*173}" y="216" text-anchor="middle" font-size="20" font-weight="800" fill="var(--ink2)">${d}</text>`).join('')}
-   <text x="570" y="216" text-anchor="end" font-size="20" font-weight="800" fill="var(--ink2)">${lbl[0]}</text></svg>`}
+   <text x="570" y="242" text-anchor="end" font-size="20" font-weight="800" fill="var(--ink2)">${lbl[0]} →</text></svg>`}
 function chickSVG(){
   const lb={zh:['中心温度','天','翻堆','×5'],en:['core temp','days','turns','×5'],ms:['suhu tengah','hari','balik','×5']}[L()];
   let s=`<svg class="ill" viewBox="0 0 600 200" role="img" aria-label="55–77 °C, 15 ${lb[1]}, ${lb[3]} ${lb[2]}">`;
@@ -1103,9 +1204,29 @@ zh:[
  ['24:1 是微生物最爱吃的比例',`${plateSVG()}<p>土壤微生物本身大约是 <b>8:1</b>。它们吃进去的碳有一部分要烧掉当能量，所以要吃 <b>24:1</b> 的“饭”：16 份碳烧掉，8 份碳加 1 份氮变成身体（美国 NRCS）。</p>`],
  ['高于 24 借氮，低于 24 放氮',`<p><b>高于 24:1</b>（稻草 80、空果串约 52、木屑 500 以上）：微生物氮不够，会<b>向土壤借氮</b>（氮固持）。这段时间作物可能缺氮，等微生物死掉分解后才还回来。</p><p><b>低于 24:1</b>（鸡粪 6–14、新割草 17）：多出来的氮被放出来给作物用（矿化），但材料很快就烂完。</p><p><b>注意：</b>${t('seesawNote')}树本身的碳氮比是另一回事，见下面“两种碳氮比：材料和树”。</p>`],
  ['堆肥：起堆 25–35，完成 10–15',`${curveSVG()}<p>起堆时碳氮比约 <b>30:1</b> 最常用（康奈尔大学）；20–40 都能成功，25–30 最理想（《农场堆肥手册》）。马来西亚博特拉大学用空果串加 POME 厌氧污泥试验，起始 <b>35:1</b> 分解最好。</p><p>堆的过程中碳变成二氧化碳跑掉，碳氮比一路下降，成品约 10–15。</p><ul><li><b>太低</b>（&lt;20）：氮变成氨气跑掉，有臭氨味。</li><li><b>太高</b>（&gt;40）：堆不热，几个月都不烂。</li></ul>`],
+['堆肥里的微生物：自己会来，还是要加？',`<p>每一把粪、叶子、泥土或旧堆肥本来就带着大量微生物。它们随着温度轮流上场（康奈尔大学）：</p>${microbeSVG()}
+<ul class="mk"><li><b>升温期（约 40 °C 以下）：</b>普通细菌吃糖分和软的部分，堆子开始发热。</li>
+<li><b>高温期（55–77 °C）：</b>耐热细菌（主要是芽孢杆菌）做大部分工作；真菌和放线菌躲到较凉的外层。超过约 65 °C，很多微生物会死。</li>
+<li><b>降温和腐熟期：</b>放线菌和真菌回来，分解硬纤维（纤维素、木质素）。放线菌像灰白色蜘蛛网，多在外层 10–15 厘米，泥土香味就是它们产生的。最后螨、跳虫、蚯蚓进来。</li></ul>
+<p><b>要不要另外加微生物？</b>通常不用。泥土和腐熟堆肥本身就带着分解菌（爱荷华州立大学）。泰国一项试验中，加 5% 腐熟堆肥比市售菌种效果更好；以粪为主的堆子，加菌几乎没有差别（BioCycle 2022 综述）。</p>
+<p><b>默认做法：</b>不用买菌。起堆时按重量加约 5% 的腐熟堆肥或园土（每 100 公斤材料约 5 公斤），一层一层撒进去。</p>
+<p><b>加菌可能有用的情况：</b>又干、又多纤维、缺氮的材料，例如空果串、油棕叶。综述中，大多数这类试验加菌（包括 EM）有帮助，例如空果串加 EM 提早约 7 天完成。前提是剁碎到 2–4 厘米、保持湿润、通气（BioCycle 2022）。</p>
+<p><b>放线菌：</b>会跟着泥土、粪、稻草和旧堆肥自己来。给它们纤维、空气和水分，翻堆时把外层的灰白层翻进中间。</p>
+<p><b>什么时候加：</b>对付根病的菌（例如木霉菌 Trichoderma）要等高温期过后、堆子降到接近气温（腐熟期）才加，翻堆时混匀，再让它腐熟至少 3 星期。研究发现 40–50 °C 堆肥里的耐热真菌会干扰木霉菌，堆肥在 25 °C 放 3 星期后才有效（Chung 与 Hoitink 1990）。帮忙加快纤维堆的产品，按产品说明在起堆、浇水时混入。</p>
+<p><b>安全：</b>干堆表面灰白色的粉多是孢子。有些放线菌孢子吸入多了会引起过敏性肺病（农夫肺）（Lacey 1997）。翻堆或筛干堆肥时先洒湿表面，戴防尘口罩（N95 类）（美国 NIOSH 个案）。</p>`],
  ['含水量 50–60%',`<p>含水量按<b>湿重</b>算。大部分材料以 50–60% 为好。手捏测试：用力捏一把，滴一两滴水就对了；捏不出水又松散 = 太干；水一直流 = 太湿、会缺氧发臭。</p><p><b>湿的褐料陷阱：</b>榴莲壳碳氮比约 50（褐料），但含水约 85%。直接堆会太湿。先切碎晒干，或配谷壳、木屑这类干的褐料。泰国研究把榴莲壳和柑橘皮 1:1 堆，起始含水 78–85%，堆不热（只到约 41 °C）。</p>`],
  ['不是所有碳都一样快',`<p>木屑、空果串、榴莲壳含很多木质素，碳很“硬”，微生物吃得慢。所以这类材料起堆碳氮比可以偏高一点（康奈尔）。<b>切碎、压碎</b>能加快分解——马来西亚大多数油棕厂都先把空果串切碎。</p>`],
  ['覆盖物与果园',`<p>新鲜的高碳覆盖物（空果串、木屑、稻草）铺在树下，会在接触土壤的地方借氮。翻进土里借得更多，铺在表面借得少、慢。土壤有机质本身约 10:1。</p><p>做法：铺表面不翻土；树头周围留空位；照常施肥；小树发黄才补氮。或者先堆成熟再铺。在“覆盖”页可以算每棵树最多会被借多少氮。</p>`],
+['豆科覆盖作物（Pueraria、Centrosema、Calopogonium）',`<p>油棕、橡胶园常种的豆科覆盖作物会从空气中固氮。它们的叶子含氮约 2–4%（Pueraria 在雪兰莪 2.35%、沙登 3.01%；Centrosema 2.4–2.7%；Calopogonium 2.6–3.8%），碳氮比低，烂的时候会<b>放氮</b>。</p>
+<ul><li>Centrosema 每英亩每年固氮约 49–109 公斤；马来西亚年轻油棕园的 Pueraria 约 61 公斤（PROSEA；Lehmann 等）。</li>
+<li>落叶分解快慢说法不一：有的说很快，有的测到半衰期雨季约 110 天、旱季约 220 天。</li>
+<li>Mucuna bracteata：生物量是一般覆盖作物的 3–4 倍，67–84% 的氮来自固氮（MPOB），但没找到可靠的含氮量和碳氮比，所以没有放进计算器。</li></ul>
+<p><b>默认做法：</b>割下或翻进土里时用“覆盖”页的“翻进土里”，材料选“新割青草”或“新鲜修剪枝叶”作近似；避开榴莲开花到坐果期。</p>`],
+ ['育苗袋、苗圃介质（椰糠、木屑、谷壳）',`<p>新鲜木屑、椰糠这类高碳材料放进育苗土，会在袋里<b>借氮</b>，小苗变黄、长不动。</p>
+<ul><li><b>新鲜木屑</b>借氮最厉害（实验室“氮消耗指数”接近 0）。用放旧、堆过的木屑比较安全；苗床土里掺木屑时，第一年每吨木屑补 2.5–5 公斤氮（美国林务局）。</li>
+<li><b>椰糠</b>借得比较少，但比泥炭多：取代泥炭时每升介质每星期多给约 10 毫克氮（Handreck 1993），约等于每升 22 毫克尿素。例如 100 个 10 升的育苗袋，每星期约 22 克尿素，溶在水里浇。</li>
+<li><b>谷壳</b>（蒸过的）占到 60% 时，两个月内没有明显缺氮（阿肯色大学，行业文章）。<b>炭化谷壳</b>的证据不一致，暂时不能说完全不借氮。</li></ul>
+<p><b>默认做法：</b>育苗土里的木屑、椰糠先堆过或放旧再用；用新鲜椰糠时照上面每星期补一点氮，看到叶子变黄就补。</p>`],
 ['两种碳氮比：材料和树',`${twoCnSVG()}<p>本软件算的是<b>材料的碳氮比</b>（堆肥、覆盖物）。果农常说的“碳氮比高才开花”，指的是<b>树本身的碳氮比</b>：叶子做出的碳水化合物，对比根吸进来的氮。这是 1918 年 Kraus 和 Kraybill 提出的老理论。两者只是间接相关。</p>
 <p><b>榴莲的证据：</b>柬埔寨 Monthong 试验（Var 等 2026），干旱 28 天后：</p>${droughtSVG()}<p>叶片氮下降、叶片碳氮比上升，花多了约一倍，产量增加约 31%（58.5 → 76.4 公斤/棵）。但该试验没有量碳水化合物，只有一个地点、一年，所以只能说两者同时发生，不能证明是碳氮比导致开花。</p>
 <p><b>不是全部：</b>苹果研究发现成花跟树的碳平衡、淀粉没有直接关系，赤霉素等激素信号更重要（Belhassine 等 2019）；多效唑就是阻断赤霉素。干旱太严重反而毁花（Kozai 等 2024）。</p>
@@ -1117,11 +1238,13 @@ zh:[
 <li><b>生鸡粪：收果前 120 天以上。</b>榴莲落地后捡起来吃，算是果实接触土壤的作物，生粪要在收果前至少 120 天翻进土里。实际做法：开花到收果期间绝对不用生鸡粪。</li>
 <li><b>来源要干净。</b>用鸡舍垫料（谷壳或木屑），不要混了别人农场泥土的鸡粪——那才是线虫和土传病真正的传播途径。不要有死鸡；堆之前盖好保持干。</li>
 <li><b>施在对的位置。</b>撒在树冠外缘（吸收根所在）的表面，适量；不要堆在树头。</li></ol>`],
- ['堆肥要施多少？',`<p><b>找不到榴莲“堆肥”用量的正式数字</b>：泰国农业厅 2022 年榴莲报告只说有机肥要和化肥一起用，没有给量。</p>
-<p>找到的马来西亚官方数字是<b>鸡粪</b>：砂拉越农业部建议种植时每穴 5–10 公斤，之后每棵每年 20–40 公斤，另加化肥。</p>
-<p><b>默认做法：</b>以这个范围为上限参考，全年分次撒在树冠外缘的表面，避开开花到坐果期（见“覆盖”页）。成品堆肥的养分每批都不同，量大时最好化验氮磷钾，再跟您的农艺师对照施肥计划。</p>`],
+ ['堆肥要施多少？',`<p><b>马来西亚农业部《榴莲技术配套》</b>（Pakej Teknologi Durian）给的是“有机物”用量，即完全腐熟的堆肥或动物粪：</p>
+<ul><li><b>2012 年版（表 9）：</b>第 1 年每棵每年 20 公斤，第 2–3 年 30 公斤，第 4 年起 40 公斤。</li>
+<li><b>2024 年印刷版：</b>随树龄增加，第 10 年起每棵每年 80 公斤，每年分 2 次施。</li></ul>
+<p>砂拉越农业部对<b>鸡粪</b>的建议：种植时每穴 5–10 公斤，之后每棵每年 20–40 公斤，另加化肥。</p>
+<p><b>默认做法：</b>成年树每棵每年 40–80 公斤腐熟堆肥，分 2 次撒在树冠外缘的表面，避开开花到坐果期（见“覆盖”页）。一定要用腐熟的；生粪和半熟堆肥会借氮或放出太多氮。</p>`],
  ['看化验报告',`<p>请化验室做<b>有机碳</b>和<b>全氮（凯氏法）</b>，都要干重。碳氮比 = 碳% ÷ 氮%。只有有机质%？碳% ≈ 有机质% ÷ 1.72（例：榴莲壳有机质 63.68%，有机碳 36.94%）。再量含水量，填进“材料”页的“我的材料”。</p>`],
- ['堆好了没有？',`<p>泰国土地发展厅标准：成品碳氮比 ≤20，种子发芽指数 ≥80%。但<b>只看碳氮比不够</b>——日本研究发现它不能单独判断腐熟。还要看：温度回到常温、有泥土味没有臭味、种子测试正常。</p>`],
+ ['堆好了没有？',`<p>泰国土地发展厅标准：成品碳氮比 ≤20，种子发芽指数 ≥80%。但<b>只看碳氮比不够</b>——日本研究发现它不能单独判断腐熟。还要看：温度回到常温、有泥土味没有臭味、种子测试正常。这些不用化验也能自己做，方法见“堆肥日志”页的“高温期之后”。</p>`],
  ['数值只是平均',`<p>表里的数值是文献平均，您的鸡粪、空果串每一批都会不同。第一次用新来源的材料，最好化验一次，用“改数值”或“我的材料”输入。</p>`]
 ],
 en:[
@@ -1129,9 +1252,29 @@ en:[
  ['24:1 is the microbes\' ideal diet',`${plateSVG()}<p>Soil microbes themselves are about <b>8:1</b>. They burn part of the carbon they eat for energy, so they need a <b>24:1</b> diet: 16 parts carbon burned, 8 parts carbon plus 1 part nitrogen built into their bodies (USDA NRCS).</p>`],
  ['Above 24 borrows N, below 24 releases N',`<p><b>Above 24:1</b> (straw 80, EFB about 52, sawdust over 500): microbes run short of nitrogen and <b>take it from the soil</b> (immobilisation). Crops can go short until the microbes die and release it again.</p><p><b>Below 24:1</b> (chicken manure 6–14, grass clippings 17): the extra nitrogen is released for crops (mineralisation), but the material is gone quickly.</p><p><b>Note:</b> ${t('seesawNote')} The tree's own C:N is a different number; see "Two kinds of C:N: material and tree" below.</p>`],
  ['Compost: start at 25–35, finish at 10–15',`${curveSVG()}<p>A starting C:N near <b>30:1</b> is the usual target (Cornell). 20–40 works and 25–30 is preferred (On-Farm Composting Handbook). A Universiti Putra Malaysia trial of EFB with POME anaerobic sludge found <b>35:1</b> gave the best breakdown.</p><p>As carbon leaves as CO₂, C:N falls; finished compost sits around 10–15.</p><ul><li><b>Too low</b> (&lt;20): nitrogen escapes as ammonia; you smell it.</li><li><b>Too high</b> (&gt;40): the pile stays cool and takes months.</li></ul>`],
+['Microbes in compost: already there, or add them?',`<p>Every handful of manure, leaves, soil or old compost already carries huge numbers of microbes. They take turns as the pile heats and cools (Cornell):</p>${microbeSVG()}
+<ul class="mk"><li><b>Warm-up (below about 40 °C):</b> ordinary bacteria eat the sugars and soft parts, and the pile heats up.</li>
+<li><b>Hot (55–77 °C):</b> heat-loving bacteria (mostly <i>Bacillus</i>) do most of the work; fungi and actinomycetes retreat to the cooler outer layer. Above about 65 °C many microbes die.</li>
+<li><b>Cooling and curing:</b> actinomycetes and fungi come back and break down tough fibre (cellulose, lignin). Actinomycetes look like grey cobwebs, mostly in the outer 10–15 cm, and make the earthy smell. Mites, springtails and earthworms move in last.</li></ul>
+<p><b>Do I need to add microbes?</b> Usually not. Soil and finished compost already carry the decomposers (Iowa State University). In a Thai trial, adding 5% mature compost worked better than commercial inoculants; in manure-rich piles, added microbes made little difference (BioCycle 2022 review).</p>
+<p><b>Default:</b> don't buy any. When building the pile, sprinkle in about 5% finished compost or garden soil by weight (about 5 kg per 100 kg of material), layer by layer.</p>
+<p><b>When adding can help:</b> dry, fibrous material short of nitrogen, such as empty fruit bunches or palm fronds. In the review, inoculants (including EM) helped in most such trials; for example EM on EFB finished about 7 days sooner. It works only if the material is chopped to 2–4 cm, kept moist and aired (BioCycle 2022).</p>
+<p><b>Actinomycetes:</b> they arrive by themselves with soil, manure, straw and old compost. Give them fibre, air and moisture, and turn the grey outer layer into the centre.</p>
+<p><b>When to add:</b> microbes against root disease, such as <i>Trichoderma</i>, go in after the hot stage, once the pile has cooled to near air temperature (curing); mix them in while turning, then let it cure at least 3 weeks. In a study, heat-loving fungi in 40–50 °C compost interfered with <i>Trichoderma</i>; it worked after the compost had sat 3 weeks at 25 °C (Chung & Hoitink 1990). Products meant to speed up a fibrous pile go in while building and wetting the pile, as the label says.</p>
+<p><b>Safety:</b> the grey-white dust on a dry pile is mostly spores. Some actinomycete spores cause an allergic lung disease (farmer's lung) when breathed in large amounts (Lacey 1997). Wet the surface first and wear a dust mask (N95 type) when turning or sieving dry compost (NIOSH case report).</p>`],
  ['Moisture 50–60%',`<p>Moisture is on a <b>wet-weight</b> basis. Most mixes do best at 50–60%. Squeeze test: squeeze a handful hard. One or two drops is right; no water and it crumbles = too dry; water runs out = too wet, it goes airless and smells.</p><p><b>The wet-brown trap:</b> durian husk is a brown by C:N (about 50) but holds about 85% water. Piled fresh it is far too wet. Chop and sun-dry it, or mix in dry browns such as rice husk or sawdust. A Thai trial composting durian husk with citrus peel 1:1 started at 78–85% moisture and never got hot (about 41 °C).</p>`],
  ['Not all carbon rots at the same speed',`<p>Sawdust, EFB and durian husk are high in lignin. Their carbon is tough and slow for microbes, so these can start a little higher in C:N (Cornell). <b>Shredding or pressing</b> speeds things up; most Malaysian mills shred EFB first.</p>`],
  ['Mulch and the orchard',`<p>Fresh high-carbon mulch (EFB, sawdust, straw) borrows nitrogen where it touches the soil. Dug in, it borrows more; left on the surface, it borrows less and more slowly. Soil organic matter itself is about 10:1.</p><p>Practice: keep mulch on the surface, keep a clear ring around the trunk base, keep normal fertilising, and add N only if young trees yellow. Or compost it first. The Mulch tab estimates the most N a tree's mulch can borrow.</p>`],
+['Legume cover crops (Pueraria, Centrosema, Calopogonium)',`<p>The legume covers grown in oil palm and rubber fix nitrogen from the air. Their leaves hold about 2–4% N (Pueraria 2.35% in Selangor and 3.01% in Serdang; Centrosema 2.4–2.7%; Calopogonium 2.6–3.8%), so their C:N is low and they <b>release N</b> as they rot.</p>
+<ul><li>Centrosema fixes about 49–109 kg N per acre per year; Pueraria about 61 kg per acre in young Malaysian oil palm (PROSEA; Lehmann et al.).</li>
+<li>Sources disagree on how fast the litter rots: one calls it very rapid, another measured a half-life of about 110 days in the wet season and 220 in the dry.</li>
+<li>Mucuna bracteata: 3–4 times the biomass of ordinary covers, and 67–84% of its N comes from fixation (MPOB), but no reliable N% or C:N was found, so it is not in the calculator.</li></ul>
+<p><b>Default:</b> when you cut or dig covers in, use "Dug into the soil" on the Mulch tab with "Fresh grass clippings" or "Fresh tree trimmings" as the nearest material; avoid the durian flowering-to-fruit-set window.</p>`],
+ ['Polybag and nursery mixes (coir, sawdust, husk)',`<p>High-carbon materials such as fresh sawdust or coir <b>borrow N inside the polybag</b>, and seedlings turn yellow and stall.</p>
+<ul><li><b>Fresh sawdust</b> borrows the most (its lab "N drawdown index" is close to 0). Aged or composted sawdust is safer; for sawdust worked into nursery soil beds the rule is 2.5–5 kg N per tonne of sawdust in the first year (US Forest Service).</li>
+<li><b>Coir</b> borrows less, but more than peat: replacing peat needed about 10 mg extra N per litre of mix per week (Handreck 1993), about 22 mg urea per litre. For example 100 polybags of 10 litres need about 22 g urea a week, dissolved in water and watered in.</li>
+<li><b>Rice husk</b> (parboiled) at up to 60% showed no significant N shortage over two months (University of Arkansas, trade article). Evidence on <b>carbonised husk</b> is mixed, so it cannot yet be called N-neutral.</li></ul>
+<p><b>Default:</b> use sawdust and coir in seedling mixes only after composting or ageing them; with fresh coir add a little N each week as above, and more if leaves yellow.</p>`],
 ['Two kinds of C:N: material and tree',`${twoCnSVG()}<p>This app calculates the <b>material C:N</b> of compost and mulch. When growers say "high C:N makes trees flower", they mean the <b>tree's own C:N</b>: carbohydrates made by the leaves against nitrogen taken up by the roots. That is the old theory of Kraus and Kraybill (1918). The two are only loosely linked.</p>
 <p><b>Durian evidence:</b> a Monthong trial in Cambodia (Var et al. 2026), after a 28-day dry spell:</p>${droughtSVG()}<p>Leaf N fell, leaf C/N rose, flowers roughly doubled and yield rose about 31% (58.5 → 76.4 kg per tree). The trial did not measure carbohydrates and ran at one site for one year, so it shows these happening together; it does not prove C/N caused the flowering.</p>
 <p><b>Not the whole story:</b> in apple, flower induction was not tied to the tree's carbon balance or starch; hormone signals such as gibberellin mattered more (Belhassine et al. 2019). Paclobutrazol works by blocking gibberellin. Severe drought destroys flowers instead (Kozai et al. 2024).</p>
@@ -1143,11 +1286,13 @@ en:[
 <li><b>Raw dung: 120 days before harvest.</b> Durian falls on the ground and is picked up to eat, so it counts as a crop whose edible part touches soil. Raw manure must be worked in at least 120 days before harvest. In practice: never raw dung from flowering to harvest.</li>
 <li><b>Use a clean source.</b> Poultry-house litter on rice husk or sawdust. Not dung mixed with soil from another farm; that soil is how nematodes and soil diseases really travel. No dead birds; keep it covered and dry until you compost it.</li>
 <li><b>Put it in the right place.</b> Spread on the surface toward the outer canopy, where the feeding roots are, at a moderate rate. Never heap it against the trunk.</li></ol>`],
- ['How much compost to apply?',`<p><b>No published durian compost rate was found.</b> Thailand's Department of Agriculture 2022 durian report says only to use organic fertiliser together with chemical fertiliser, with no amount.</p>
-<p>The Malaysian official figure found is for <b>chicken manure</b>: Sarawak's Department of Agriculture recommends 5–10 kg per planting hole, then 20–40 kg per tree per year, on top of chemical fertiliser.</p>
-<p><b>Default:</b> treat that range as an upper guide, spread across the year on the surface toward the canopy edge, and skip the flowering-to-fruit-set window (see the Mulch tab). Finished compost differs batch to batch; for large amounts, lab-test its N, P and K and check it against your fertiliser plan with your agronomist.</p>`],
+ ['How much compost to apply?',`<p>Malaysia's Department of Agriculture <b>Pakej Teknologi Durian</b> gives rates for "organic matter", meaning fully decomposed compost or animal manure:</p>
+<ul><li><b>2012 edition (Table 9):</b> 20 kg per tree per year in year 1, 30 kg in years 2–3, and 40 kg from year 4.</li>
+<li><b>2024 printing:</b> rising with tree age to 80 kg per tree per year from year 10, in 2 applications a year.</li></ul>
+<p>Sarawak's Department of Agriculture for <b>chicken manure</b>: 5–10 kg per planting hole, then 20–40 kg per tree per year, on top of chemical fertiliser.</p>
+<p><b>Default:</b> 40–80 kg of finished compost per mature tree per year, in 2 applications, spread on the surface toward the canopy edge, and skip the flowering-to-fruit-set window (see the Mulch tab). Use only finished compost; raw manure and half-made compost borrow N or release too much.</p>`],
  ['Reading a lab report',`<p>Ask for <b>organic carbon</b> and <b>total nitrogen (Kjeldahl)</b>, both on dry weight. C:N = C% ÷ N%. Only organic matter given? C% ≈ OM% ÷ 1.72 (durian husk: OM 63.68%, organic C 36.94%). Measure moisture too, then enter it under My materials.</p>`],
- ['Is the compost finished?',`<p>Thailand's Land Development Department standard: finished C:N ≤20 and seed germination index ≥80%. <b>C:N alone is not proof</b>; a Japanese study found it unreliable as a maturity index on its own. Also check: temperature back to ambient, earthy smell with no stink, and a seed test that sprouts normally.</p>`],
+ ['Is the compost finished?',`<p>Thailand's Land Development Department standard: finished C:N ≤20 and seed germination index ≥80%. <b>C:N alone is not proof</b>; a Japanese study found it unreliable as a maturity index on its own. Also check: temperature back to ambient, earthy smell with no stink, and a seed test that sprouts normally. You can do all of these yourself without a lab; see "After the hot stage" in the Pile tab.</p>`],
  ['Values are averages',`<p>Table values are published averages. Every batch of chicken manure or EFB differs. When you start with a new source, lab-test it once and enter the values with Edit values or My materials.</p>`]
 ],
 ms:[
@@ -1155,9 +1300,29 @@ ms:[
  ['24:1 ialah diet terbaik mikrob',`${plateSVG()}<p>Mikrob tanah sendiri kira-kira <b>8:1</b>. Sebahagian karbon dibakar untuk tenaga, jadi mereka perlukan diet <b>24:1</b>: 16 bahagian karbon dibakar, 8 bahagian karbon dan 1 bahagian nitrogen menjadi badan (USDA NRCS).</p>`],
  ['Atas 24 meminjam N, bawah 24 membebaskan N',`<p><b>Atas 24:1</b> (jerami 80, EFB ~52, habuk kayu lebih 500): mikrob kekurangan nitrogen dan <b>mengambilnya dari tanah</b> (imobilisasi). Tanaman boleh kekurangan N sehingga mikrob mati dan membebaskannya semula.</p><p><b>Bawah 24:1</b> (tahi ayam 6–14, rumput 17): N berlebihan dibebaskan untuk tanaman (mineralisasi), tetapi bahan cepat habis.</p><p><b>Nota:</b> ${t('seesawNote')} C:N pokok sendiri ialah nombor lain; lihat "Dua jenis C:N: bahan dan pokok" di bawah.</p>`],
  ['Kompos: mula 25–35, siap 10–15',`${curveSVG()}<p>C:N permulaan sekitar <b>30:1</b> ialah sasaran biasa (Cornell). 20–40 boleh, 25–30 paling baik (On-Farm Composting Handbook). Kajian Universiti Putra Malaysia (EFB + enapcemar anaerobik POME) mendapati <b>35:1</b> paling baik.</p><p>Karbon keluar sebagai CO₂, jadi C:N menurun; kompos siap sekitar 10–15.</p><ul><li><b>Terlalu rendah</b> (&lt;20): nitrogen lari sebagai ammonia; berbau.</li><li><b>Terlalu tinggi</b> (&gt;40): longgokan sejuk, berbulan-bulan.</li></ul>`],
+['Mikrob dalam kompos: sudah ada, atau perlu ditambah?',`<p>Setiap genggam tahi, daun, tanah atau kompos lama sudah membawa sangat banyak mikrob. Mereka bergilir mengikut suhu longgokan (Cornell):</p>${microbeSVG()}
+<ul class="mk"><li><b>Memanas (bawah ~40 °C):</b> bakteria biasa makan gula dan bahagian lembut, dan longgokan mula panas.</li>
+<li><b>Panas (55–77 °C):</b> bakteria tahan panas (kebanyakan <i>Bacillus</i>) membuat kebanyakan kerja; kulat dan aktinomiset berundur ke lapisan luar yang lebih sejuk. Melebihi ~65 °C banyak mikrob mati.</li>
+<li><b>Menyejuk dan pematangan:</b> aktinomiset dan kulat kembali dan mengurai serat keras (selulosa, lignin). Aktinomiset kelihatan seperti sarang labah-labah kelabu, kebanyakannya di 10–15 cm luar, dan menghasilkan bau tanah. Hama, ekor pegas dan cacing tanah masuk paling akhir.</li></ul>
+<p><b>Perlukah tambah mikrob?</b> Biasanya tidak. Tanah dan kompos matang sudah membawa pengurai (Iowa State University). Dalam satu ujian di Thailand, menambah 5% kompos matang lebih baik daripada inokulan komersial; dalam longgokan banyak tahi, mikrob tambahan hampir tiada beza (ulasan BioCycle 2022).</p>
+<p><b>Lalai:</b> tidak perlu beli. Semasa membina longgokan, tabur kira-kira 5% kompos matang atau tanah kebun ikut berat (~5 kg bagi setiap 100 kg bahan), lapis demi lapis.</p>
+<p><b>Bila tambahan boleh membantu:</b> bahan kering, berserat dan kurang nitrogen, seperti tandan kosong (EFB) atau pelepah sawit. Dalam ulasan itu, inokulan (termasuk EM) membantu dalam kebanyakan ujian sebegini; contohnya EM pada EFB siap kira-kira 7 hari lebih awal. Ia hanya berkesan jika bahan dicincang 2–4 cm, dikekalkan lembap dan berudara (BioCycle 2022).</p>
+<p><b>Aktinomiset:</b> datang sendiri bersama tanah, tahi, jerami dan kompos lama. Beri mereka serat, udara dan lembapan, dan balikkan lapisan kelabu di luar ke tengah.</p>
+<p><b>Bila hendak menambah:</b> mikrob melawan penyakit akar, seperti <i>Trichoderma</i>, dimasukkan selepas fasa panas, apabila longgokan sudah sejuk hampir suhu udara (pematangan); gaul semasa membalik, kemudian biar matang sekurang-kurangnya 3 minggu. Satu kajian mendapati kulat tahan panas dalam kompos 40–50 °C mengganggu <i>Trichoderma</i>; ia berkesan selepas kompos disimpan 3 minggu pada 25 °C (Chung & Hoitink 1990). Produk untuk mempercepat longgokan berserat dimasukkan semasa membina dan menyiram longgokan, ikut label.</p>
+<p><b>Keselamatan:</b> debu putih kelabu pada longgokan kering kebanyakannya spora. Sesetengah spora aktinomiset menyebabkan penyakit paru-paru alahan (paru-paru petani) jika banyak tersedut (Lacey 1997). Basahkan permukaan dahulu dan pakai topeng debu (jenis N95) semasa membalik atau mengayak kompos kering (laporan kes NIOSH).</p>`],
  ['Lembapan 50–60%',`<p>Lembapan ialah berat <b>basah</b>. Kebanyakan campuran terbaik pada 50–60%. Ujian genggam: genggam kuat. Satu dua titis = tepat; tiada air dan berderai = terlalu kering; air mengalir = terlalu basah, tiada udara dan berbau.</p><p><b>Perangkap bahan perang basah:</b> kulit durian ialah bahan perang (C:N ~50) tetapi ~85% air. Jika dilonggok segar, terlalu basah. Cincang dan jemur, atau campur bahan perang kering seperti sekam padi atau habuk kayu. Kajian Thailand (kulit durian + kulit limau 1:1) bermula pada lembapan 78–85% dan tidak panas (~41 °C).</p>`],
  ['Tidak semua karbon sama laju',`<p>Habuk kayu, EFB dan kulit durian tinggi lignin. Karbonnya keras dan lambat dimakan mikrob, jadi boleh bermula dengan C:N lebih tinggi sedikit (Cornell). <b>Mencincang atau memampat</b> mempercepat; kebanyakan kilang di Malaysia mencincang EFB dahulu.</p>`],
  ['Sungkupan dan dusun',`<p>Sungkupan segar tinggi karbon (EFB, habuk kayu, jerami) meminjam N di tempat ia menyentuh tanah. Jika dibenam, lebih banyak dipinjam; di permukaan, kurang dan lebih perlahan. Bahan organik tanah sendiri ~10:1.</p><p>Amalan: biar di permukaan, kosongkan sekeliling pangkal batang, teruskan baja biasa, tambah N hanya jika pokok muda menguning. Atau kompos dahulu. Tab Sungkupan menganggar N maksimum yang dipinjam.</p>`],
+['Tanaman penutup kekacang (Pueraria, Centrosema, Calopogonium)',`<p>Kekacang penutup di ladang sawit dan getah mengikat nitrogen dari udara. Daunnya mengandungi kira-kira 2–4% N (Pueraria 2.35% di Selangor dan 3.01% di Serdang; Centrosema 2.4–2.7%; Calopogonium 2.6–3.8%), jadi C:N rendah dan ia <b>membebaskan N</b> semasa reput.</p>
+<ul><li>Centrosema mengikat kira-kira 49–109 kg N seekar setahun; Pueraria kira-kira 61 kg seekar di ladang sawit muda Malaysia (PROSEA; Lehmann et al.).</li>
+<li>Sumber tidak sepakat tentang kelajuan reput daun gugur: satu kata sangat cepat, satu lagi mengukur separuh hayat ~110 hari pada musim hujan dan 220 hari pada musim kemarau.</li>
+<li>Mucuna bracteata: biojisim 3–4 kali penutup biasa, dan 67–84% N daripada pengikatan (MPOB), tetapi tiada N% atau C:N yang boleh dipercayai ditemui, jadi ia tiada dalam kalkulator.</li></ul>
+<p><b>Lalai:</b> bila memotong atau membenamkan penutup, guna "Dibenamkan ke tanah" di tab Sungkupan dengan "Rumput baru dipotong" atau "Cantasan pokok segar" sebagai bahan terdekat; elakkan tempoh berbunga hingga pembentukan buah durian.</p>`],
+ ['Campuran polibeg dan semaian (sabut, habuk kayu, sekam)',`<p>Bahan tinggi karbon seperti habuk kayu segar atau sabut <b>meminjam N dalam polibeg</b>, dan anak benih menguning dan terbantut.</p>
+<ul><li><b>Habuk kayu segar</b> paling banyak meminjam (indeks penyusutan N makmal hampir 0). Habuk kayu lama atau dikompos lebih selamat; untuk habuk kayu yang digaul ke batas tanah semaian, peraturannya 2.5–5 kg N setan habuk kayu pada tahun pertama (US Forest Service).</li>
+<li><b>Sabut</b> meminjam kurang, tetapi lebih daripada gambut: menggantikan gambut memerlukan kira-kira 10 mg N tambahan seliter campuran seminggu (Handreck 1993), kira-kira 22 mg urea seliter. Contohnya 100 polibeg 10 liter perlu kira-kira 22 g urea seminggu, dilarutkan dalam air dan disiram.</li>
+<li><b>Sekam padi</b> (direbus) sehingga 60% tidak menunjukkan kekurangan N yang ketara dalam dua bulan (University of Arkansas, artikel industri). Bukti tentang <b>sekam berkarbon</b> bercampur, jadi belum boleh dikatakan tidak meminjam N.</li></ul>
+<p><b>Lalai:</b> guna habuk kayu dan sabut dalam campuran semaian hanya selepas dikompos atau disimpan lama; dengan sabut segar tambah sedikit N setiap minggu seperti di atas, dan lebih jika daun menguning.</p>`],
 ['Dua jenis C:N: bahan dan pokok',`${twoCnSVG()}<p>Aplikasi ini mengira <b>C:N bahan</b> (kompos, sungkupan). Bila pekebun kata "C:N tinggi membuat pokok berbunga", maksudnya <b>C:N pokok itu sendiri</b>: karbohidrat yang dibuat daun berbanding nitrogen yang diserap akar. Itu teori lama Kraus dan Kraybill (1918). Kedua-duanya hanya berkait secara tidak langsung.</p>
 <p><b>Bukti durian:</b> ujian Monthong di Kemboja (Var et al. 2026), selepas kemarau 28 hari:</p>${droughtSVG()}<p>N daun turun, C/N daun naik, bunga hampir dua kali ganda dan hasil naik ~31% (58.5 → 76.4 kg sepokok). Ujian itu tidak mengukur karbohidrat dan hanya satu tapak, satu tahun; ia menunjukkan semuanya berlaku serentak, bukan membuktikan C/N menyebabkan pembungaan.</p>
 <p><b>Bukan keseluruhan cerita:</b> pada epal, aruhan bunga tidak berkait dengan imbangan karbon atau kanji pokok; isyarat hormon seperti giberelin lebih penting (Belhassine et al. 2019). Paklobutrazol berfungsi dengan menyekat giberelin. Kemarau teruk pula merosakkan bunga (Kozai et al. 2024).</p>
@@ -1169,11 +1334,13 @@ ms:[
 <li><b>Tahi mentah: 120 hari sebelum tuai.</b> Durian gugur ke tanah lalu dikutip untuk dimakan, jadi ia dikira tanaman yang bahagian boleh dimakan menyentuh tanah. Tahi mentah mesti dibenamkan sekurang-kurangnya 120 hari sebelum tuai. Amalannya: jangan langsung guna tahi mentah dari berbunga hingga tuai.</li>
 <li><b>Sumber mesti bersih.</b> Hampas reban bersekam atau berhabuk kayu. Bukan tahi bercampur tanah dari ladang lain; tanah itulah laluan sebenar nematod dan penyakit tanah. Tiada bangkai ayam; tutup dan simpan kering sebelum dikompos.</li>
 <li><b>Letak di tempat betul.</b> Tabur di permukaan ke arah pinggir kanopi, tempat akar penyerap, pada kadar sederhana. Jangan longgok pada pangkal batang.</li></ol>`],
- ['Berapa banyak kompos perlu ditabur?',`<p><b>Tiada kadar kompos durian yang diterbitkan ditemui.</b> Laporan durian Jabatan Pertanian Thailand 2022 hanya menyebut baja organik digunakan bersama baja kimia, tanpa jumlah.</p>
-<p>Angka rasmi Malaysia yang ditemui ialah untuk <b>tahi ayam</b>: Jabatan Pertanian Sarawak mengesyorkan 5–10 kg selubang semasa menanam, kemudian 20–40 kg sepokok setahun, di samping baja kimia.</p>
-<p><b>Lalai:</b> anggap julat itu sebagai panduan maksimum, tabur sepanjang tahun di permukaan ke arah pinggir kanopi, dan elakkan tempoh berbunga hingga pembentukan buah (lihat tab Sungkupan). Kompos siap berbeza setiap kelompok; untuk jumlah besar, uji N, P dan K di makmal dan semak dengan pelan baja bersama ahli agronomi anda.</p>`],
+ ['Berapa banyak kompos perlu ditabur?',`<p><b>Pakej Teknologi Durian</b> Jabatan Pertanian Malaysia memberi kadar "bahan organik", iaitu kompos atau tahi haiwan yang telah reput sepenuhnya:</p>
+<ul><li><b>Edisi 2012 (Jadual 9):</b> 20 kg sepokok setahun pada tahun 1, 30 kg pada tahun 2–3, dan 40 kg mulai tahun 4.</li>
+<li><b>Cetakan 2024:</b> meningkat mengikut umur pokok hingga 80 kg sepokok setahun mulai tahun 10, 2 kali setahun.</li></ul>
+<p>Jabatan Pertanian Sarawak untuk <b>tahi ayam</b>: 5–10 kg selubang semasa menanam, kemudian 20–40 kg sepokok setahun, di samping baja kimia.</p>
+<p><b>Lalai:</b> 40–80 kg kompos siap sepokok matang setahun, 2 kali, ditabur di permukaan ke arah pinggir kanopi, dan elakkan tempoh berbunga hingga pembentukan buah (lihat tab Sungkupan). Guna kompos siap sahaja; tahi mentah dan kompos separuh masak meminjam N atau melepaskan terlalu banyak.</p>`],
  ['Membaca laporan makmal',`<p>Minta <b>karbon organik</b> dan <b>nitrogen jumlah (Kjeldahl)</b>, kedua-duanya berat kering. C:N = C% ÷ N%. Hanya ada bahan organik? C% ≈ BO% ÷ 1.72 (kulit durian: BO 63.68%, C organik 36.94%). Ukur lembapan, kemudian masukkan di Bahan saya.</p>`],
- ['Sudah siapkah kompos?',`<p>Piawaian Jabatan Pembangunan Tanah Thailand: C:N siap ≤20 dan indeks percambahan biji ≥80%. <b>C:N sahaja bukan bukti</b>; kajian Jepun mendapati ia tidak boleh dipercayai sebagai indeks kematangan sendirian. Periksa juga: suhu kembali seperti udara, bau tanah tanpa bau busuk, dan ujian biji bercambah normal.</p>`],
+ ['Sudah siapkah kompos?',`<p>Piawaian Jabatan Pembangunan Tanah Thailand: C:N siap ≤20 dan indeks percambahan biji ≥80%. <b>C:N sahaja bukan bukti</b>; kajian Jepun mendapati ia tidak boleh dipercayai sebagai indeks kematangan sendirian. Periksa juga: suhu kembali seperti udara, bau tanah tanpa bau busuk, dan ujian biji bercambah normal. Semua ini boleh dibuat sendiri tanpa makmal; lihat "Selepas fasa panas" dalam tab Longgokan.</p>`],
  ['Nilai ialah purata',`<p>Nilai jadual ialah purata terbitan. Setiap kelompok tahi ayam atau EFB berbeza. Bila guna sumber baharu, uji di makmal sekali dan masukkan dengan Ubah nilai atau Bahan saya.</p>`]
 ]});
 const REFS=[
@@ -1216,11 +1383,47 @@ const REFS=[
  ['Cornell Waste Management Institute. Moisture content (weigh–dry–reweigh method).','https://www.css.cornell.edu/cwmi/compost/calc/moisture_content.html'],
  ['Cornell Waste Management Institute. Balancing greens and browns (layering, coarse base, brown cover).','https://cwmi.css.cornell.edu/balancing.pdf'],
  ['Texas A&M AgriLife Extension EHT-069. Composting (coarse base layer, 6–10 inch layers, soil or manure layer).','https://aggie-horticulture.tamu.edu/vegetable/files/2013/09/EHT-069.pdf'],
+ ['Cornell Waste Management Institute. Compost microorganisms (bacteria, actinomycetes, fungi by stage).','https://compost.css.cornell.edu/microorg.html'],
+ ['Iowa State University Extension. Do I need to add an activator to my compost pile?','https://yardandgarden.extension.iastate.edu/faq/do-i-need-add-activator-my-compost-pile'],
+ ['Bennett-Jones J., Biala J., Johnston A. (2022). Are microbial inoculants a fit for lignocellulosic organics? BioCycle.','https://www.biocycle.net/are-microbial-inoculants-a-fit-for-lignocellulosic-organics/'],
+ ['Chung Y.R., Hoitink H.A.J. (1990). Interactions between thermophilic fungi and Trichoderma hamatum in suppression of Rhizoctonia damping-off in a bark compost-amended container medium. Phytopathology 80:73–77.','https://www.apsnet.org/publications/phytopathology/backissues/Documents/1990Abstracts/Phyto80_73.htm'],
+ ['Lacey J. (1997). Actinomycetes in composts. Ann. Agric. Environ. Med. 4:113–121.','https://agro.icm.edu.pl/agro/element/bwmeta1.element.agro-article-d769e34d-fe19-40ba-9754-4ada3a98b6fa/c/Actinomycetes_in_composts.pdf'],
+ ['Weber S. et al. (NIOSH) (1993). Organic dust exposures from compost handling: case presentation and respiratory exposure assessment. Am. J. Ind. Med. 24:365–374.','https://stacks.cdc.gov/view/cdc/205292/cdc_205292_DS1.pdf'],
+ ['Jabatan Pertanian Malaysia (2012). Pakej Teknologi Durian, Edisi Kedua. Jadual 9: Kadar Pembajaan Untuk Durian.','https://www.doa.gov.my/doa/modules_resources/bookshelf/pt_buah_durian_2012/pt_durian_2012.pdf'],
+ ['Jabatan Pertanian Malaysia (2023, cetakan kedua 2024). Pakej Teknologi Durian. Gambar rajah 28: kadar baja organik (copy hosted by a third party).','https://azmi.my/wp-content/uploads/2024/09/Buku-Pakej-Teknologi-Durian-17-September-2024.pdf'],
+ ['BC Ministry of Agriculture and Food (2025). Agricultural Compost Factsheets: Assessing Compost (bag test, reheating, seed test).','https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/agriculture-and-seafood/agricultural-land-and-environment/waste-management/compost-management/assessing_compost_-_factsheet.pdf'],
+ ['BC Ministry of Agriculture and Food (2025). Factsheet 3: The Composting Process (curing).','https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/agriculture-and-seafood/agricultural-land-and-environment/waste-management/compost-management/factsheet_3_the_composting_process.pdf'],
+ ['Misra R.V., Roy R.N., Hiraoka H. (2003). On-Farm Composting Methods. FAO Land and Water Discussion Paper 2.','https://www.fao.org/4/y5104e/y5104e06.htm'],
+ ['UF/IFAS Extension Sarasota. Compost maturity test (radish seeds, 80%).','https://sfyl.ifas.ufl.edu/sarasota/natural-resources/waste-reduction/composting/what-is-composting/when-is-compost-ready/compost-maturity-test/'],
+ ['UF/IFAS Extension Sarasota. Elements of composting (particle size).','https://sfyl.ifas.ufl.edu/sarasota/natural-resources/waste-reduction/composting/what-is-composting/elements-of-composting/'],
+ ['Hamilton, Hillock, Campbell. Compost Quality, BAE-1732. Oklahoma State University Extension (screening, germination).','https://extension.okstate.edu/fact-sheets/compost-quality'],
+ ['Miller R. How Does Composting Work? Utah State University Extension (curing).','https://extension.usu.edu/agwastemanagement/files/How_Does_Composting_Work_Red.pdf'],
+ ['Cornell Cooperative Extension Tompkins County. Compost testing for finished compost.','https://ccetompkins.org/resources/compost-testing-for-finished-compost'],
+ ['Wade G.L., Linvill D. Composting, Circular 981. University of Georgia Extension.','https://fieldreport.caes.uga.edu/wp-content/uploads/2025/08/C-981_6.pdf'],
+ ['Timmerman et al. (2022). How to store and handle compost materials. LSU AgCenter Pub. 3838-J.','https://www.lsuagcenter.com/articles/page1651625613936'],
+ ['Opoku et al. (2024). Covering compost heaps to reduce nutrient losses (West Africa). Tropentag 2024 abstract.','https://www.tropentag.de/2024/abstracts/links/Kashongwe_Mq6Gvg9A.php'],
+ ['Nutrient Cycling in Agroecosystems (2010). Roofing of stored manure and nutrient leaching in Niger. doi:10.1007/s10705-009-9316-1.','https://link.springer.com/article/10.1007/s10705-009-9316-1'],
+ ['Connecticut DEEP (2013). On-farm composting: setback distances from wells and watercourses.','https://portal.ct.gov/-/media/deep/compost/compost_pdf/cnmponfarmcompostingpdf.pdf'],
+ ['Sullivan, Andrews, Brewer (2020). Estimating plant-available nitrogen release from cover crops. PNW 636, Oregon State University.','https://extension.oregonstate.edu/catalog/pub/pnw-636-estimating-plant-available-nitrogen-release-cover-crops'],
+ ['Brown B. (1988). Managing crop residues, CIS 825. University of Idaho (extra N per ton of straw).','https://objects.lib.uidaho.edu/uiext/uiext30049.pdf'],
+ ['Coppens F. et al. (2007). Decomposition of surface vs incorporated residues. Soil Biol. Biochem. 39.','https://agris.fao.org/search/fr/records/65dfbc5e0f3e94b9e5dbd80b'],
+ ['Mubarak, Rosenani et al. (2001). N mineralisation of residues in Malaysian soils. Tropical Agriculture 78(3).','https://journals.sta.uwi.edu/ojs/index.php/ta/article/view/1627'],
+ ['PROSEA. Pueraria phaseoloides.','https://uses.plantnet-project.org/en/Pueraria_phaseoloides_(PROSEA)'],
+ ['PROSEA. Centrosema pubescens.','https://uses.plantnet-project.org/en/Centrosema_pubescens_(PROSEA)'],
+ ['PROSEA. Calopogonium mucunoides.','https://uses.plantnet-project.org/en/Calopogonium_mucunoides_(PROSEA)'],
+ ['Lehmann J. et al. Legume cover crops and nutrient cycling in tropical fruit tree production. Acta Hort. 531.','https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/1119498/1/Legumecovercropsandnutrientcyclingintropica.pdf'],
+ ['MPOB. Biological nitrogen fixation by Mucuna bracteata under oil palm.','https://opb.mpob.gov.my/biological-nitrogen-fixation-by-mucuna-bracteata-under-oil-palm-filed-environments/'],
+ ['Thomas et al. (1998). Nitrogen drawdown index of growing media. IPPS 48.','https://researcharchive.lincoln.ac.nz/bitstream/handle/10182/2699/ipps_v48_pp66-71.pdf?sequence=1'],
+ ['Handreck K.A. (1993). Use of coir dust in potting media. Acta Hort. 342.','https://ishs.org/ishs-article/342_14/'],
+ ['Arenas M. et al. (2002). Coir as an alternative to peat in media for tomato transplant production. HortScience 37.','https://swfrec.ifas.ufl.edu/docs/pdf/veg-hort/transplant/trans_media1.pdf'],
+ ['Rose, Haase, Boyer. Organic Matter Management in Forest Nurseries. USDA Forest Service / RNGR.','https://npn.rngr.net/publications/omm/types-of-organic-amendments/at_download/file'],
+ ['Evans M. (2003). Could rice hulls be a valuable commodity? (University of Arkansas, Farm Progress).','https://www.farmprogress.com/rice/could-rice-hulls-be-a-valuable-commodity-'],
  ['ANSES (France). Plant-parasitic nematodes: new waste management solutions.','https://www.anses.fr/node/158925/'],
  ['Hino K. et al. (1995). Mixing materials in composting leftovers (C/N not a reliable maturity index).','https://agris.fao.org/search/fr/records/647236e9e17b74d2224eccea']
 ];
 const APP_URL='https://stanleywoosweeleong.github.io/cnbalance/';
-const APP_VER='2026-10-20';
+const APP_VER='2026-10-21';
+const APP_BUILD='20261020225413'; // build_site.py stamps a unique id here for each GitHub Pages release
 const QR_SVG='<svg viewBox="0 0 37 37" width="200" height="200" role="img" aria-label="QR" shape-rendering="crispEdges" style="background:#fff;border-radius:8px"><rect width="37" height="37" fill="#fff"/><path d="M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM15 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM25 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM13 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM23 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM17 4h1v1h-1zM19 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM25 5h1v1h-1zM26 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM11 6h1v1h-1zM15 6h1v1h-1zM16 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM22 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM24 9h1v1h-1zM25 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM28 10h1v1h-1zM31 10h1v1h-1zM33 10h1v1h-1zM34 10h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM6 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM13 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM34 11h1v1h-1zM3 12h1v1h-1zM4 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM16 12h1v1h-1zM19 12h1v1h-1zM23 12h1v1h-1zM25 12h1v1h-1zM28 12h1v1h-1zM29 12h1v1h-1zM30 12h1v1h-1zM31 12h1v1h-1zM33 12h1v1h-1zM34 12h1v1h-1zM3 13h1v1h-1zM13 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM20 13h1v1h-1zM22 13h1v1h-1zM25 13h1v1h-1zM26 13h1v1h-1zM28 13h1v1h-1zM29 13h1v1h-1zM31 13h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM4 14h1v1h-1zM8 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM20 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM29 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM2 15h1v1h-1zM4 15h1v1h-1zM6 15h1v1h-1zM10 15h1v1h-1zM11 15h1v1h-1zM12 15h1v1h-1zM15 15h1v1h-1zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM26 15h1v1h-1zM29 15h1v1h-1zM31 15h1v1h-1zM33 15h1v1h-1zM2 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM13 16h1v1h-1zM14 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM32 16h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM6 17h1v1h-1zM12 17h1v1h-1zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM30 17h1v1h-1zM32 17h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM23 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM32 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM4 19h1v1h-1zM7 19h1v1h-1zM11 19h1v1h-1zM13 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM22 19h1v1h-1zM25 19h1v1h-1zM26 19h1v1h-1zM28 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM34 19h1v1h-1zM4 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM19 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM7 21h1v1h-1zM11 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM30 21h1v1h-1zM34 21h1v1h-1zM3 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM9 22h1v1h-1zM14 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM31 22h1v1h-1zM32 22h1v1h-1zM33 22h1v1h-1zM34 22h1v1h-1zM2 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM23 23h1v1h-1zM25 23h1v1h-1zM28 23h1v1h-1zM29 23h1v1h-1zM31 23h1v1h-1zM34 23h1v1h-1zM5 24h1v1h-1zM8 24h1v1h-1zM11 24h1v1h-1zM14 24h1v1h-1zM15 24h1v1h-1zM18 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM30 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM34 24h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM7 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM21 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM31 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h1v1h-1zM16 26h1v1h-1zM17 26h1v1h-1zM19 26h1v1h-1zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM17 27h1v1h-1zM18 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM23 27h1v1h-1zM25 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM31 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM16 28h1v1h-1zM18 28h1v1h-1zM21 28h1v1h-1zM22 28h1v1h-1zM23 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM15 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM15 30h1v1h-1zM17 30h1v1h-1zM19 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM25 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM32 30h1v1h-1zM33 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM11 31h1v1h-1zM19 31h1v1h-1zM20 31h1v1h-1zM21 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM24 31h1v1h-1zM29 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM19 32h1v1h-1zM21 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM26 32h1v1h-1zM27 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM31 32h1v1h-1zM32 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h1v1h-1zM12 33h1v1h-1zM13 33h1v1h-1zM15 33h1v1h-1zM17 33h1v1h-1zM18 33h1v1h-1zM19 33h1v1h-1zM20 33h1v1h-1zM21 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM26 33h1v1h-1zM28 33h1v1h-1zM29 33h1v1h-1zM30 33h1v1h-1zM34 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM11 34h1v1h-1zM13 34h1v1h-1zM15 34h1v1h-1zM16 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM20 34h1v1h-1zM23 34h1v1h-1zM25 34h1v1h-1zM27 34h1v1h-1zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1z" fill="#000"/></svg>';
 function shareHTML(){const lbl={zh:['分享这个软件','用 WhatsApp 分享','让朋友扫这个二维码，或复制链接：','复制链接','已复制'],en:['Share this app','Share on WhatsApp','Let a friend scan this QR code, or copy the link:','Copy link','Copied'],ms:['Kongsi aplikasi ini','Kongsi di WhatsApp','Biar rakan imbas kod QR ini, atau salin pautan:','Salin pautan','Disalin']}[L()];
   const msg={zh:'碳氮配比：自己做堆肥的碳氮比、湿度计算和堆肥日志 ',en:'CN Balance: compost C:N, moisture and pile diary for farmers ',ms:'Imbangan C:N: kira C:N, lembapan dan diari longgokan kompos '}[L()]+APP_URL;
@@ -1229,6 +1432,19 @@ function shareHTML(){const lbl={zh:['分享这个软件','用 WhatsApp 分享','
     <p style="margin:0">${lbl[2]}</p>${QR_SVG}
     <p class="num" style="margin:0;user-select:all;word-break:break-all;font-weight:800">${APP_URL}</p>
     <button type="button" class="btn ghost" id="copyLink" data-ok="${lbl[4]}">${lbl[3]}</button></div></details>`}
+function microbeSVG(){
+  const lb={zh:['升温','高温 55–77 °C','降温','腐熟','普通细菌','耐热细菌；真菌、放线菌躲到外层','放线菌、真菌回来','真菌、放线菌、螨、蚯蚓'],
+   en:['Warm-up','Hot 55–77 °C','Cooling','Curing','ordinary bacteria','heat-loving bacteria; fungi and actinomycetes in the outer layer','actinomycetes and fungi return','fungi, actinomycetes, mites, worms'],
+   ms:['Memanas','Panas 55–77 °C','Sejuk','Matang','bakteria biasa','bakteria tahan panas; kulat dan aktinomiset di lapisan luar','aktinomiset dan kulat kembali','kulat, aktinomiset, hama, cacing']}[L()];
+  const x=[0,150,300,450,600],col=['warn','bad','water','leaf'];
+  let s=`<svg class="ill" viewBox="0 0 600 220" role="img" aria-label="${lb.slice(0,4).join(' → ')}">`;
+  for(let i=0;i<4;i++)s+=`<rect x="${x[i]}" y="10" width="150" height="200" fill="var(--${col[i]}-soft)"/>`;
+  s+=`<path d="M0 200 C40 192 90 60 150 50 S270 45 300 72 S400 168 450 178 S560 190 600 192" fill="none" stroke="var(--bad)" stroke-width="6" stroke-linecap="round"/>`;
+  const dots=(cx,cy,c)=>[[-16,-6],[0,4],[16,-4],[-6,14],[10,16],[-18,10]].map(([a,b])=>`<circle cx="${cx+a}" cy="${cy+b}" r="5" fill="${c}"/>`).join('');
+  const threads=(cx,cy)=>`<path d="M${cx-26} ${cy+12} q12 -22 24 -5 t24 -10 M${cx-16} ${cy-10} q10 12 22 0 t18 8 M${cx} ${cy+18} l5 -18 l9 -7" fill="none" stroke="var(--ink2)" stroke-width="3" stroke-linecap="round"/>`;
+  const worm=(cx,cy)=>`<path d="M${cx-24} ${cy} q10 -14 20 0 t20 0 t14 -5" fill="none" stroke="var(--bark)" stroke-width="7" stroke-linecap="round"/>`;
+  s+=dots(75,150,'var(--bark)')+dots(205,160,'var(--bad)')+threads(265,180)+threads(375,140)+threads(500,150)+worm(560,160);
+  return s+`</svg>`}
 function twoCnSVG(){
   const lb={zh:['材料的碳氮比','树的碳氮比','堆肥、覆盖物','碳水化合物 ÷ 氮','决定：烂得快不快、借氮还是放氮','影响：长叶还是开花'],
    en:['Material C:N','Tree C:N','compost, mulch','carbohydrate ÷ nitrogen','decides: how fast it rots, borrows or releases N','affects: leaf growth or flowering'],
@@ -1293,6 +1509,7 @@ function applyStatic(){
   $('setBtn').setAttribute('aria-label',t('setTitle'));$('navBot').setAttribute('aria-label',t('navAria'));$('sheetClose').setAttribute('aria-label',t('close'));
 }
 function applyTheme(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);else document.documentElement.removeAttribute('data-theme')}
+function showUpdate(){const u=$('upd');if(!u||!u.hidden)return;$('updGo').textContent=t('updT');$('updX').textContent='×';$('updX').setAttribute('aria-label',t('close'));u.hidden=false}
 function renderSettingsSheet(){
   S.restoreArm=false;
   const sec=(lbl,html)=>`<p class="small" style="font-weight:800;margin:14px 0 6px">${lbl}</p><div class="seg">${html}</div>`;
@@ -1323,6 +1540,7 @@ document.addEventListener('click',e=>{
   if(d.sq){S.sq=S.sq===d.sq?null:d.sq;save();renderSettings();renderResults();return}
   if(d.lsq){S.lsq=S.lsq===d.lsq?null:d.lsq;document.querySelectorAll('[data-lsq]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.lsq===S.lsq));return}
   if(d.hmuse!=null){const i=+d.hmuse;const m=hmCalc('r'+i);if(m!=null){const r=S.rows[i];r.ov=r.ov||{};r.ov.m=m;touched();save();renderRows();renderResults()}return}
+  if(d.mhow){S.mulch.how=d.mhow;save();renderMulch();return}
   if(d.setsize){S.size=+d.setsize;save();applySize();renderSettingsSheet();return}
   if(d.settheme){S.theme=d.settheme==='auto'?null:d.settheme;save();applyTheme();renderSettingsSheet();return}
   if(d.unit){S.unit=d.unit;save();renderMix();renderPile();return}
@@ -1341,7 +1559,7 @@ document.addEventListener('click',e=>{
     case 'sheetClose':closePicker();break;
     case 'mulchPick':openPicker(id=>{S.mulch.id=id},false);break;
     case 'copyLink':{const done=()=>{b.textContent=b.dataset.ok};try{navigator.clipboard.writeText(APP_URL).then(done,()=>{})}catch(e){}break}
-    case 'pileStartBtn':{if(missingKg().length){show('mix');break}const tot=totals(S.rows);S.pile={start:(()=>{const v=$('pStart')&&$('pStart').value;return v&&/^\d{4}-\d\d-\d\d$/.test(v)&&v<=today()?v:today()})(),recipe:S.rows.map(r=>({id:r.id,kg:+r.kg||0,n:matName(r.id)})),cn:tot.cn,mo:tot.mo,logs:[],cure:{}};S.turnToggle=false;save();renderPile();break}
+    case 'pileStartBtn':{if(missingKg().length){show('mix');break}const tot=totals(S.rows);S.pile={start:(()=>{const v=$('pStart')&&$('pStart').value;return v&&/^\d{4}-\d\d-\d\d$/.test(v)&&v<=today()?v:today()})(),recipe:S.rows.map(r=>Object.assign({id:r.id,kg:+r.kg||0,n:matName(r.id)},r.ov&&Object.values(r.ov).some(v=>v!=null)?{ov:Object.assign({},r.ov)}:{})),cn:tot.cn,mo:tot.mo,logs:[],cure:{}};S.turnToggle=false;save();renderPile();break}
     case 'lRain':S.lrain=!S.lrain;b.setAttribute('aria-pressed',S.lrain);b.textContent=(S.lrain?'✓ ':'')+t('rainChip');break;
     case 'bkCopy':{const ta=$('bkOut');const done=()=>{b.textContent=t('copied')};const fb=()=>{ta.hidden=false;ta.select()};try{navigator.clipboard.writeText(ta.value).then(done,fb)}catch(e){fb()}break}
     case 'bkRestore':{const mm=($('bkIn').value||'').replace(/\s+/g,'').match(/CNB1:([A-Za-z0-9+/=]+)/);let obj=null;
@@ -1356,6 +1574,8 @@ document.addEventListener('click',e=>{
     case 'pileEnd':if(!S.endArm){S.endArm=true;renderPile()}else{const st=pileStats(S.pile);S.pileHist.unshift({start:S.pile.start,end:today(),cn:S.pile.cn,hot:st.hot,turns:st.turnsHot});S.pileHist=S.pileHist.slice(0,5);S.pile=null;S.endArm=false;save();renderPile()}break;
     case 'noChick':S.noChicken=!S.noChicken;save();renderSettings();renderResults();break;
     case 'setBtn':if(S.view==='set')show(S.prevView||'mix');else{S.prevView=S.view;show('set')}break;
+    case 'updGo':location.reload();break;
+    case 'updX':$('upd').hidden=true;break;
     case 'setBack':show(S.prevView||'mix');break;
     case 'oSave':{const c=parseFloat(oC.value),n=parseFloat(oN.value),mo=parseFloat(oM.value),name=oName.value.trim();const base=oBaseId&&mat(oBaseId);
       const lab=c>0&&n>0;if(!(name&&(lab||base)&&mo>=0&&mo<100)){oPreview.textContent=t('ownNeed');return}
@@ -1387,7 +1607,21 @@ try{const icon='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/
   const l=document.createElement('link');l.rel='manifest';l.href=onPages?'manifest.webmanifest':'data:application/manifest+json,'+encodeURIComponent(JSON.stringify(man));document.head.appendChild(l);
   const ai=document.createElement('link');ai.rel='apple-touch-icon';ai.href=onPages?'cnbalance-icon-180.png':'data:image/png;base64,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';document.head.appendChild(ai);
   const fi=document.createElement('link');fi.rel='icon';fi.href=icon;document.head.appendChild(fi);
-  if('serviceWorker' in navigator&&onPages)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if('serviceWorker' in navigator&&onPages){
+    const hadSW=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    // a new service worker took over while this page was open
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadSW)showUpdate()});
+  }
+  // a newer index.html was published since this page was loaded (works even when sw.js is unchanged)
+  if(onPages&&APP_BUILD!=='dev'){
+    let last=0;
+    const check=()=>{const now=Date.now();if(!navigator.onLine||document.hidden||now-last<60000)return;last=now;
+      fetch('./index.html',{cache:'no-store'}).then(r=>r.ok?r.text():'').then(tx=>{const m=tx.match(/const APP_BUILD='(\d+)'/);if(m&&m[1]!==APP_BUILD)showUpdate()}).catch(()=>{})};
+    setTimeout(check,4000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
+    addEventListener('online',check);
+  }
 }catch(e){}
 
 applyTheme();applySize();
