@@ -1,14 +1,18 @@
 {
+  "id": "./",
   "name": "碳氮配比 CN Balance",
   "short_name": "碳氮配比",
+  "description": "Compost C:N, moisture and pile diary for farmers · 自己做堆肥的碳氮比计算 · Kira C:N kompos",
+  "lang": "zh-CN",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#2f6b34",
   "theme_color": "#2f6b34",
   "icons": [
-    {"src": "cnbalance-icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "cnbalance-icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "cnbalance-icon.svg", "sizes": "any", "type": "image/svg+xml"}
+    {"src": "cnbalance-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "cnbalance-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "cnbalance-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
   ]
 }

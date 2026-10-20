@@ -1,6 +1,13 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="碳氮配比 CN Balance · Imbangan C:N — compost C:N, moisture and pile diary for farmers">
 <title>碳氮配比 CN Balance</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#2f6b34">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 /* Layout: phone-first single column; sticky header, settings card at top, results below, fixed icon nav at bottom. */
@@ -153,6 +160,9 @@ nav.bot button{border:0;background:none;padding:8px 1px 9px;min-width:0;display:
 nav.bot button svg{width:26px;height:26px;flex:none}
 nav.bot button span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.74rem}
 @media (max-width:380px){html[lang=ms] nav.bot button span{font-size:.68rem;letter-spacing:-.01em}}
+input[aria-invalid="true"]{border-color:var(--bad)!important;background:var(--bad-soft)!important}
+#setBtn[aria-pressed="true"]{background:#fff;color:var(--leaf)}
+#v-set details{margin-top:0}
 nav.bot button{position:relative;-webkit-tap-highlight-color:transparent;transition:background-color .15s,color .15s}
 nav.bot button svg{padding:3px 12px;box-sizing:content-box;border-radius:14px;transition:background-color .15s}
 nav.bot button:active svg{background:var(--leaf-soft);transform:scale(.92)}
@@ -181,6 +191,9 @@ nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
 .launch .langs button{background:#fff;color:#1f3b22;border:0;border-radius:10px;min-height:56px;font-size:1.15rem;font-weight:900}
 @media (prefers-reduced-motion:no-preference){.card,.fix{transition:background .2s}}
 </style>
+</head>
+<body>
+
 
 <div id="launch" class="launch" hidden>
   <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fbf7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23efe6d3%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L428.7%20370%20L83.3%20370%20Z%22%20fill%3D%22%23f0dcc4%22/%3E%3Cpath%20d%3D%22M123.9%20218%20L388.1%20218%20L392.9%20236%20L119.1%20236%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M110.5%20268%20L401.5%20268%20L406.3%20286%20L105.7%20286%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M97.2%20318%20L414.8%20318%20L419.6%20336%20L92.4%20336%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M83.3%20370%20L428.7%20370%20L442.0%20420%20L70.0%20420%20Z%22%20fill%3D%22%237a4a1f%22/%3E%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L362%20120%20Q256%2096%20150%20120%20Z%22%20fill%3D%22%23e4ebdc%22/%3E%3Cg%20stroke%3D%22%238a5a28%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M200%20198%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20194%20l26%20-7%22/%3E%3Cpath%20d%3D%22M180%20246%20l26%20-7%22/%3E%3Cpath%20d%3D%22M300%20250%20l26%20-7%22/%3E%3Cpath%20d%3D%22M215%20298%20l26%20-7%22/%3E%3Cpath%20d%3D%22M320%20296%20l26%20-7%22/%3E%3Cpath%20d%3D%22M190%20346%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20350%20l26%20-7%22/%3E%3C/g%3E%3Cg%20stroke%3D%22%23f3dcb8%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M96%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M150%20400%20l44%20-16%22/%3E%3Cpath%20d%3D%22M210%20410%20l44%20-16%22/%3E%3Cpath%20d%3D%22M270%20402%20l44%20-16%22/%3E%3Cpath%20d%3D%22M330%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M380%20398%20l44%20-16%22/%3E%3C/g%3E%3Cpath%20d%3D%22M70%20420%20L150%20120%20Q256%2096%20362%20120%20L442%20420%20Z%22%20fill%3D%22none%22%20stroke%3D%22%232b2418%22%20stroke-width%3D%229%22%20stroke-linejoin%3D%22round%22/%3E%3Crect%20x%3D%2236%22%20y%3D%22418%22%20width%3D%22440%22%20height%3D%2212%22%20rx%3D%226%22%20fill%3D%22%232b2418%22/%3E%3Cg%20fill%3D%22%232f7fc1%22%3E%3Cpath%20d%3D%22M452%20232%20q-13%2020%200%2026%20q13%20-6%200%20-26z%22/%3E%3Cpath%20d%3D%22M466%20276%20q-11%2017%200%2022%20q11%20-5%200%20-22z%22/%3E%3C/g%3E%3C/svg%3E" width="120" height="120" alt="" style="border-radius:26px;box-shadow:0 4px 18px rgba(0,0,0,.3)">
@@ -271,9 +284,10 @@ nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
 
   <!-- LEARN -->
   <section class="view" id="v-learn" hidden></section>
+  <section class="view" id="v-set" hidden></section>
 </main>
 
-<nav class="bot" aria-label="Sections">
+<nav class="bot" id="navBot" aria-label="Sections">
   <button type="button" data-view="mix" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 20 Q6 8 12 7 Q18 8 22 20 Z"/><path d="M12 7 Q11 3 7 2 M12 7 Q13 3 17 2" stroke-linecap="round"/></svg><span data-t="navMix"></span></button>
   <button type="button" data-view="pile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="14" rx="3"/><circle cx="12" cy="18" r="4"/><path d="M12 9v9"/><path d="M18 5h3M18 9h2M18 13h3"/></svg><span data-t="navPile"></span></button>
   <button type="button" data-view="lib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg><span data-t="navLib"></span></button>
@@ -281,11 +295,7 @@ nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
   <button type="button" data-view="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5q4-2 9 1 5-3 9-1v14q-4-2-9 1-5-3-9-1z"/><path d="M12 6v14"/></svg><span data-t="navLearn"></span></button>
 </nav>
 
-<div id="setSheet" class="scrim" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-  <div class="hd"><h2 id="setTitle" data-t="setTitle"></h2><button class="x" type="button" id="setClose" aria-label="Close">×</button></div>
-  <div id="setBody"></div>
-</div></div>
-<div id="sheet" class="scrim" hidden><div class="sheet" role="dialog" aria-modal="true">
+<div id="sheet" class="scrim" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="hd"><h2 id="sheetTitle"></h2><button class="x" type="button" id="sheetClose" aria-label="Close">×</button></div>
   <div class="seg" id="pickFilter"></div>
   <div id="pickBody"></div>
@@ -297,13 +307,36 @@ nav.bot button[aria-current="page"] span{font-weight:900;color:var(--ink)}
 /* ---------- storage ---------- */
 const KEY='cnbalance.v1';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-const S=Object.assign({lang:null,theme:null,size:1,view:'mix',cn:30,m:55,example:false,
-  rows:[],noChicken:true,own:[],mulch:{id:'efb',kg:null,trees:null},libF:'all',unit:'kg',uw:{},pile:null,pileHist:[]},load());
-if(!S.uw)S.uw={};
-if(S.noChicken==null)S.noChicken=true;
-if(!S.noPh){if(S.example){S.rows=[];S.example=false}if(S.mulch&&S.mulch.kg===30&&S.mulch.trees===40){S.mulch.kg=null;S.mulch.trees=null}S.noPh=1}
-if(!S.noPh2){const g=id=>(S.rows.find(r=>r.id===id)||{}).kg;if(g('durian')===200&&g('cattle')===100)S.rows.forEach(r=>{r.kg=null});S.rows.forEach(r=>{if(r.kg===0)r.kg=null});S.example=false;S.noPh2=1}
+const TRANSIENT=['restoreArm','endArm','turnToggle'];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S,(k,v)=>TRANSIENT.includes(k)?undefined:v))}catch(e){}}
+const isObj=o=>o&&typeof o==='object'&&!Array.isArray(o);
+const num=v=>typeof v==='number'&&isFinite(v);
+// One place for defaults and clean-up: used on every launch and on backup restore.
+function normalize(src){
+  const o=Object.assign({lang:null,theme:null,size:1,view:'mix',cn:30,m:55,example:false,
+    rows:[],noChicken:true,own:[],mulch:{id:'efb',kg:null,trees:null},libF:'all',unit:'kg',uw:{},pile:null,pileHist:[]},isObj(src)?src:{});
+  if(!['zh','en','ms'].includes(o.lang))o.lang=null;
+  if(![1,2,3].includes(o.size))o.size=1;
+  if(![25,30,35].includes(o.cn))o.cn=30;
+  if(![50,55,60].includes(o.m))o.m=55;
+  if(!['kg','sack','bucket','barrow'].includes(o.unit))o.unit='kg';
+  if(!['mix','pile','lib','mulch','learn','set'].includes(o.view))o.view='mix';
+  if(!Array.isArray(o.own))o.own=[];
+  o.own=o.own.filter(m=>isObj(m)&&typeof m.id==='string'&&num(m.n)&&m.n>0&&num(m.cn)&&m.cn>0&&num(m.m)&&m.m>=0&&m.m<100);
+  if(!Array.isArray(o.rows))o.rows=[];
+  o.rows=o.rows.filter(r=>isObj(r)&&typeof r.id==='string');
+  o.rows.forEach(r=>{if(r.ov!=null&&!isObj(r.ov))delete r.ov});
+  if(!isObj(o.mulch))o.mulch={id:'efb',kg:null,trees:null};
+  if(!isObj(o.uw))o.uw={};
+  if(!Array.isArray(o.pileHist))o.pileHist=[];
+  if(o.pile!=null&&!(isObj(o.pile)&&typeof o.pile.start==='string'&&Array.isArray(o.pile.recipe)&&Array.isArray(o.pile.logs)))o.pile=null;
+  if(o.pile&&!isObj(o.pile.cure))o.pile.cure={};
+  if(o.noChicken==null)o.noChicken=true;
+  if(!o.noPh){if(o.example){o.rows=[];o.example=false}if(o.mulch.kg===30&&o.mulch.trees===40){o.mulch.kg=null;o.mulch.trees=null}o.noPh=1}
+  if(!o.noPh2){const g=id=>(o.rows.find(r=>r.id===id)||{}).kg;if(g('durian')===200&&g('cattle')===100)o.rows.forEach(r=>{r.kg=null});o.rows.forEach(r=>{if(r.kg===0)r.kg=null});o.example=false;o.noPh2=1}
+  TRANSIENT.forEach(k=>delete o[k]);
+  return o}
+const S=normalize(load());
 const blankKg=r=>r.kg==null||r.kg===''||!isFinite(+r.kg)||+r.kg<=0;
 const missingKg=()=>S.rows.filter(r=>mat(r.id)&&blankKg(r));
 
@@ -360,6 +393,7 @@ MATS.forEach(m=>{if(m.note==='CHICK')m.note=CHICK});
 const WATER={id:'water',n:0,cn:0,m:100,zh:'水',en:'Water',ms:'Air'};
 function allMats(){return MATS.concat(S.own)}
 function mat(id){if(id==='water')return WATER;return allMats().find(x=>x.id===id)}
+function matName(id,fb){const m=mat(id);return m?nm(m):(fb||'?')}
 function grp(m){if(m.id==='water')return 'W';return m.cn<=24?'N':'C'}
 function nm(m){return m.name||m[L()]||m.en}
 
@@ -444,9 +478,15 @@ function t(k){return (T[L()]&&T[L()][k])||T.en[k]||k}
 Object.assign(T.zh,{seesawNote:'24 是土壤微生物需要的碳氮比，用来判断覆盖物会借氮还是放氮；它不是让树开花或长叶的开关。'});
 Object.assign(T.en,{seesawNote:'24 is the C:N soil microbes need, used to tell whether mulch borrows or releases nitrogen. It is not a switch that makes the tree flower or grow leaves.'});
 Object.assign(T.ms,{seesawNote:'24 ialah C:N yang diperlukan mikrob tanah, untuk tahu sama ada sungkupan meminjam atau melepaskan nitrogen. Ia bukan suis yang membuat pokok berbunga atau berpucuk.'});
-Object.assign(T.zh,{setTitle:'设置',setLang:'语言',setSize:'字体大小',setTheme:'显示',thLight:'白天',thDark:'夜间',thAuto:'跟随手机'});
-Object.assign(T.en,{setTitle:'Settings',setLang:'Language',setSize:'Text size',setTheme:'Display',thLight:'Light',thDark:'Dark',thAuto:'Same as phone'});
-Object.assign(T.ms,{setTitle:'Tetapan',setLang:'Bahasa',setSize:'Saiz tulisan',setTheme:'Paparan',thLight:'Cerah',thDark:'Gelap',thAuto:'Ikut telefon'});
+Object.assign(T.zh,{setLang:'语言',setSize:'字体大小',setTheme:'显示',thLight:'白天',thDark:'夜间',thAuto:'跟随手机'});
+Object.assign(T.en,{setLang:'Language',setSize:'Text size',setTheme:'Display',thLight:'Light',thDark:'Dark',thAuto:'Same as phone'});
+Object.assign(T.ms,{setLang:'Bahasa',setSize:'Saiz tulisan',setTheme:'Paparan',thLight:'Cerah',thDark:'Gelap',thAuto:'Ikut telefon'});
+Object.assign(T.zh,{ownInPile:'正在使用中的堆肥用了这个材料，完成该堆后才能删除。',ovBad:'这个数值不合理：氮 0–50%，碳氮比 1–2000，含水量 0–99%。暂时用上面的数值。',calcBad:'无法计算：请检查数量和“改数值”里填的数字。',navAria:'主要页面',close:'关闭'});
+Object.assign(T.en,{ownInPile:'Your current pile uses this material. Finish that pile before deleting it.',ovBad:'That value is not possible: N 0–50%, C:N 1–2000, moisture 0–99%. Using the value shown above for now.',calcBad:'Cannot calculate: check the amounts and any numbers typed in Edit values.',navAria:'Main sections',close:'Close'});
+Object.assign(T.ms,{ownInPile:'Longgokan semasa anda menggunakan bahan ini. Selesaikan longgokan itu dahulu sebelum memadamnya.',ovBad:'Nilai itu tidak mungkin: N 0–50%, C:N 1–2000, lembapan 0–99%. Nilai di atas digunakan buat sementara.',calcBad:'Tidak dapat mengira: semak jumlah dan nombor yang diisi dalam Ubah nilai.',navAria:'Bahagian utama',close:'Tutup'});
+Object.assign(T.zh,{setTitle:'软件设置',back:'返回',bkT:'备份与恢复',refsT:'参考资料',aboutT:'关于本软件',aboutVer:'版本',aboutBody:'碳氮配比帮助农友自己做堆肥：算碳氮比和含水量、记录堆肥温度、计算覆盖物的氮。材料数值是有出处的文献平均值，不需要送化验。数据只存在您的手机里。'});
+Object.assign(T.en,{setTitle:'App settings',back:'Back',bkT:'Back up and restore',refsT:'References',aboutT:'About this app',aboutVer:'Version',aboutBody:'CN Balance helps farmers make their own compost: work out C:N and moisture, log pile temperatures, and check the nitrogen in mulch. Material values are published averages with sources; no lab test needed. Your data stays on your phone.'});
+Object.assign(T.ms,{setTitle:'Tetapan aplikasi',back:'Kembali',bkT:'Sandaran dan pulih',refsT:'Rujukan',aboutT:'Tentang aplikasi ini',aboutVer:'Versi',aboutBody:'Imbangan C:N membantu pekebun membuat kompos sendiri: kira C:N dan lembapan, catat suhu longgokan, dan semak nitrogen dalam sungkupan. Nilai bahan ialah purata terbitan bersumber; tidak perlu ujian makmal. Data anda kekal dalam telefon anda.'});
 Object.assign(T.zh,{ovHint:'空着就用上面显示的数值；只填您自己有的数据。'});
 Object.assign(T.zh,{needKg:'请先填写数量：',needMulchKg:'请填写每棵树铺多少公斤，才计算氮的借还。',loadEx:'看一个示范配方'});
 Object.assign(T.en,{ovHint:'Leave blank to use the values shown above. Fill in only what you know for your own material.'});
@@ -562,12 +602,11 @@ const ULBL={zh:{kg:'公斤',sack:'包',bucket:'桶',barrow:'手推车'},en:{kg:'
 function ul(u){return ULBL[L()][u]}
 function ulN(u,c){return L()==='en'&&c!==1&&u!=='kg'?ul(u)+'s':ul(u)}
 function uw(id){const u=S.unit;if(u==='kg'||id==='water')return 1;return (S.uw[id]&&S.uw[id][u])||null}
-function qtyText(id,kg){ // "6.5 sacks rice husk (≈81 kg)"
-  const m=mat(id),u=S.unit,w=uw(id);
-  if(id==='water')return `<span class="num">${kgFmt(kg)}</span> ${t('L')} ${esc(nm(m))}`;
-  if(u==='kg')return `<span class="num">${kgFmt(kg)}</span> ${t('kg')} ${esc(nm(m))}`;
-  if(!w)return `<span class="num">${kgFmt(kg)}</span> ${t('kg')} ${esc(nm(m))}`;
-  const c=Math.round(kg/w*2)/2;return `<span class="num">${f(c,1)}</span> ${ulN(u,c)} ${esc(nm(m))} <span class="small muted">(≈${kgFmt(kg)} ${t('kg')})</span>`}
+function qtyText(id,kg,fb){ // "6.5 sacks rice husk (≈81 kg)"
+  const u=S.unit,w=uw(id),name=esc(matName(id,fb));
+  if(id==='water')return `<span class="num">${kgFmt(kg)}</span> ${t('L')} ${name}`;
+  if(u==='kg'||!w)return `<span class="num">${kgFmt(kg)}</span> ${t('kg')} ${name}`;
+  const c=Math.round(kg/w*2)/2;if(c<0.5)return `<span class="num">${kgFmt(kg)}</span> ${t('kg')} ${name}`;return `<span class="num">${f(c,1)}</span> ${ulN(u,c)} ${name} <span class="small muted">(≈${kgFmt(kg)} ${t('kg')})</span>`}
 
 /* ---------- dates ---------- */
 function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -590,7 +629,7 @@ function pileStats(p){
   });
   const withT=days.filter(x=>x.t!=null);const last=withT[withT.length-1]||null;
   return {days,hot:hotDates.length,turnsHot,firstHot,lastTurn,last,
-    hotDone:hotDates.length>=HOT_DAYS,allDone:hotDates.length>=HOT_DAYS&&turnsHot>=TURNS,age:dayDiff(p.start,today())}}
+    hotDone:hotDates.length>=HOT_DAYS,allDone:hotDates.length>=HOT_DAYS&&turnsHot>=TURNS,age:Math.max(0,dayDiff(p.start,today()))}}
 function pileAdvice(p,st){
   const td=today(),tr=st.days.find(x=>x.d===td),tt=tr&&tr.t!=null?tr.t:null;
   if(st.last&&st.last.t>HOT_HI&&st.last.d===td)return ['bad','advHotHi'];
@@ -627,21 +666,22 @@ function pileSummary(p,st){
     `C:N ${f(p.cn,0)} · ${t('ownM').replace(' %','')} ${f(p.mo,0)}%`,
     `${t('sumHot')}: ${st.hot}/${HOT_DAYS} · ${t('sumTurn')}: ${st.turnsHot}/${TURNS}`,
     `${t('sumRecent')}: `+st.days.filter(x=>x.t!=null).slice(-7).map(x=>`${dFmt(x.d)} ${f(x.t,0)}°C${x.turn?' ↻':''}`).join(', '),
-    p.recipe.map(r=>`${nm(mat(r.id)||{en:r.id})} ${kgFmt(r.kg)} ${t('kg')}`).join(' + '),APP_URL];
+    p.recipe.map(r=>`${matName(r.id,r.n)} ${kgFmt(r.kg)} ${t('kg')}`).join(' + '),APP_URL];
   return L1.join('\n')}
 function backupCode(){try{return 'CNB1:'+btoa(unescape(encodeURIComponent(JSON.stringify({v:1,S}))))}catch(e){return ''}}
 function backupMsg(){return t('bkMsgHead')+'\n'+backupCode()}
-function backupHTML(p,st){
-  return `<details><summary>${t('shareT')}</summary><div class="in" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
-   ${p?`<p style="margin:0;font-weight:800">${t('shareLogT')}</p><a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(pileSummary(p,st))}">${t('shareWa')}</a>`:''}
-   <p style="margin:10px 0 0;font-weight:800">${t('bkWhyT')}</p>
+function pileShareHTML(p,st){
+  return `<div class="card"><p style="margin:0 0 10px;font-weight:800">${t('shareLogT')}</p><a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(pileSummary(p,st))}">${t('shareWa')}</a></div>`}
+function backupHTML(){
+  return `<details><summary>${t('bkT')}</summary><div class="in" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+   <p style="margin:0;font-weight:800">${t('bkWhyT')}</p>
    <p style="margin:0">${t('bkWhy')}</p>
    <a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(backupMsg())}">${t('bkSendWa')}</a>
    <button type="button" class="btn ghost" id="bkCopy">${t('copyCode')}</button>
-   <textarea id="bkOut" readonly rows="3" hidden style="width:100%;font:inherit;font-size:.8rem;border:2px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);padding:8px">${backupMsg()}</textarea>
+   <textarea id="bkOut" name="bkOut" aria-label="CNB1" readonly rows="3" hidden style="width:100%;font:inherit;font-size:.8rem;border:2px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);padding:8px">${backupMsg()}</textarea>
    <details class="sub" style="width:100%"><summary>${t('restoreT')}</summary><div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding-top:6px">
-    <p style="margin:0">${t('restoreHow')}</p>
-    <textarea id="bkIn" rows="3" style="width:100%;font:inherit;font-size:.8rem;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px"></textarea>
+    <label for="bkIn" style="margin:0">${t('restoreHow')}</label>
+    <textarea id="bkIn" name="bkIn" rows="3" style="width:100%;font:inherit;font-size:.8rem;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px"></textarea>
     <button type="button" class="btn ghost" id="bkRestore">${S.restoreArm?t('restoreConfirm'):t('restoreBtn')}</button>
     <p class="small" id="bkMsg"></p></div></details></div></details>`}
 function buildSVG(){
@@ -678,11 +718,11 @@ function renderPile(){
     el.innerHTML=`<div class="card"><p class="label">${t('settings')}</p><h2>${t('pileStartT')}</h2>
       <p class="muted">${t('pileStartB')}</p>
       ${has?`<p class="num" style="font-weight:800">C:N ${f(tot.cn,0)} · ${t('ownM').replace(' %','')} ${f(tot.mo,0)}% · ${kgFmt(tot.W)} ${t('kg')}</p>
-      <label class="field" style="margin:10px 0"><span>${t('startDate')}</span><input id="pStart" type="date" value="${today()}" style="width:12em"></label>
+      <label class="field" style="margin:10px 0"><span>${t('startDate')}</span><input id="pStart" type="date" value="${today()}" max="${today()}" style="width:12em"></label>
       <p class="small">${t('yieldNote')} → <b class="num">${kgFmt(tot.W*0.2)}–${kgFmt(tot.W*0.5)} ${t('kg')}</b></p>
       <p class="small">${t('pileSize')}</p>
       <button type="button" class="btn" id="pileStartBtn">${t('pileStartBtn')}</button>`:`<p>${miss.length?t('needKg')+' '+miss.map(r=>esc(nm(mat(r.id)))).join(' · '):t('pileNoMix')}</p><button type="button" class="btn ghost" data-view="mix">${t('navMix')}</button>`}
-      </div>${buildHTML(true)}${troubleHTML()}${backupHTML(null,null)}`;
+      </div>${buildHTML(true)}${troubleHTML()}`;
     return}
   const st=pileStats(p);const [cls,key]=pileAdvice(p,st);
   const td=today();const todayLog=st.days.find(x=>x.d===td);
@@ -691,7 +731,7 @@ function renderPile(){
   el.innerHTML=`
   <div class="card"><p class="label">${t('logToday')}</p>
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
-      <label class="field"><span>${t('date')}</span><input id="lDate" type="date" value="${td}" style="width:11em"></label>
+      <label class="field"><span>${t('date')}</span><input id="lDate" type="date" value="${td}" min="${p.start}" max="${today()}" style="width:11em"></label>
       <label class="field"><span>${t('coreT')}</span><input id="lTemp" type="number" inputmode="decimal" step="any" placeholder="°C"></label>
       <button type="button" class="chip" id="lTurn" aria-pressed="${!!S.turnToggle}">${S.turnToggle?'✓ ':''}${t('turnedToday')}</button>
     </div>
@@ -721,12 +761,12 @@ function renderPile(){
   </div></details>
   <details><summary>${t('pileRecipe')}</summary><div class="in">
     <p>${t('startDate')}: <b>${dFmt(p.start)}</b> · C:N <b class="num">${f(p.cn,0)}</b> · ${t('ownM').replace(' %','')} <b class="num">${f(p.mo,0)}%</b></p>
-    <ul>${p.recipe.map(r=>`<li>${qtyText(r.id,r.kg)}</li>`).join('')}</ul>
+    <ul>${p.recipe.map(r=>`<li>${qtyText(r.id,r.kg,r.n)}</li>`).join('')}</ul>
     <p class="small">${t('yieldNote')} → <b class="num">${kgFmt(p.recipe.reduce((a,r)=>a+r.kg,0)*0.2)}–${kgFmt(p.recipe.reduce((a,r)=>a+r.kg,0)*0.5)} ${t('kg')}</b></p>
     ${(()=>{const n=p.recipe.reduce((a,r)=>{const m=mat(r.id);return m?a+r.kg*coef(m).n:a},0);return `<p class="small">${t('nBudget').replace(/\{n\}/g,f(n,1)).replace('{lo}',f(n*0.6,1))}</p>`})()}
     <button type="button" class="btn ghost" id="pileEnd">${S.endArm?t('endConfirm'):t('endPile')}</button>
   </div></details>
-  ${buildHTML(false)}${troubleHTML()}${backupHTML(p,st)}`;
+  ${buildHTML(false)}${pileShareHTML(p,st)}${troubleHTML()}`;
 }
 
 /* ---------- troubleshooting (illustrated) ---------- */
@@ -814,7 +854,7 @@ function renderRows(){
       <button class="x" type="button" data-del="${i}" aria-label="${t('del')}">×</button>
       ${S.unit!=='kg'&&m.id!=='water'&&!uw(r.id)?`<div class="ovr" style="background:var(--warn-soft)"><label class="field"><span>${t('weighPrompt').replace('{u}',ul(S.unit)).replace('{x}',esc(nm(m)))}</span><span style="display:flex;gap:6px;align-items:center"><input id="uw${i}" type="number" inputmode="decimal" step="any" data-uwset="${i}"> ${t('kg')}</span></label></div>`:''}
       ${r.open?`<div class="ovr">
-        <p class="small" style="flex-basis:100%;margin:0">${t('ovHint')}</p>
+        <p class="small" style="flex-basis:100%;margin:0">${t('ovHint')}</p><p class="small" id="ovErr${i}" role="alert" style="flex-basis:100%;margin:0;color:var(--bad);font-weight:800"></p>
         <label class="field">N % <input id="on${i}" type="number" inputmode="decimal" step="any" value="${ov.n??''}" data-on="${i}"></label>
         <label class="field">C:N <input id="oc${i}" type="number" inputmode="decimal" step="any" value="${ov.cn??''}" data-oc="${i}"></label>
         <label class="field">${t('ownM')} <input id="om${i}" type="number" inputmode="decimal" step="any" value="${ov.m??''}" data-om="${i}"></label>
@@ -844,7 +884,7 @@ function renderResults(){
   const miss=missingKg();
   if(miss.length){results.innerHTML=`<div class="banner" style="display:block"><b>${t('needKg')}</b> ${miss.map(r=>esc(nm(mat(r.id)))).join(' · ')}</div>`;return}
   const tot=totals(S.rows);
-  if(!(tot.W>0)||!(tot.N>0)){results.innerHTML='';return}
+  if(!(tot.W>0)||!(tot.N>0)||!isFinite(tot.cn)||!isFinite(tot.mo)){results.innerHTML=S.rows.length?`<div class="banner" style="display:block"><b>${t('calcBad')}</b></div>`:'';return}
   const [cb,ck]=cnBand(tot.cn),[mb,mk]=mBand(tot.mo);
   const fx=solveFix(S.rows);
   let fixHTML='';
@@ -904,7 +944,7 @@ function matCard(m,canDel){const ov=null;const q=coef(m);
     ${m.note?`<div class="vals">${esc(m.note[L()]||m.note.en)}</div>`:''}
     <div class="vals" style="font-size:.8rem">${t('source')}: ${m.base&&mat(m.base)?esc(t('basedOn').replace('{x}',nm(mat(m.base)))):esc((SRC[m.src]||SRC.own)[L()])}</div>
     <button type="button" class="addbtn" data-addmat="${m.id}">＋ ${t('addToMix')}</button>
-    ${canDel?`<button type="button" class="addbtn" data-delown="${m.id}">${t('del')}</button>`:''}
+    ${canDel?(S.pile&&S.pile.recipe.some(r=>r.id===m.id)?`<div class="vals" style="font-weight:800">${t('ownInPile')}</div>`:`<button type="button" class="addbtn" data-delown="${m.id}">${t('del')}</button>`):''}
    </div>
    <div class="cnv num">${f(m.cn,m.cn<10?1:0)}<small>C:N</small></div></div>`}
 function renderLib(){
@@ -931,7 +971,7 @@ function hmCalc(pre){const v=[0,1,2].map(i=>parseFloat(($(pre+'h'+i)||{}).value)
 let oBaseId=null;
 function renderOwnForm(){const b=$('oBase');const m=oBaseId&&mat(oBaseId);
   b.innerHTML=m?`<span class="sw ${grp(m)}" style="border-radius:3px"></span><span><b>${esc(nm(m))}</b><span class="num">C:N ${f(m.cn,0)} · N ${f(m.n,2)}%</span></span>`:`<span></span><span><b>${t('ownPickBase')}</b></span>`;
-  const h=$('oHome');if(!h.firstChild)h.innerHTML=homeMoist('o');ownPreview()}
+  const h=$('oHome');if(h.dataset.lang!==L()){h.innerHTML=homeMoist('o');h.dataset.lang=L()}ownPreview()}
 function ownPreview(){const c=parseFloat(oC.value),n=parseFloat(oN.value);const m=oBaseId&&mat(oBaseId);oPreview.textContent=(c>0&&n>0)?`C:N = ${f(c/n,1)}`:(m?`C:N ${f(m.cn,0)} · N ${f(m.n,2)}%`:'')}
 
 /* ---------- mulch ---------- */
@@ -1180,6 +1220,7 @@ const REFS=[
  ['Hino K. et al. (1995). Mixing materials in composting leftovers (C/N not a reliable maturity index).','https://agris.fao.org/search/fr/records/647236e9e17b74d2224eccea']
 ];
 const APP_URL='https://stanleywoosweeleong.github.io/cnbalance/';
+const APP_VER='2026-10-20';
 const QR_SVG='<svg viewBox="0 0 37 37" width="200" height="200" role="img" aria-label="QR" shape-rendering="crispEdges" style="background:#fff;border-radius:8px"><rect width="37" height="37" fill="#fff"/><path d="M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM15 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM25 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM13 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM23 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM17 4h1v1h-1zM19 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM25 5h1v1h-1zM26 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM11 6h1v1h-1zM15 6h1v1h-1zM16 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM22 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM24 9h1v1h-1zM25 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM28 10h1v1h-1zM31 10h1v1h-1zM33 10h1v1h-1zM34 10h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM6 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM13 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM34 11h1v1h-1zM3 12h1v1h-1zM4 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM16 12h1v1h-1zM19 12h1v1h-1zM23 12h1v1h-1zM25 12h1v1h-1zM28 12h1v1h-1zM29 12h1v1h-1zM30 12h1v1h-1zM31 12h1v1h-1zM33 12h1v1h-1zM34 12h1v1h-1zM3 13h1v1h-1zM13 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM20 13h1v1h-1zM22 13h1v1h-1zM25 13h1v1h-1zM26 13h1v1h-1zM28 13h1v1h-1zM29 13h1v1h-1zM31 13h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM4 14h1v1h-1zM8 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM20 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM29 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM2 15h1v1h-1zM4 15h1v1h-1zM6 15h1v1h-1zM10 15h1v1h-1zM11 15h1v1h-1zM12 15h1v1h-1zM15 15h1v1h-1zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM26 15h1v1h-1zM29 15h1v1h-1zM31 15h1v1h-1zM33 15h1v1h-1zM2 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM13 16h1v1h-1zM14 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM32 16h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM6 17h1v1h-1zM12 17h1v1h-1zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM30 17h1v1h-1zM32 17h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM23 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM32 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM4 19h1v1h-1zM7 19h1v1h-1zM11 19h1v1h-1zM13 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM22 19h1v1h-1zM25 19h1v1h-1zM26 19h1v1h-1zM28 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM34 19h1v1h-1zM4 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM19 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM7 21h1v1h-1zM11 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM30 21h1v1h-1zM34 21h1v1h-1zM3 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM9 22h1v1h-1zM14 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM31 22h1v1h-1zM32 22h1v1h-1zM33 22h1v1h-1zM34 22h1v1h-1zM2 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM23 23h1v1h-1zM25 23h1v1h-1zM28 23h1v1h-1zM29 23h1v1h-1zM31 23h1v1h-1zM34 23h1v1h-1zM5 24h1v1h-1zM8 24h1v1h-1zM11 24h1v1h-1zM14 24h1v1h-1zM15 24h1v1h-1zM18 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM30 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM34 24h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM7 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM21 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM31 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h1v1h-1zM16 26h1v1h-1zM17 26h1v1h-1zM19 26h1v1h-1zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM17 27h1v1h-1zM18 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM23 27h1v1h-1zM25 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM31 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM16 28h1v1h-1zM18 28h1v1h-1zM21 28h1v1h-1zM22 28h1v1h-1zM23 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM15 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM15 30h1v1h-1zM17 30h1v1h-1zM19 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM25 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM32 30h1v1h-1zM33 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM11 31h1v1h-1zM19 31h1v1h-1zM20 31h1v1h-1zM21 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM24 31h1v1h-1zM29 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM19 32h1v1h-1zM21 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM26 32h1v1h-1zM27 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM31 32h1v1h-1zM32 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h1v1h-1zM12 33h1v1h-1zM13 33h1v1h-1zM15 33h1v1h-1zM17 33h1v1h-1zM18 33h1v1h-1zM19 33h1v1h-1zM20 33h1v1h-1zM21 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM26 33h1v1h-1zM28 33h1v1h-1zM29 33h1v1h-1zM30 33h1v1h-1zM34 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM11 34h1v1h-1zM13 34h1v1h-1zM15 34h1v1h-1zM16 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM20 34h1v1h-1zM23 34h1v1h-1zM25 34h1v1h-1zM27 34h1v1h-1zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1z" fill="#000"/></svg>';
 function shareHTML(){const lbl={zh:['分享这个软件','用 WhatsApp 分享','让朋友扫这个二维码，或复制链接：','复制链接','已复制'],en:['Share this app','Share on WhatsApp','Let a friend scan this QR code, or copy the link:','Copy link','Copied'],ms:['Kongsi aplikasi ini','Kongsi di WhatsApp','Biar rakan imbas kod QR ini, atau salin pautan:','Salin pautan','Disalin']}[L()];
   const msg={zh:'碳氮配比：自己做堆肥的碳氮比、湿度计算和堆肥日志 ',en:'CN Balance: compost C:N, moisture and pile diary for farmers ',ms:'Imbangan C:N: kira C:N, lembapan dan diari longgokan kompos '}[L()]+APP_URL;
@@ -1218,14 +1259,14 @@ function droughtSVG(){
   return s+`</svg>`}
 function renderLearn(){
   const sec=LEARN_()[L()];
-  vLearn.innerHTML=sec.map((s,i)=>`<details ${i<2?'open':''}><summary>${s[0]}</summary><div class="in">${s[1]}</div></details>`).join('')+
-  shareHTML()+`<details><summary>${L()==='zh'?'参考资料':L()==='ms'?'Rujukan':'References'}</summary><div class="in"><ol class="refs">${REFS.map(r=>`<li><a href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join('')}</ol></div></details>`;
+  vLearn.innerHTML=sec.map((s,i)=>`<details ${i<2?'open':''}><summary>${s[0]}</summary><div class="in">${s[1]}</div></details>`).join('');
 }
 
 /* ---------- picker sheet ---------- */
 let pickCb=null,pickF='all',pickWater=false;
-function openPicker(cb,withWater){pickCb=cb;pickWater=!!withWater;pickF='all';sheetTitle.textContent=t('pickTitle');renderPicker();sheet.hidden=false;document.body.style.overflow='hidden'}
-function closePicker(){sheet.hidden=true;document.body.style.overflow=''}
+let pickReturn=null;
+function openPicker(cb,withWater){pickReturn=document.activeElement;pickCb=cb;pickWater=!!withWater;pickF='all';sheetTitle.textContent=t('pickTitle');renderPicker();sheet.hidden=false;document.body.style.overflow='hidden';$('sheetClose').focus()}
+function closePicker(){sheet.hidden=true;document.body.style.overflow='';if(pickReturn&&document.contains(pickReturn))pickReturn.focus();pickReturn=null}
 function renderPicker(){
   pickFilter.innerHTML=[['all','all'],['N','greens'],['C','browns']].map(x=>`<button type="button" class="chip" aria-pressed="${pickF===x[0]}" data-pf="${x[0]}">${t(x[1])}</button>`).join('');
   const groups=[];
@@ -1248,20 +1289,25 @@ function applyStatic(){
   document.documentElement.lang=L()==='zh'?'zh-CN':L();
   document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
   $('appTitle').textContent=t('app');document.title=t('app')+(L()==='zh'?' · CN Balance':'');
-  if(!$('setSheet').hidden)renderSettingsSheet();
+  if(S.view==='set')renderSettingsSheet();
+  $('setBtn').setAttribute('aria-label',t('setTitle'));$('navBot').setAttribute('aria-label',t('navAria'));$('sheetClose').setAttribute('aria-label',t('close'));
 }
 function applyTheme(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);else document.documentElement.removeAttribute('data-theme')}
-function closeSettings(){$('setSheet').hidden=true;document.body.style.overflow=''}
 function renderSettingsSheet(){
+  S.restoreArm=false;
   const sec=(lbl,html)=>`<p class="small" style="font-weight:800;margin:14px 0 6px">${lbl}</p><div class="seg">${html}</div>`;
   const lang=[['zh','中文'],['en','English'],['ms','Malay']].map(([k,v])=>`<button type="button" data-setlang="${k}" aria-pressed="${L()===k}">${v}</button>`).join('');
   const size=[1,2,3].map(n=>`<button type="button" data-setsize="${n}" aria-pressed="${S.size===n}" aria-label="${t('setSize')} ${n}"><span style="font-size:${[1,1.25,1.5][n-1]}em;line-height:1">A</span></button>`).join('');
   const th=[['light','thLight'],['dark','thDark'],[null,'thAuto']].map(([k,l])=>`<button type="button" data-settheme="${k||'auto'}" aria-pressed="${(S.theme||null)===k}">${t(l)}</button>`).join('');
-  $('setBody').innerHTML=sec(t('setLang'),lang)+sec(t('setSize'),size)+sec(t('setTheme'),th);
+  const refs=`<details><summary>${t('refsT')}</summary><div class="in"><ol class="refs">${REFS.map(r=>`<li><a href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join('')}</ol></div></details>`;
+  const about=`<details><summary>${t('aboutT')}</summary><div class="in"><p>${t('aboutBody')}</p><p class="num" style="font-weight:800;word-break:break-all">${APP_URL}</p><p class="small">${t('aboutVer')} ${APP_VER}</p></div></details>`;
+  $('v-set').innerHTML=`<button type="button" class="btn ghost" id="setBack" style="margin-bottom:12px">← ${t('back')}</button>
+   <div class="card"><h2 style="margin-top:0">${t('setTitle')}</h2>${sec(t('setLang'),lang)}${sec(t('setSize'),size)}${sec(t('setTheme'),th)}</div>
+   ${shareHTML()}${backupHTML()}${refs}${about}`;
 }
 function applySize(){document.documentElement.setAttribute('data-size',S.size)}
 function renderAll(){applyStatic();renderMix();renderPile();renderLib();renderMulch();renderLearn()}
-function show(v){S.view=v;save();['mix','pile','lib','mulch','learn'].forEach(x=>{$('v-'+x).hidden=x!==v});if(v==='pile')renderPile();
+function show(v){S.view=v;save();['mix','pile','lib','mulch','learn','set'].forEach(x=>{$('v-'+x).hidden=x!==v});if(v==='pile')renderPile();if(v==='set')renderSettingsSheet();$('setBtn').setAttribute('aria-pressed',v==='set');
   document.querySelectorAll('nav.bot button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v?'page':'false'));window.scrollTo(0,0)}
 function touched(){if(S.example){S.example=false;exBanner.hidden=true}}
 
@@ -1284,7 +1330,7 @@ document.addEventListener('click',e=>{
   if(d.dellog){S.pile.logs=S.pile.logs.filter(l=>l.d!==d.dellog);save();renderPile();return}
   if(d.libf){S.libF=d.libf;save();renderLib();return}
   if(d.addmat){const ex=S.rows.find(r=>r.id===d.addmat);if(!ex)S.rows.push({id:d.addmat,kg:null});touched();save();renderMix();show('mix');return}
-  if(d.delown){S.own=S.own.filter(m=>m.id!==d.delown);S.rows=S.rows.filter(r=>r.id!==d.delown);save();renderAll();return}
+  if(d.delown){if(S.pile&&S.pile.recipe.some(r=>r.id===d.delown))return;S.own=S.own.filter(m=>m.id!==d.delown);S.rows=S.rows.filter(r=>r.id!==d.delown);save();renderAll();return}
   if(d.pf){pickF=d.pf;renderPicker();return}
   if(d.pick){const cb=pickCb;closePicker();if(cb)cb(d.pick);save();renderMix();renderMulch();return}
   if(b.id==='applyFix'&&window.__fix){window.__fix.adds.forEach(a=>{const r=S.rows.find(x=>x.id===a.id);const add=Math.round(a.x*10)/10;
@@ -1295,22 +1341,22 @@ document.addEventListener('click',e=>{
     case 'sheetClose':closePicker();break;
     case 'mulchPick':openPicker(id=>{S.mulch.id=id},false);break;
     case 'copyLink':{const done=()=>{b.textContent=b.dataset.ok};try{navigator.clipboard.writeText(APP_URL).then(done,()=>{})}catch(e){}break}
-    case 'pileStartBtn':{if(missingKg().length){show('mix');break}const tot=totals(S.rows);S.pile={start:($('pStart')&&$('pStart').value)||today(),recipe:S.rows.map(r=>({id:r.id,kg:+r.kg||0})),cn:tot.cn,mo:tot.mo,logs:[],cure:{}};S.turnToggle=false;save();renderPile();break}
+    case 'pileStartBtn':{if(missingKg().length){show('mix');break}const tot=totals(S.rows);S.pile={start:(()=>{const v=$('pStart')&&$('pStart').value;return v&&/^\d{4}-\d\d-\d\d$/.test(v)&&v<=today()?v:today()})(),recipe:S.rows.map(r=>({id:r.id,kg:+r.kg||0,n:matName(r.id)})),cn:tot.cn,mo:tot.mo,logs:[],cure:{}};S.turnToggle=false;save();renderPile();break}
     case 'lRain':S.lrain=!S.lrain;b.setAttribute('aria-pressed',S.lrain);b.textContent=(S.lrain?'✓ ':'')+t('rainChip');break;
     case 'bkCopy':{const ta=$('bkOut');const done=()=>{b.textContent=t('copied')};const fb=()=>{ta.hidden=false;ta.select()};try{navigator.clipboard.writeText(ta.value).then(done,fb)}catch(e){fb()}break}
     case 'bkRestore':{const mm=($('bkIn').value||'').replace(/\s+/g,'').match(/CNB1:([A-Za-z0-9+/=]+)/);let obj=null;
       try{if(mm)obj=JSON.parse(decodeURIComponent(escape(atob(mm[1]))))}catch(e){obj=null}
       if(!obj||!obj.S||typeof obj.S!=='object'){S.restoreArm=false;$('bkMsg').textContent=t('restoreBad');b.textContent=t('restoreBtn');break}
       if(!S.restoreArm){S.restoreArm=true;b.textContent=t('restoreConfirm');break}
-      const keep=S.lang;Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,obj.S);S.restoreArm=false;if(!S.lang)S.lang=keep;save();applyTheme();applySize();renderAll();show('pile');$('bkMsg')&&($('bkMsg').textContent=t('restoreOk'));break}
+      const keep=S.lang;const ns=normalize(obj.S);Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,ns);if(!S.lang)S.lang=keep;save();applyTheme();applySize();renderAll();show('pile');$('bkMsg')&&($('bkMsg').textContent=t('restoreOk'));break}
     case 'lTurn':S.turnToggle=!S.turnToggle;b.setAttribute('aria-pressed',S.turnToggle);b.textContent=(S.turnToggle?'✓ ':'')+t('turnedToday');break;
-    case 'lSave':{const d=$('lDate').value||today(),tv=parseFloat($('lTemp').value);const has=isFinite(tv);
+    case 'lSave':{let d=$('lDate').value||today();if(d>today())d=today();if(d<S.pile.start)d=S.pile.start;const tv=parseFloat($('lTemp').value);const has=isFinite(tv);
       if(!has&&!S.turnToggle&&!S.lsq&&!S.lrain){$('lMsg').textContent=t('needTemp');break}
       S.pile.logs.push({d,t:has?tv:null,turn:!!S.turnToggle,sq:S.lsq||null,rain:!!S.lrain});S.turnToggle=false;S.lsq=null;S.lrain=false;save();renderPile();$('lMsg').textContent=t('logSaved');break}
     case 'pileEnd':if(!S.endArm){S.endArm=true;renderPile()}else{const st=pileStats(S.pile);S.pileHist.unshift({start:S.pile.start,end:today(),cn:S.pile.cn,hot:st.hot,turns:st.turnsHot});S.pileHist=S.pileHist.slice(0,5);S.pile=null;S.endArm=false;save();renderPile()}break;
     case 'noChick':S.noChicken=!S.noChicken;save();renderSettings();renderResults();break;
-    case 'setBtn':renderSettingsSheet();$('setSheet').hidden=false;document.body.style.overflow='hidden';break;
-    case 'setClose':closeSettings();break;
+    case 'setBtn':if(S.view==='set')show(S.prevView||'mix');else{S.prevView=S.view;show('set')}break;
+    case 'setBack':show(S.prevView||'mix');break;
     case 'oSave':{const c=parseFloat(oC.value),n=parseFloat(oN.value),mo=parseFloat(oM.value),name=oName.value.trim();const base=oBaseId&&mat(oBaseId);
       const lab=c>0&&n>0;if(!(name&&(lab||base)&&mo>=0&&mo<100)){oPreview.textContent=t('ownNeed');return}
       const rec={id:'u'+Date.now(),name,n:lab?n:base.n,cn:lab?c/n:base.cn,m:mo,src:'own'};if(!lab)rec.base=base.id;
@@ -1319,14 +1365,13 @@ document.addEventListener('click',e=>{
   }
 });
 sheet.addEventListener('click',e=>{if(e.target===sheet)closePicker()});
-$('setSheet').addEventListener('click',e=>{if(e.target===$('setSheet'))closeSettings()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!sheet.hidden)closePicker();if(!$('setSheet').hidden)closeSettings()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheet.hidden)closePicker()});
 document.addEventListener('input',e=>{const el=e.target,d=el.dataset;
   if(d.hm){const m=hmCalc(d.hm);if(d.hm==='o'&&m!=null){oM.value=m;ownPreview()}return}
   const v=parseFloat(el.value);
   if(d.kg!=null){S.rows[+d.kg].kg=isFinite(v)?v:null;touched();save();renderResults();return}
   if(d.cnt!=null){const r=S.rows[+d.cnt];const w=uw(r.id);r.kg=isFinite(v)&&w?Math.round(v*w*100)/100:null;touched();save();renderResults();return}
-  const ovSet=(i,k)=>{const r=S.rows[+i];r.ov=r.ov||{};r.ov[k]=isFinite(v)?v:null;touched();save();const me=$('meta'+i);if(me)me.textContent=metaTxt(r);renderResults()};
+  const ovSet=(i,k)=>{const r=S.rows[+i];r.ov=r.ov||{};const ok=isFinite(v)&&(k==='m'?v>=0&&v<100:k==='n'?v>0&&v<=50:v>0&&v<=2000);const bad=el.value!==''&&!ok;el.setAttribute('aria-invalid',bad);const er=$('ovErr'+i);if(er)er.textContent=bad?t('ovBad'):'';r.ov[k]=ok?v:null;touched();save();const me=$('meta'+i);if(me)me.textContent=metaTxt(r);renderResults()};
   if(d.on!=null)return ovSet(d.on,'n');if(d.oc!=null)return ovSet(d.oc,'cn');if(d.om!=null)return ovSet(d.om,'m');
   if(el===oC||el===oN)return ownPreview();
   if(el===mKg){S.mulch.kg=isFinite(v)?v:null;save();renderMulch();return}
@@ -1338,9 +1383,9 @@ if(e.target.dataset&&(e.target.dataset.on!=null||e.target.dataset.oc!=null||e.ta
 
 /* PWA manifest + offline worker on GitHub Pages */
 try{const icon='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fbf7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23efe6d3%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L428.7%20370%20L83.3%20370%20Z%22%20fill%3D%22%23f0dcc4%22/%3E%3Cpath%20d%3D%22M123.9%20218%20L388.1%20218%20L392.9%20236%20L119.1%20236%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M110.5%20268%20L401.5%20268%20L406.3%20286%20L105.7%20286%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M97.2%20318%20L414.8%20318%20L419.6%20336%20L92.4%20336%20Z%22%20fill%3D%22%232f7a36%22/%3E%3Cpath%20d%3D%22M83.3%20370%20L428.7%20370%20L442.0%20420%20L70.0%20420%20Z%22%20fill%3D%22%237a4a1f%22/%3E%3Cpath%20d%3D%22M135.1%20176%20L376.9%20176%20L362%20120%20Q256%2096%20150%20120%20Z%22%20fill%3D%22%23e4ebdc%22/%3E%3Cg%20stroke%3D%22%238a5a28%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M200%20198%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20194%20l26%20-7%22/%3E%3Cpath%20d%3D%22M180%20246%20l26%20-7%22/%3E%3Cpath%20d%3D%22M300%20250%20l26%20-7%22/%3E%3Cpath%20d%3D%22M215%20298%20l26%20-7%22/%3E%3Cpath%20d%3D%22M320%20296%20l26%20-7%22/%3E%3Cpath%20d%3D%22M190%20346%20l26%20-7%22/%3E%3Cpath%20d%3D%22M290%20350%20l26%20-7%22/%3E%3C/g%3E%3Cg%20stroke%3D%22%23f3dcb8%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M96%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M150%20400%20l44%20-16%22/%3E%3Cpath%20d%3D%22M210%20410%20l44%20-16%22/%3E%3Cpath%20d%3D%22M270%20402%20l44%20-16%22/%3E%3Cpath%20d%3D%22M330%20408%20l44%20-16%22/%3E%3Cpath%20d%3D%22M380%20398%20l44%20-16%22/%3E%3C/g%3E%3Cpath%20d%3D%22M70%20420%20L150%20120%20Q256%2096%20362%20120%20L442%20420%20Z%22%20fill%3D%22none%22%20stroke%3D%22%232b2418%22%20stroke-width%3D%229%22%20stroke-linejoin%3D%22round%22/%3E%3Crect%20x%3D%2236%22%20y%3D%22418%22%20width%3D%22440%22%20height%3D%2212%22%20rx%3D%226%22%20fill%3D%22%232b2418%22/%3E%3Cg%20fill%3D%22%232f7fc1%22%3E%3Cpath%20d%3D%22M452%20232%20q-13%2020%200%2026%20q13%20-6%200%20-26z%22/%3E%3Cpath%20d%3D%22M466%20276%20q-11%2017%200%2022%20q11%20-5%200%20-22z%22/%3E%3C/g%3E%3C/svg%3E';const onPages=/github\.io$/.test(location.hostname);
-  const man={name:'碳氮配比 CN Balance',short_name:'碳氮配比',start_url:'.',display:'standalone',background_color:'#2f6b34',theme_color:'#2f6b34',icons:[{src:icon,sizes:'any',type:'image/svg+xml'}]};
+  const here=location.href.split('#')[0].split('?')[0];const man={id:here,name:'碳氮配比 CN Balance',short_name:'碳氮配比',start_url:here,scope:here.replace(/[^/]*$/,''),display:'standalone',background_color:'#2f6b34',theme_color:'#2f6b34',icons:[{src:icon,sizes:'any',type:'image/svg+xml'}]};
   const l=document.createElement('link');l.rel='manifest';l.href=onPages?'manifest.webmanifest':'data:application/manifest+json,'+encodeURIComponent(JSON.stringify(man));document.head.appendChild(l);
-  const ai=document.createElement('link');ai.rel='apple-touch-icon';ai.href='data:image/png;base64,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';document.head.appendChild(ai);
+  const ai=document.createElement('link');ai.rel='apple-touch-icon';ai.href=onPages?'cnbalance-icon-180.png':'data:image/png;base64,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';document.head.appendChild(ai);
   const fi=document.createElement('link');fi.rel='icon';fi.href=icon;document.head.appendChild(fi);
   if('serviceWorker' in navigator&&onPages)navigator.serviceWorker.register('sw.js').catch(()=>{});
 }catch(e){}
@@ -1351,3 +1396,6 @@ renderAll();show(S.view||'mix');
 window.__cn={totals,solveFix,coef,S};
 })();
 </script>
+
+</body>
+</html>
